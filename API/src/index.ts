@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import cors from 'cors';
 import userRouter from './router/user';
-import giaovienRouter from './router/giaovien';
+import sanphamRouter from './router/sanpham';
 
 const app = express();
 const corsOptions = {
@@ -20,7 +20,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use('/api/user', userRouter);
-app.use('/api/giaovien', giaovienRouter);
+app.use('/api/sanpham',sanphamRouter)
 
 
 app.listen(7000, () => console.log('Server running on port 7000'));

@@ -1,7 +1,7 @@
-import { Pool } from "mysql2/promise";
+import {Pool} from "mysql2/promise";
 import db from "../database";
 
-export class GiaoVienRepository {
+export class SanPhamRepository {
   private db: Pool;
 
   constructor() {
@@ -10,7 +10,7 @@ export class GiaoVienRepository {
 
   async getAll(): Promise<any> {
     try {
-      const sql = "CALL GetAllGiaoVien()";
+      const sql = "CALL GetAllSanPham()";
       const [rows] = await this.db.query(sql);
       return rows;
     } catch (error: any) {
@@ -19,4 +19,4 @@ export class GiaoVienRepository {
   }
 }
 
-export default GiaoVienRepository;
+export default SanPhamRepository;
