@@ -18,9 +18,9 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-
+app.use(express.json()); 
 app.use('/api/user', userRouter);
 app.use('/api/sanpham',sanphamRouter)
 
 
-app.listen(7000, () => console.log('Server running on port 7000'));
+app.listen(7000, () => console.log('Server running on port http://localhost:7000'));
