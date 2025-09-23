@@ -1,7 +1,39 @@
 SELECT * FROM tiemtrachanh1997.san_pham;
+SELECT * FROM tiemtrachanh1997.cong_thuc;
 use tiemtrachanh1997;
-DELIMITER $$
 
+-- Sản Phẩm và Công Thức
+-- Mục đích: Quản lý thông tin sản phẩm và công thức liên quan.
+
+-- API cần thiết:
+
+-- POST /api/sanpham/create: Thêm sản phẩm và công thức.
+
+-- PUT /api/sanpham/update/:id: Cập nhật sản phẩm và công thức.
+
+-- DELETE /api/sanpham/delete/:id: Xóa sản phẩm và công thức.
+
+-- GET /api/sanpham/get-all: Lấy danh sách tất cả sản phẩm.
+
+-- GET /api/sanpham/get-by-id/:id: Lấy thông tin sản phẩm và công thức theo ID.
+
+-- GET /api/sanpham/search: Tìm kiếm sản phẩm theo tên.
+
+-- Procedure:
+
+-- CreateSanPhamVaCongThuc
+
+-- UpdateSanPhamVaCongThuc
+
+-- DeleteSanPhamVaCongThuc
+
+-- GetAllSanPham (Có thể sử dụng JOIN để lấy thêm thông tin loại SP).
+
+-- GetSanPhamVaCongThucByID (Cần kết hợp san_pham và cong_thuc).
+
+-- SearchSanPham.
+
+DELIMITER $$
 CREATE PROCEDURE GetAllSanPham()
 BEGIN
     SELECT
@@ -35,6 +67,65 @@ BEGIN
         san_pham sp
     JOIN
         loai_san_pham lsp ON sp.id_loai = lsp.id
+    WHERE
+        sp.id = p_id_san_pham;
+END$$
+
+DELIMITER ;
+
+-- GetAllSanPhamVaCongThuc
+
+DELIMITER $$
+
+CREATE PROCEDURE GetAllSanPhamVaCongThuc()
+BEGIN
+    SELECT
+        sp.id,
+        sp.ten_san_pham,
+        sp.gia_ban,
+        sp.mo_ta,
+        lsp.ten_loai,
+        ct.id_nguyen_lieu,
+        ct.so_luong,
+        nl.ten_nguyen_lieu,
+        nl.don_vi
+    FROM
+        san_pham sp
+    JOIN
+        loai_san_pham lsp ON sp.id_loai = lsp.id
+    LEFT JOIN
+        cong_thuc ct ON sp.id = ct.id_san_pham
+    LEFT JOIN
+        nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id;
+END$$
+
+DELIMITER ;
+
+-- GetSanPhamVaCongThucByID
+DELIMITER $$
+
+CREATE PROCEDURE GetSanPhamVaCongThucByID(
+    IN p_id_san_pham INT
+)
+BEGIN
+    SELECT
+        sp.id,
+        sp.ten_san_pham,
+        sp.gia_ban,
+        sp.mo_ta,
+        lsp.ten_loai,
+        ct.id_nguyen_lieu,
+        ct.so_luong,
+        nl.ten_nguyen_lieu,
+        nl.don_vi
+    FROM
+        san_pham sp
+    JOIN
+        loai_san_pham lsp ON sp.id_loai = lsp.id
+    LEFT JOIN
+        cong_thuc ct ON sp.id = ct.id_san_pham
+    LEFT JOIN
+        nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
     WHERE
         sp.id = p_id_san_pham;
 END$$
