@@ -35,52 +35,43 @@ export class UserRepository {
       throw new Error(error.message);
     }
   }
-    async getByKhoaHoc(id: number): Promise<any> {
-    try {
-      const sql = "CALL getByKhoaHocID(?)";
-      const [rows] = await this.db.query(sql,[id]);
-      return rows;
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }
+
   async signup(id: number): Promise<any> {
     try {
       const sql = "CALL signup(?)";
-      const [rows] = await this.db.query(sql,[]);
+      const [rows] = await this.db.query(sql, []);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-    async login(user:any): Promise<any> {
+  async login(user: any): Promise<any> {
     try {
       const sql = "CALL login(?)";
-      const [rows] = await this.db.query(sql,[]);
+      const [rows] = await this.db.query(sql, []);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-    async update(id: number): Promise<any> {
+  async update(id: number): Promise<any> {
     try {
       const sql = "CALL updateNguoiDung(?)";
-      const [rows] = await this.db.query(sql,[]);
+      const [rows] = await this.db.query(sql, []);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-    async delete(id: number): Promise<any> {
+  async delete(id: number): Promise<any> {
     try {
       const sql = "CALL deleteNguoiDung(?)";
-      const [rows] = await this.db.query(sql,[id]);
+      const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-
 }
 
 export default UserRepository;

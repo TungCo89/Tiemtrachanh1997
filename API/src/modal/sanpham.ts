@@ -6,12 +6,47 @@ export class SanPhamModal {
     this.sanphamRepository = sanphamRepository;
   }
 
-  async getAll(): Promise<any> {
-    return await this.sanphamRepository.getAll();
+  private processSanPhamData(data: any[]): any[] {
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    const sanphamMap = new Map();
+    data.forEach((row) => {
+      const sanphamId = row.id;
+      if (!sanphamMap.has(sanphamId)) {
+        sanphamMap.set(sanphamId, {
+          id: row.id,
+          ten_san_pham: row.ten_san_pham,
+          gia_ban: row.gia_ban,
+          mo_ta: row.mo_ta,
+          ten_loai: row.ten_loai,
+          cong_thuc: [],
+        });
+      }
+
+      if (row.id_nguyen_lieu !== null) {
+        sanphamMap.get(sanphamId).cong_thuc.push({
+          id_nguyen_lieu: row.id_nguyen_lieu,
+          ten_nguyen_lieu: row.ten_nguyen_lieu,
+          don_vi: row.don_vi,
+          so_luong: row.so_luong,
+        });
+      }
+    });
+
+    return Array.from(sanphamMap.values());
+  }
+
+  async getAll(): Promise<any[]> {
+    const results = await this.sanphamRepository.getAll();
+    return this.processSanPhamData(results[0]);
   }
 
   async getByID(id: number): Promise<any> {
-    return await this.sanphamRepository.getByID(id);
+    const results = await this.sanphamRepository.getByID(id);
+    const processed = this.processSanPhamData(results[0]);
+    return processed.length > 0 ? processed[0] : null;
   }
 
   async createSanPham(
@@ -19,7 +54,7 @@ export class SanPhamModal {
     gia_ban: number,
     mo_ta: string,
     id_loai: number,
-    cong_thuc: any[] 
+    cong_thuc: any[]
   ): Promise<void> {
     if (
       !ten_san_pham ||
@@ -71,8 +106,9 @@ export class SanPhamModal {
     await this.sanphamRepository.deleteSanPham(id);
   }
 
-  async searchSanPhamByName(name: string): Promise<any> {
-    return await this.sanphamRepository.searchSanPhamByName(name);
+  async searchSanPhamByName(name: string): Promise<any[]> {
+    const results = await this.sanphamRepository.searchSanPhamByName(name);
+    return this.processSanPhamData(results);
   }
 }
 

@@ -77,12 +77,10 @@ export class SanPhamController {
         cong_thuc
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Cập nhật sản phẩm và công thức thành công.",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Cập nhật sản phẩm và công thức thành công.",
+      });
     } catch (error: any) {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }

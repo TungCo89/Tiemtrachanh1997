@@ -30,9 +30,64 @@ BEGIN
 END$$
 DELIMITER ;
 
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetAllNguyenLieuByNCC`()
+BEGIN
+    SELECT
+        ncc.id AS id_ncc,
+        ncc.ten_ncc,
+        ncc.dia_chi,
+        ncc.so_dien_thoai,
+        nl.id AS id_nguyen_lieu,
+        nl.ten_nguyen_lieu,
+        nl.don_vi,
+        SUM(cthdn.so_luong) AS tong_so_luong_nhap,
+        SUM(cthdn.thanh_tien) AS tong_tien_nhap
+    FROM
+        nha_cung_cap AS ncc
+    LEFT JOIN
+        hoa_don_nhap AS hdn ON ncc.id = hdn.id_ncc
+    LEFT JOIN
+        chi_tiet_hoa_don_nhap AS cthdn ON hdn.id = cthdn.id_hoa_don_nhap
+    LEFT JOIN
+        nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
+    GROUP BY
+        ncc.id, nl.id
+    ORDER BY
+        ncc.id, nl.ten_nguyen_lieu;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetNguyenLieuByNCCID`(
+    IN p_id_ncc INT
+)
+BEGIN
+    SELECT
+        nl.id AS id_nguyen_lieu,
+        nl.ten_nguyen_lieu,
+        nl.don_vi,
+        hdn.ngay_nhap,
+        cthdn.so_luong,
+        cthdn.don_gia,
+        cthdn.thanh_tien
+    FROM
+        nha_cung_cap AS ncc
+    JOIN
+        hoa_don_nhap AS hdn ON ncc.id = hdn.id_ncc
+    JOIN
+        chi_tiet_hoa_don_nhap AS cthdn ON hdn.id = cthdn.id_hoa_don_nhap
+    JOIN
+        nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
+    WHERE
+        ncc.id = p_id_ncc
+    GROUP BY nl.id, hdn.ngay_nhap; -- Đảm bảo các hàng được nhóm một cách hợp lý nếu có trùng lặp
+END$$
+DELIMITER ;
+
 -- create 
 DELIMITER $$
-CREATE PROCEDURE ThemNguyeLieu(
+CREATE PROCEDURE CreateNguyeLieu(
     IN p_ten_nguyen_lieu VARCHAR(100),
     IN p_don_vi VARCHAR(20)
 )

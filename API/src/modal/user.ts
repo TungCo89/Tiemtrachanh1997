@@ -16,9 +16,6 @@ export class UserModal {
   async getRoles(): Promise<any> {
     return await this.userRepository.getRoles();
   }
-  async getByKhoaHoc(id: number): Promise<any> {
-    return await this.userRepository.getByKhoaHoc(id);
-  }
     async signup(user: any): Promise<any> {
     return await this.userRepository.signup(user);
   }

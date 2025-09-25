@@ -30,7 +30,7 @@ DELIMITER ;
 
 -- create 
 DELIMITER $$
-CREATE PROCEDURE ThemLoaiSanPham(
+CREATE PROCEDURE CreateLoaiSanPham(
     IN p_ten_loai VARCHAR(100)
 )
 BEGIN

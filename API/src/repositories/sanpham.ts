@@ -11,7 +11,7 @@ export class SanPhamRepository {
 
   async getAll(): Promise<any> {
     try {
-      const sql = "CALL GetAllSanPham()";
+      const sql = "CALL GetAllSanPhamVaCongThuc()";
       const [rows] = await this.db.query(sql);
       return rows;
     } catch (error: any) {
@@ -21,7 +21,7 @@ export class SanPhamRepository {
 
   async getByID(id: number): Promise<any> {
     try {
-      const sql = "CALL GetSanPhamByID(?)";
+      const sql = "CALL GetSanPhamVaCongThucByID(?)";
       const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {
@@ -78,7 +78,6 @@ export class SanPhamRepository {
     if (Array.isArray(results)) {
       return results[0];
     }
-
     return [];
   }
 }
