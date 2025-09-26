@@ -96,9 +96,9 @@ END$$
 DELIMITER ;
 
 -- lấy thông tin NCC + nguyên liệu
+call GetNguyenLieuByNCCID(1);
 
 DELIMITER $$
-
 CREATE PROCEDURE GetNguyenLieuByNCCID(
     IN p_id_ncc INT
 )
@@ -110,7 +110,10 @@ BEGIN
         hdn.ngay_nhap,
         cthdn.so_luong,
         cthdn.don_gia,
-        cthdn.thanh_tien
+        cthdn.thanh_tien,
+        nl.don_vi,
+        SUM(cthdn.so_luong) AS tong_so_luong_nhap,
+        SUM(cthdn.thanh_tien) AS tong_tien_nhap
     FROM
         nha_cung_cap AS ncc
     JOIN
@@ -121,12 +124,21 @@ BEGIN
         nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
     WHERE
         ncc.id = p_id_ncc
-    GROUP BY nl.id, hdn.ngay_nhap; -- Đảm bảo các hàng được nhóm một cách hợp lý nếu có trùng lặp
+	GROUP BY
+        ncc.id,
+        ncc.ten_ncc,
+        ncc.dia_chi,
+        ncc.so_dien_thoai,
+        nl.id,
+        nl.ten_nguyen_lieu,
+        nl.don_vi  -- 
+    ORDER BY
+        ncc.id, nl.ten_nguyen_lieu;
 END$$
-
 DELIMITER ;
--- lấy all NCC + nguyên liệu
 
+-- lấy all NCC + nguyên liệu
+call GetAllNguyenLieuByNCC();
 DELIMITER $$
 
 CREATE PROCEDURE GetAllNguyenLieuByNCC()

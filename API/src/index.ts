@@ -4,6 +4,10 @@ import userRouter from './router/user';
 import sanphamRouter from './router/sanpham';
 import loaisanphamRouter from './router/loaisanpham';
 import nguyenlieuRouter from './router/nguyenlieu';
+import banRouter from './router/ban';
+import nccRouter from './router/nhacungcap';
+import hdnhapRouter from './router/hoadonnhap';
+import hdbanRouter from './router/hoadonban';
 
 const app = express();
 const corsOptions = {
@@ -25,6 +29,10 @@ app.use('/api/user', userRouter);
 app.use('/api/sanpham',sanphamRouter)
 app.use('/api/loaisanpham',loaisanphamRouter)
 app.use('/api/nguyenlieu',nguyenlieuRouter)
+app.use('/api/ban',banRouter)
+app.use('/api/nhacungcap',nccRouter)
+app.use('/api/hoadonnhap',hdnhapRouter)
+app.use('/api/hoadonban',hdbanRouter)
 
 
 app.listen(7000, () => console.log('Server running on port http://localhost:7000'));

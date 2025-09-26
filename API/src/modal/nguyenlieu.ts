@@ -14,10 +14,6 @@ export class NguyenLieuModal {
     await this.nguyenlieuRepository.getByID(id);
   }
 
-  async getAllByNCC(): Promise<any> {
-    await this.nguyenlieuRepository.getAllByNCC();
-  }
-
   async getByIDNCC(id: number): Promise<any> {
     await this.nguyenlieuRepository.getByIDNCC(id);
   }

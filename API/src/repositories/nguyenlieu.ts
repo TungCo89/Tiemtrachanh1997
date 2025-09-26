@@ -29,16 +29,6 @@ export class NguyenLieuRepository {
     }
   }
 
-  async getAllByNCC(): Promise<any> {
-    try {
-      const sql = "CALL GetAllNguyenLieuByNCC()";
-      const [rows] = await this.db.query(sql);
-      return rows;
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }
-
   async getByIDNCC(id: number): Promise<any> {
     try {
       const sql = "CALL GetNguyenLieuByNCCID(?)";
