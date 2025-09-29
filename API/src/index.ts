@@ -8,6 +8,7 @@ import banRouter from './router/ban';
 import nccRouter from './router/nhacungcap';
 import hdnhapRouter from './router/hoadonnhap';
 import hdbanRouter from './router/hoadonban';
+import thongkeRouter from './router/thongke-baocao';
 
 const app = express();
 const corsOptions = {
@@ -33,6 +34,7 @@ app.use('/api/ban',banRouter)
 app.use('/api/nhacungcap',nccRouter)
 app.use('/api/hoadonnhap',hdnhapRouter)
 app.use('/api/hoadonban',hdbanRouter)
+app.use('/api/thongke',thongkeRouter)
 
 
 app.listen(7000, () => console.log('Server running on port http://localhost:7000'));
