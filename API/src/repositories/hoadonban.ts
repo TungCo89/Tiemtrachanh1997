@@ -13,7 +13,11 @@ export class HDBanRepository {
     try {
       const sql = "CALL GetAllHoaDonBan()";
       const [rows] = await this.db.query(sql);
-      return rows;
+      console.log(rows);
+            if (Array.isArray(rows) && rows.length > 0) {
+        return rows[0];
+      }
+      return [];
     } catch (error: any) {
       throw new Error(error.message);
     }

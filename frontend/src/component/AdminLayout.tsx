@@ -1,27 +1,26 @@
 // src/components/AdminLayout.tsx
-import React, { useState, ReactNode } from 'react';
+
+import React, { useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'; 
 import {
-    MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, ShoppingOutlined, UserOutlined
+    MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, ShoppingOutlined, UserOutlined 
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
+
 const { Header, Sider, Content } = Layout;
-import { useLocation, useNavigate } from 'react-router-dom';
-interface AdminLayoutProps {
-    children: ReactNode;
-}
 
 const AdminLayout: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
-
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Menu items 
     const menuItems = [
         { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
+        { key: '/admin/loaisanpham', icon: <ShoppingOutlined />, label: 'Quản lý Loại sản phẩm' },
         { key: '/admin/products', icon: <ShoppingOutlined />, label: 'Quản lý Sản phẩm' },
         { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Người dùng' },
-        // ... Các trang khác
     ];
 
     return (
@@ -49,7 +48,8 @@ const AdminLayout: React.FC = () => {
                 <Content
                     style={{ margin: '24px 16px', padding: 24, minHeight: 280, background: colorBgContainer, borderRadius: borderRadiusLG }}
                 >
-
+                    {/* THÊM <Outlet /> ĐỂ HIỂN THỊ NỘI DUNG ROUTE CON */}
+                    <Outlet />
                 </Content>
             </Layout>
         </Layout>

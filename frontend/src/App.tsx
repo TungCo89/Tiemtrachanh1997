@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './component/AdminLayout';
 import Dashboard from './page/Dashboard';
 import SanPham from './page/SanPham';
+import LoaiSanPham from './page/LoaiSanPham/LoaiSanPham';
 
 const App = () => {
     return (
@@ -12,7 +13,8 @@ const App = () => {
 
                 <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Dashboard />} />
-                    <Route path="products" element={<SanPham />} />
+                    <Route path="loaisanpham" element={<SanPham />} />
+                    <Route path="products" element={<LoaiSanPham />} />
                     {/* <Route path="users" element={<UserManagement />} />  */}
                 </Route>
                 <Route path="*" element={<div>404 - Trang không tồn tại</div>} />

@@ -13,7 +13,11 @@ export class HDNhapRepository {
     try {
       const sql = "CALL GetAllHoaDonNhap()";
       const [rows] = await this.db.query(sql);
-      return rows;
+      console.log(rows);
+            if (Array.isArray(rows) && rows.length > 0) {
+        return rows[0];
+      }
+      return [];
     } catch (error: any) {
       throw new Error(error.message);
     }

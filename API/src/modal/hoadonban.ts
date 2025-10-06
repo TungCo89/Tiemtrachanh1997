@@ -7,11 +7,11 @@ export class HDBanModal {
   }
 
   async getAll(): Promise<any> {
-    await this.hdbanRepository.getAll();
+    return await this.hdbanRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.hdbanRepository.getByID(id);
+    return await this.hdbanRepository.getByID(id);
   }
 
   async createHDBan(chi_tiet: any[]): Promise<void> {

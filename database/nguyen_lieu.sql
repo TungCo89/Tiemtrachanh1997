@@ -57,6 +57,7 @@ BEGIN
         ncc.id, nl.ten_nguyen_lieu;
 END$$
 DELIMITER ;
+drop procedure GetNguyenLieuByNCCID;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetNguyenLieuByNCCID`(
@@ -81,7 +82,8 @@ BEGIN
         nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
     WHERE
         ncc.id = p_id_ncc
-    GROUP BY nl.id, hdn.ngay_nhap; -- Đảm bảo các hàng được nhóm một cách hợp lý nếu có trùng lặp
+    -- XÓA DÒNG GROUP BY NÀY
+    ORDER BY hdn.ngay_nhap DESC, nl.ten_nguyen_lieu; -- Thêm ORDER BY để dễ theo dõi
 END$$
 DELIMITER ;
 

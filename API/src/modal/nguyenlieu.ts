@@ -7,15 +7,15 @@ export class NguyenLieuModal {
   }
 
   async getAll(): Promise<any> {
-    await this.nguyenlieuRepository.getAll();
+    return await this.nguyenlieuRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.nguyenlieuRepository.getByID(id);
+    return await this.nguyenlieuRepository.getByID(id);
   }
 
   async getByIDNCC(id: number): Promise<any> {
-    await this.nguyenlieuRepository.getByIDNCC(id);
+    return await this.nguyenlieuRepository.getByIDNCC(id);
   }
 
   async createNguyenLieu(
@@ -46,7 +46,7 @@ export class NguyenLieuModal {
   }
 
   async searchNguyenLieuByName(name: string): Promise<any> {
-    await this.nguyenlieuRepository.searchNguyenLieuByName(name);
+    return await this.nguyenlieuRepository.searchNguyenLieuByName(name);
   }
 }
 

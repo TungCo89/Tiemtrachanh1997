@@ -7,11 +7,11 @@ export class LoaiSanPhamModal {
   }
 
   async getAll(): Promise<any> {
-    await this.loaisanphamRepository.getAll();
+    return await this.loaisanphamRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.loaisanphamRepository.getByID(id);
+    return await this.loaisanphamRepository.getByID(id);
   }
 
   async createLoaiSanPham(ten_loai: string): Promise<void> {
@@ -34,7 +34,7 @@ export class LoaiSanPhamModal {
   }
 
   async searchLoaiSanPhamByName(name: string): Promise<any> {
-    await this.loaisanphamRepository.searchLoaiSanPhamByName(name);
+    return await this.loaisanphamRepository.searchLoaiSanPhamByName(name);
   }
 }
 

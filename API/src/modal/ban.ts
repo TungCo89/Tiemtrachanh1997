@@ -7,11 +7,11 @@ export class BanModal {
   }
 
   async getAll(): Promise<any> {
-    await this.banRepository.getAll();
+    return await this.banRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.banRepository.getAll();
+    return await this.banRepository.getAll();
   }
 
   async createBan(ten_ban: string): Promise<void> {
@@ -34,7 +34,7 @@ export class BanModal {
   }
 
   // async searchBanByName(name: string): Promise<any> {
-  //   await this.banRepository.searchBanByName(name);
+  //   return await this.banRepository.searchBanByName(name);
   // }
 }
 

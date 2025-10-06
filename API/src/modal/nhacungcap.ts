@@ -7,11 +7,11 @@ export class NCCModal {
   }
 
   async getAll(): Promise<any> {
-    await this.nccRepository.getAll();
+    return await this.nccRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.nccRepository.getByID(id);
+    return await this.nccRepository.getByID(id);
   }
 
   async createNCC(
@@ -43,7 +43,7 @@ export class NCCModal {
   }
 
   async searchNCCByKeyword(keyword: string): Promise<any> {
-    await this.nccRepository.searchNCCByKeyword(keyword);
+    return await this.nccRepository.searchNCCByKeyword(keyword);
   }
 }
 

@@ -7,11 +7,11 @@ export class HDNhapModal {
   }
 
   async getAll(): Promise<any> {
-    await this.hdnhapRepository.getAll();
+    return await this.hdnhapRepository.getAll();
   }
 
   async getByID(id: number): Promise<any> {
-    await this.hdnhapRepository.getByID(id);
+    return await this.hdnhapRepository.getByID(id);
   }
 
   async createHDNhap(
