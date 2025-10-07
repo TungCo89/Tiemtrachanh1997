@@ -11,22 +11,31 @@ export class BanModal {
   }
 
   async getByID(id: number): Promise<any> {
-    return await this.banRepository.getAll();
+    return await this.banRepository.getByID(id);
   }
 
-  async createBan(ten_ban: string): Promise<void> {
-    if (!ten_ban) {
+  async getBanByIDKhuVuc(id: number): Promise<any> {
+    return await this.banRepository.getBanByIDKhuVuc(id);
+  }
+
+  async createBan(ten_ban: string, id_khu_vuc: number): Promise<void> {
+    if (!ten_ban || !id_khu_vuc) {
       throw new Error("Dữ liệu không hợp lệ.");
     }
-    await this.banRepository.createBan(ten_ban);
+    await this.banRepository.createBan(ten_ban, id_khu_vuc);
   }
 
-  async updateBan(id: number, ten_ban: string, trang_thai: string): Promise<void> {
+  async updateBan(
+    id: number,
+    ten_ban: string,
+    trang_thai: string,
+    id_khu_vuc: number
+  ): Promise<void> {
     if (!id || !ten_ban) {
       throw new Error("Dữ liệu cập nhật không hợp lệ.");
     }
 
-    await this.banRepository.updateBan(id, ten_ban, trang_thai);
+    await this.banRepository.updateBan(id, ten_ban, trang_thai, id_khu_vuc);
   }
 
   async deleteBan(id: number): Promise<void> {

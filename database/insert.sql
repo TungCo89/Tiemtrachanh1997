@@ -7,9 +7,9 @@ INSERT INTO vai_tro (ten_vai_tro) VALUES
 
 -- Thêm dữ liệu vào bảng Người dùng
 -- Mật khẩu: 123456
--- INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, ho_ten, email, so_dien_thoai, id_vai_tro) VALUES
--- ('admin', '$2a$10$wNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXw', 'Nguyễn Văn A', 'admin@example.com', '0987654321', 1), -- id_vai_tro = 1 (Quản trị viên)
--- ('nv_lam', '$2a$10$wNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXw', 'Nguyễn Thị B', 'lam@example.com', '0123456789', 2); -- id_vai_tro = 2 (Nhân viên)
+INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, ho_ten, email, so_dien_thoai, id_vai_tro) VALUES
+('admin', '$2a$10$wNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXw', 'Nguyễn Văn A', 'admin@example.com', '0987654321', 1), -- id_vai_tro = 1 (Quản trị viên)
+('nv_lam', '$2a$10$wNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXwNnI.qXw', 'Nguyễn Thị B', 'lam@example.com', '0123456789', 2); -- id_vai_tro = 2 (Nhân viên)
 
 -- Thêm dữ liệu vào bảng Nhà cung cấp
 INSERT INTO nha_cung_cap (ten_ncc, dia_chi, so_dien_thoai) VALUES
@@ -26,7 +26,7 @@ INSERT INTO nguyen_lieu (ten_nguyen_lieu, don_vi) VALUES
 
 -- Thêm dữ liệu vào bảng Loại sản phẩm
 INSERT INTO loai_san_pham (ten_loai) VALUES
-('Đồ uống'),
+('Trà sữa'),
 ('Đồ ăn vặt');
 
 -- Thêm dữ liệu vào bảng Sản phẩm
@@ -38,19 +38,25 @@ INSERT INTO san_pham (ten_san_pham, gia_ban, mo_ta, id_loai) VALUES
 ('Khô Gà', 20000, 'Khô gà lá chanh', 2);
 
 -- Thêm dữ liệu vào bảng Hóa đơn nhập và Chi tiết hóa đơn nhập
--- INSERT INTO hoa_don_nhap (id_ncc, id_nguoi_dung, ngay_nhap, tong_tien) VALUES
--- (1, 1, '2025-09-01 10:00:00', 500000),
--- (2, 1, '2025-09-05 15:30:00', 800000);
+INSERT INTO hoa_don_nhap (id_ncc, ngay_nhap, tong_tien) VALUES
+(1,  '2025-09-01 10:00:00', 500000),
+(2,  '2025-09-05 15:30:00', 800000);
 
--- INSERT INTO chi_tiet_hoa_don_nhap (id_hoa_don_nhap, id_nguyen_lieu, so_luong, don_gia, thanh_tien) VALUES
--- (1, 1, 10, 50000, 500000), -- Trà đen: 10kg, giá 50k/kg
--- (2, 2, 5, 20000, 100000),  -- Chanh: 5kg, giá 20k/kg
--- (2, 3, 20, 15000, 300000),  -- Đường: 20kg, giá 15k/kg
--- (2, 4, 8, 50000, 400000);  -- Đào: 8kg, giá 50k/kg
+INSERT INTO chi_tiet_hoa_don_nhap (id_hoa_don_nhap, id_nguyen_lieu, so_luong, don_gia, thanh_tien) VALUES
+(1, 1, 10, 50000, 500000), -- Trà đen: 10kg, giá 50k/kg
+(2, 2, 5, 20000, 100000),  -- Chanh: 5kg, giá 20k/kg
+(2, 3, 20, 15000, 300000),  -- Đường: 20kg, giá 15k/kg
+(2, 4, 8, 50000, 400000);  -- Đào: 8kg, giá 50k/kg
+
+-- Thêm khu vực 
+INSERT INTO khu_vuc (ten_khu_vuc, mo_ta) VALUES ('Khu A', 'Trong nhà, có máy lạnh');
+INSERT INTO khu_vuc (ten_khu_vuc, mo_ta) VALUES ('Khu B', 'Khu vực ngoài trời');
 
 -- Thêm dữ liệu vào bảng Bàn
-INSERT INTO ban (ten_ban) VALUES
-('Bàn 01'), ('Bàn 02'), ('Bàn 03'), ('Bàn 04'), ('Bàn 05');
+INSERT INTO ban (ten_ban, id_khu_vuc) VALUES
+('Bàn 01','1'), ('Bàn 02','1'), ('Bàn 03','1'), ('Bàn 04','1'), ('Bàn 05','1'),
+('Bàn 06','2'), ('Bàn 07','2'), ('Bàn 08','2'), ('Bàn 09','2'), ('Bàn 10','2')
+;
 
 -- Thêm dữ liệu vào bảng Công thức
 INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
@@ -62,11 +68,11 @@ INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
 (2, 3, 0.05); -- Trà đào cần 0.05kg Đường
 
 -- Thêm dữ liệu vào bảng Hóa đơn bán và Chi tiết hóa đơn bán
--- INSERT INTO hoa_don_ban (id_ban, id_nguoi_dung, ngay_lap, tong_tien) VALUES
--- (1, 2, '2025-09-15 19:30:00', 40000),
--- (2, 2, '2025-09-15 20:15:00', 25000);
+INSERT INTO hoa_don_ban (id_ban, ngay_lap, tong_tien) VALUES
+(1,  '2025-09-15 19:30:00', 40000),
+(2,  '2025-09-15 20:15:00', 25000);
 
--- INSERT INTO chi_tiet_hoa_don_ban (id_hoa_don_ban, id_san_pham, so_luong, don_gia, thanh_tien) VALUES
--- (1, 1, 1, 15000, 15000), -- 1 Trà chanh
--- (1, 2, 1, 25000, 25000), -- 1 Trà đào
--- (2, 2, 1, 25000, 25000); -- 1 Trà đào
+INSERT INTO chi_tiet_hoa_don_ban (id_hoa_don_ban, id_san_pham, so_luong, don_gia, thanh_tien) VALUES
+(1, 1, 1, 15000, 15000), -- 1 Trà chanh
+(1, 2, 1, 25000, 25000), -- 1 Trà đào
+(2, 2, 1, 25000, 25000); -- 1 Trà đào

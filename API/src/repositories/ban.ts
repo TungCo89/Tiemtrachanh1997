@@ -29,14 +29,29 @@ export class BanRepository {
     }
   }
 
-  async createBan(ten_ban: string): Promise<void> {
-    const sql = "CALL CreateBan(?)";
-    await this.db.query(sql, [ten_ban]);
+  async getBanByIDKhuVuc(id: number): Promise<any> {
+    try {
+      const sql = "CALL GetBanByKhuVuc(?)";
+      const [rows] = await this.db.query(sql, [id]);
+      return rows;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 
-  async updateBan(id: number, ten_ban: string, trang_thai: string): Promise<void> {
-    const sql = "CALL UpdateBan(?, ?, ?)";
-    await this.db.query(sql, [id, ten_ban, trang_thai]);
+  async createBan(ten_ban: string, id_khu_vuc: number): Promise<void> {
+    const sql = "CALL CreateBan(?,?)";
+    await this.db.query(sql, [ten_ban, id_khu_vuc]);
+  }
+
+  async updateBan(
+    id: number,
+    ten_ban: string,
+    trang_thai: string,
+    id_khu_vuc: number
+  ): Promise<void> {
+    const sql = "CALL UpdateBan(?, ?, ?, ?)";
+    await this.db.query(sql, [id, ten_ban, trang_thai, id_khu_vuc]);
   }
 
   async deleteBan(id: number): Promise<void> {

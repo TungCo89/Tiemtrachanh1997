@@ -57,8 +57,8 @@ BEGIN
         ncc.id, nl.ten_nguyen_lieu;
 END$$
 DELIMITER ;
-drop procedure GetNguyenLieuByNCCID;
 
+-- các nguyên liệu của nhà cung cấp (id)
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetNguyenLieuByNCCID`(
     IN p_id_ncc INT
@@ -82,9 +82,33 @@ BEGIN
         nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
     WHERE
         ncc.id = p_id_ncc
-    -- XÓA DÒNG GROUP BY NÀY
     ORDER BY hdn.ngay_nhap DESC, nl.ten_nguyen_lieu; -- Thêm ORDER BY để dễ theo dõi
 END$$
+DELIMITER ;
+
+-- lấy ra thông tin nhà cung cấp nguyên liệu(id nguyên liệu)
+DELIMITER $$
+CREATE PROCEDURE GetNCCByNguyenLieuID(
+    IN p_id_nguyen_lieu INT
+)
+BEGIN
+    SELECT DISTINCT
+        ncc.id AS id_ncc,
+        ncc.ten_ncc,
+        ncc.dia_chi,
+        ncc.so_dien_thoai
+    FROM
+        nha_cung_cap AS ncc
+    JOIN
+        hoa_don_nhap AS hdn ON ncc.id = hdn.id_ncc
+    JOIN
+        chi_tiet_hoa_don_nhap AS cthdn ON hdn.id = cthdn.id_hoa_don_nhap
+    WHERE
+        cthdn.id_nguyen_lieu = p_id_nguyen_lieu
+    ORDER BY
+        ncc.ten_ncc;
+END$$
+
 DELIMITER ;
 
 -- create 

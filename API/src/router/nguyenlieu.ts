@@ -12,6 +12,7 @@ const nguyenlieuController = new NguyenLieuController(nguyenlieuModal);
 nguyenlieuRouter.get('/get-all', nguyenlieuController.getAll.bind(nguyenlieuController));
 nguyenlieuRouter.get('/get-by-ID', nguyenlieuController.getByID.bind(nguyenlieuController));
 nguyenlieuRouter.get('/get-by-IDNCC', nguyenlieuController.getByIDNCC.bind(nguyenlieuController));
+nguyenlieuRouter.get('/get-NCC-by-IDNguyenLieu', nguyenlieuController.getNCCByIDNuyenLieu.bind(nguyenlieuController));
 nguyenlieuRouter.post('/create', nguyenlieuController.createNguyenLieu.bind(nguyenlieuController));
 nguyenlieuRouter.put('/update', nguyenlieuController.updateNguyenLieu.bind(nguyenlieuController));
 nguyenlieuRouter.delete('/delete', nguyenlieuController.deleteNguyenLieu.bind(nguyenlieuController));

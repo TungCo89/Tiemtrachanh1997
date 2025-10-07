@@ -36,10 +36,25 @@ export class BanController {
     }
   }
 
+  async getBanByIDKhuVuc(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.query;
+      const result = await this.banModal.getBanByIDKhuVuc(Number(id));
+      res.status(200).json({
+        success: true,
+        message: "Lấy thông tin thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Lỗi khi lấy danh sách:", error);
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
+
   async createBan(req: Request, res: Response): Promise<void> {
     try {
-      const { ten_ban } = req.body;
-      await this.banModal.createBan(ten_ban);
+      const { ten_ban, id_khu_vuc } = req.body;
+      await this.banModal.createBan(ten_ban, id_khu_vuc);
       res.status(201).json({
         success: true,
         message: "Thêm thành công",
@@ -53,14 +68,14 @@ export class BanController {
     try {
       const { id } = req.query;
       const ID = Number(id);
-      const { ten_ban, trang_thai } = req.body;
+      const { ten_ban, trang_thai, id_khu_vuc } = req.body;
 
       if (isNaN(ID)) {
         res.status(400).json({ message: "ID không hợp lệ." });
         return;
       }
 
-      await this.banModal.updateBan(ID, ten_ban, trang_thai);
+      await this.banModal.updateBan(ID, ten_ban, trang_thai, id_khu_vuc);
 
       res.status(200).json({
         success: true,

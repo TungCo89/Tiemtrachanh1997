@@ -18,6 +18,10 @@ export class NguyenLieuModal {
     return await this.nguyenlieuRepository.getByIDNCC(id);
   }
 
+  async getNCCByIDNuyenLieu(id: number): Promise<any> {
+    return await this.nguyenlieuRepository.getNCCByIDNuyenLieu(id);
+  }
+
   async createNguyenLieu(
     ten_nguyen_lieu: string,
     don_vi: number

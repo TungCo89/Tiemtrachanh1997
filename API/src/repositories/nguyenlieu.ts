@@ -14,7 +14,7 @@ export class NguyenLieuRepository {
       const sql = "CALL GetAllNguyenLieu()";
       const [rows] = await this.db.query(sql);
       console.log(rows);
-            if (Array.isArray(rows) && rows.length > 0) {
+      if (Array.isArray(rows) && rows.length > 0) {
         return rows[0];
       }
       return [];
@@ -36,6 +36,16 @@ export class NguyenLieuRepository {
   async getByIDNCC(id: number): Promise<any> {
     try {
       const sql = "CALL GetNguyenLieuByNCCID(?)";
+      const [rows] = await this.db.query(sql, [id]);
+      return rows;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getNCCByIDNuyenLieu(id: number): Promise<any> {
+    try {
+      const sql = "CALL GetNCCByNguyenLieuID(?)";
       const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {

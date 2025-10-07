@@ -37,7 +37,6 @@ export class NguyenLieuController {
     }
   }
 
-  
   async getByIDNCC(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.query;
@@ -53,14 +52,26 @@ export class NguyenLieuController {
     }
   }
 
+  async getNCCByIDNuyenLieu(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.query;
+      const result = await this.nguyenlieuModal.getNCCByIDNuyenLieu(Number(id));
+      res.status(200).json({
+        success: true,
+        message: "Lấy thông tin thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Lỗi khi lấy danh sách:", error);
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
+
   async createNguyenLieu(req: Request, res: Response): Promise<void> {
     try {
-      const {ten_nguyen_lieu, don_vi } = req.body;
+      const { ten_nguyen_lieu, don_vi } = req.body;
 
-      await this.nguyenlieuModal.createNguyenLieu(
-        ten_nguyen_lieu,
-        don_vi
-      );
+      await this.nguyenlieuModal.createNguyenLieu(ten_nguyen_lieu, don_vi);
 
       res.status(201).json({
         success: true,
@@ -82,18 +93,12 @@ export class NguyenLieuController {
         return;
       }
 
-      await this.nguyenlieuModal.updateNguyenLieu(
-        ID,
-        ten_nguyen_lieu,
-        don_vi
-      );
+      await this.nguyenlieuModal.updateNguyenLieu(ID, ten_nguyen_lieu, don_vi);
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Cập nhật nguyên liệu.",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Cập nhật nguyên liệu.",
+      });
     } catch (error: any) {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
@@ -122,7 +127,9 @@ export class NguyenLieuController {
     try {
       const { name } = req.query;
       if (!name) {
-        res.status(400).json({ message: "Tên nguyên liệu không được để trống" });
+        res
+          .status(400)
+          .json({ message: "Tên nguyên liệu không được để trống" });
         return;
       }
       const result = await this.nguyenlieuModal.searchNguyenLieuByName(

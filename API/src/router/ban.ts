@@ -11,6 +11,7 @@ const banController = new BanController(banModal);
 
 banRouter.get('/get-all', banController.getAll.bind(banController));
 banRouter.get('/get-by-ID', banController.getByID.bind(banController));
+banRouter.get('/get-ban-by-IDKhuVuc', banController.getByID.bind(banController));
 banRouter.post('/create', banController.createBan.bind(banController));
 banRouter.put('/update', banController.updateBan.bind(banController));
 banRouter.delete('/delete', banController.deleteBan.bind(banController));
