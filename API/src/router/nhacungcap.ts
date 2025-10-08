@@ -12,6 +12,7 @@ const nccController = new NCCController(nccModal);
 
 nccRouter.get('/get-all', nccController.getAll.bind(nccController));
 nccRouter.get('/get-by-ID', nccController.getByID.bind(nccController));
+nccRouter.get('/get-NguyenLieu-by-NCCID', nccController.getNguyenLieubyNCCID.bind(nccController));
 nccRouter.post('/create', nccController.createNCC.bind(nccController));
 nccRouter.put('/update', nccController.updateNCC.bind(nccController));
 nccRouter.delete('/delete', nccController.deleteNCC.bind(nccController));

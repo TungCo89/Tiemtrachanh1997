@@ -14,13 +14,12 @@ export class HDBanModal {
     return await this.hdbanRepository.getByID(id);
   }
 
-  async createHDBan(chi_tiet: any[]): Promise<void> {
-    if (!chi_tiet || chi_tiet.length === 0) {
-      throw new Error(
-        "Dữ liệu hóa đơn nhập (Nhà cung cấp và Chi tiết) không hợp lệ."
-      );
+  async createHDBan(id_ban: number, chi_tiet: any[]): Promise<void> {
+    if (!id_ban || !chi_tiet || chi_tiet.length === 0) {
+      throw new Error("Dữ liệu tạo hóa đơn bán không hợp lệ.");
     }
-    await this.hdbanRepository.createHDBan(chi_tiet);
+    const chiTietJson = JSON.stringify(chi_tiet);
+    await this.hdbanRepository.createHDBan(id_ban, chiTietJson);
   }
 
   async updateHDBan(id: number, chi_tiet: any[]): Promise<void> {

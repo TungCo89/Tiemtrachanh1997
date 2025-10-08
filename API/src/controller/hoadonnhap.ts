@@ -38,48 +38,70 @@ export class HDNhapController {
 
   async createHDNhap(req: Request, res: Response): Promise<void> {
     try {
+        const { id_ncc, ghi_chu, chi_tiet } = req.body;
+        const chiTiet = chi_tiet.map((item: any) => {
+            const soLuong = parseFloat(item.so_luong);
+            const donGia = parseFloat(item.don_gia);
+            if (isNaN(soLuong) || isNaN(donGia) || soLuong <= 0 || donGia <= 0) {
+                throw new Error("Số lượng hoặc đơn giá của nguyên liệu không hợp lệ."); 
+            }
+            // Tính thành tiền = số lượng * đơn giá
+            const thanhTien = soLuong * donGia;
+            return {
+                ...item,
+                so_luong: soLuong,
+                don_gia: donGia,  
+                thanh_tien: thanhTien 
+            };
+        });
+        await this.hdnhapModal.createHDNhap(id_ncc, ghi_chu, chiTiet);
+        res.status(201).json({
+            success: true,
+            message: "Tạo hóa đơn nhập thành công."
+        });
+        
+    } catch (error: any) {
+        console.error("Lỗi khi tạo HD nhập:", error);
+        const statusCode = error.message.includes("không hợp lệ") ? 400 : 500;
+        res.status(statusCode).json({ success: false, message: "Lỗi máy chủ", error: error.message });
+    }
+}
+
+  async updateHDNhap(req: Request, res: Response): Promise<void> {
+    try {
+      const { id} = req.body;
+      const hdnhapId = Number(id);
       const { id_ncc, ghi_chu, chi_tiet } = req.body;
+      const chiTiet = chi_tiet.map((item: any) => {
+            const soLuong = parseFloat(item.so_luong);
+            const donGia = parseFloat(item.don_gia);
+            if (isNaN(soLuong) || isNaN(donGia) || soLuong <= 0 || donGia <= 0) {
+                throw new Error("Số lượng hoặc đơn giá của nguyên liệu không hợp lệ."); 
+            }
+            // Tính thành tiền = số lượng * đơn giá
+            const thanhTien = soLuong * donGia;
+            return {
+                ...item,
+                so_luong: soLuong,
+                don_gia: donGia,  
+                thanh_tien: thanhTien 
+            };
+        });
 
-      await this.hdnhapModal.createHDNhap(id_ncc, ghi_chu, chi_tiet);
+      if (isNaN(hdnhapId)) {
+        res.status(400).json({ message: "ID không hợp lệ." });
+        return;
+      }
+      await this.hdnhapModal.updateHDNhap(id_ncc, ghi_chu, chiTiet);
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
-        message: "Thêm thành công",
+        message: "Cập nhật thành công.",
       });
     } catch (error: any) {
-      console.error("Lỗi khi tạo HD nhập:", error);
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
-
-  // async updateHDNhap(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     const { id } = req.query;
-  //     const hdnhapId = Number(id);
-  //     const { ten_san_pham, gia_ban, mo_ta, id_loai, cong_thuc } = req.body;
-
-  //     if (isNaN(hdnhapId)) {
-  //       res.status(400).json({ message: "ID không hợp lệ." });
-  //       return;
-  //     }
-
-  //     await this.hdnhapModal.updateHDNhap(
-  //       hdnhapId,
-  //       ten_san_pham,
-  //       gia_ban,
-  //       mo_ta,
-  //       id_loai,
-  //       cong_thuc
-  //     );
-
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "Cập nhật thành công.",
-  //     });
-  //   } catch (error: any) {
-  //     res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
-  //   }
-  // }
 
   async deleteHDNhap(req: Request, res: Response): Promise<void> {
     try {

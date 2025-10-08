@@ -13,8 +13,7 @@ export class HDNhapRepository {
     try {
       const sql = "CALL GetAllHoaDonNhap()";
       const [rows] = await this.db.query(sql);
-      console.log(rows);
-            if (Array.isArray(rows) && rows.length > 0) {
+      if (Array.isArray(rows) && rows.length > 0) {
         return rows[0];
       }
       return [];
@@ -36,32 +35,19 @@ export class HDNhapRepository {
   async createHDNhap(
     id_ncc: number,
     ghi_chu: string,
-    chi_tiet: any[]
+    chiTietJson: string 
   ): Promise<void> {
-    const chiTietJson = JSON.stringify(chi_tiet);
     const sql = "CALL CreateHoaDonNhap(?, ?, ?)";
     await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
   }
 
-  // async updateHDNhap(
-  //   id: number,
-  //   ten_san_pham: string,
-  //   gia_ban: number,
-  //   mo_ta: string,
-  //   id_loai: number,
-  //   cong_thuc: any[]
-  // ): Promise<void> {
-  //   const congThucJson = JSON.stringify(cong_thuc);
-  //   const sql = "CALL UpdateHDNhap(?, ?, ?, ?, ?, ?)";
-  //   await this.db.query(sql, [
-  //     id,
-  //     ten_san_pham,
-  //     gia_ban,
-  //     mo_ta,
-  //     id_loai,
-  //     congThucJson,
-  //   ]);
-  // }
+  async updateHDNhap(
+    id_ncc: number,
+    ghi_chu: string,
+    chiTietJson: string   ): Promise<void> {
+    const sql = "CALL UpdateHDNhap(?, ?, ?)";
+    await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
+  }
 
   async deleteHDNhap(id: number): Promise<void> {
     const sql = "CALL DeleteHoaDonNhap(?)";

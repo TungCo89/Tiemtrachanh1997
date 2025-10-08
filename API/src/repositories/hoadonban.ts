@@ -14,7 +14,7 @@ export class HDBanRepository {
       const sql = "CALL GetAllHoaDonBan()";
       const [rows] = await this.db.query(sql);
       console.log(rows);
-            if (Array.isArray(rows) && rows.length > 0) {
+      if (Array.isArray(rows) && rows.length > 0) {
         return rows[0];
       }
       return [];
@@ -33,10 +33,9 @@ export class HDBanRepository {
     }
   }
 
-  async createHDBan(chi_tiet: any[]): Promise<void> {
-    const chiTietJson = JSON.stringify(chi_tiet);
-    const sql = "CALL CreateHoaDonBan(?)";
-    await this.db.query(sql, [chiTietJson]);
+  async createHDBan(id_ban: number, chiTietJson: string): Promise<void> {
+    const sql = "CALL CreateHoaDonBan(?, ?)";
+    await this.db.query(sql, [id_ban, chiTietJson]);
   }
 
   async updateHDBan(id: number, chi_tiet: any[]): Promise<void> {

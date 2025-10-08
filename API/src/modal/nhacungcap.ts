@@ -13,6 +13,9 @@ export class NCCModal {
   async getByID(id: number): Promise<any> {
     return await this.nccRepository.getByID(id);
   }
+  async getNguyenLieubyNCCID(id: number): Promise<any> {
+    return await this.nccRepository.getNguyenLieubyNCCID(id);
+  }
 
   async createNCC(
     ten_ncc: string,

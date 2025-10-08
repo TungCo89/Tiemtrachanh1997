@@ -38,17 +38,34 @@ export class HDBanController {
 
   async createHDBan(req: Request, res: Response): Promise<void> {
     try {
-      const { chi_tiet } = req.body;
+      const { id_ban, chi_tiet } = req.body;
+      const chiTietHoanChinh = chi_tiet.map((item: any) => {
+        const soLuong = parseFloat(item.so_luong);
+        const donGia = parseFloat(item.don_gia);
 
-      await this.hdbanModal.createHDBan(chi_tiet);
+        if (isNaN(soLuong) || isNaN(donGia) || soLuong <= 0) {
+          throw new Error("Số lượng hoặc đơn giá của sản phẩm không hợp lệ.");
+        }
+        const thanhTien = soLuong * donGia;
+        return {
+          ...item,
+          so_luong: soLuong,
+          don_gia: donGia,
+          thanh_tien: thanhTien,
+        };
+      });
 
+      await this.hdbanModal.createHDBan(id_ban, chiTietHoanChinh);
       res.status(201).json({
         success: true,
-        message: "Thêm thành công",
+        message: "Tạo hóa đơn bán thành công.",
       });
     } catch (error: any) {
       console.error("Lỗi khi tạo HD bán:", error);
-      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+      const statusCode = error.message.includes("không hợp lệ") ? 400 : 500;
+      res
+        .status(statusCode)
+        .json({ success: false, message: "Lỗi máy chủ", error: error.message });
     }
   }
 

@@ -21,8 +21,8 @@ BEGIN
                        WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')) IS NOT NULL);
 
     -- Thêm hóa đơn bán chính
-    INSERT INTO hoa_don_ban (id_ban, tong_tien, trang_thai)
-    VALUES (p_id_ban, v_tong_tien, 'Đang mở');
+    INSERT INTO hoa_don_ban (id_ban, tong_tien)
+    VALUES (p_id_ban, v_tong_tien);
 
     -- Lấy ID của hóa đơn vừa tạo
     SET v_id_hoa_don = LAST_INSERT_ID();

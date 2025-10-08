@@ -17,44 +17,30 @@ export class HDNhapModal {
   async createHDNhap(
     id_ncc: number,
     ghi_chu: string,
-    chi_tiet: any[]
+    chiTiet: any[]
   ): Promise<void> {
-    if (!id_ncc || !chi_tiet || chi_tiet.length === 0) {
+    if (!id_ncc || !chiTiet || chiTiet.length === 0) {
       throw new Error(
         "Dữ liệu hóa đơn nhập (Nhà cung cấp và Chi tiết) không hợp lệ."
       );
     }
-
-    await this.hdnhapRepository.createHDNhap(id_ncc, ghi_chu, chi_tiet);
+    const chiTietJson = JSON.stringify(chiTiet);
+    await this.hdnhapRepository.createHDNhap(id_ncc, ghi_chu, chiTietJson);
   }
 
-  // async updateHDNhap(
-  //   id: number,
-  //   ten_san_pham: string,
-  //   gia_ban: number,
-  //   mo_ta: string,
-  //   id_loai: number,
-  //   cong_thuc: any[]
-  // ): Promise<void> {
-  //   if (
-  //     !id ||
-  //     !ten_san_pham ||
-  //     gia_ban === undefined ||
-  //     !id_loai ||
-  //     !cong_thuc
-  //   ) {
-  //     throw new Error("Dữ liệu cập nhật không hợp lệ.");
-  //   }
-
-  //   await this.hdnhapRepository.updateHDNhap(
-  //     id,
-  //     ten_san_pham,
-  //     gia_ban,
-  //     mo_ta,
-  //     id_loai,
-  //     cong_thuc
-  //   );
-  // }
+  async updateHDNhap(
+    id_ncc: number,
+    ghi_chu: string,
+    chiTiet: any[]
+  ): Promise<void> {
+    if (!id_ncc || !chiTiet || chiTiet.length === 0) {
+      throw new Error(
+        "Dữ liệu hóa đơn nhập (Nhà cung cấp và Chi tiết) không hợp lệ."
+      );
+    }
+    const chiTietJson = JSON.stringify(chiTiet);
+    await this.hdnhapRepository.updateHDNhap(id_ncc, ghi_chu, chiTietJson);
+  }
 
   async deleteHDNhap(id: number): Promise<void> {
     await this.hdnhapRepository.deleteHDNhap(id);

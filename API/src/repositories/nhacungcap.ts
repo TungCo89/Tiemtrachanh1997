@@ -14,7 +14,7 @@ export class NCCRepository {
       const sql = "CALL GetAllNCC()";
       const [rows] = await this.db.query(sql);
       console.log(rows);
-            if (Array.isArray(rows) && rows.length > 0) {
+      if (Array.isArray(rows) && rows.length > 0) {
         return rows[0];
       }
       return [];
@@ -26,6 +26,16 @@ export class NCCRepository {
   async getByID(id: number): Promise<any> {
     try {
       const sql = "CALL GetNCCByID(?)";
+      const [rows] = await this.db.query(sql, [id]);
+      return rows;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getNguyenLieubyNCCID(id: number): Promise<any> {
+    try {
+      const sql = "CALL GetNguyenLieuByNCCID(?)";
       const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {

@@ -35,6 +35,20 @@ export class NCCController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+  async getNguyenLieubyNCCID(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.query;
+      const result = await this.nccModal.getNguyenLieubyNCCID(Number(id));
+      res.status(200).json({
+        success: true,
+        message: "Lấy thông tin thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Lỗi khi lấy danh sách:", error);
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
 
   async createNCC(req: Request, res: Response): Promise<void> {
     try {
