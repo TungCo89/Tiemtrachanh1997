@@ -90,6 +90,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+call GetAllUsers();
 
 -- GET /api/users/get-by-id/:id: Lấy thông tin người dùng theo ID.
 
@@ -112,6 +113,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+call GetUserByID(1);
 
 -- GET /api/users/search: Tìm kiếm người dùng.
 
@@ -137,6 +139,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+call SearchUsers("lam");
 
 -- Procedure: CreateUser, UpdateUser, DeleteUser, GetAllUsers, GetUserByID.
 

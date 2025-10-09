@@ -5,6 +5,7 @@ use tiemtrachanh1997;
 -- API cần thiết:
 
 -- GET /api/thong-ke/doanh-thu: Tính toán doanh thu theo ngày, tháng, năm.
+
 DELIMITER $$
 
 CREATE PROCEDURE GetDoanhThuByDateRange(
@@ -26,6 +27,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+CALL GetDoanhThuByDateRange('2025-09-01', '2025-09-30');
 
 -- GET /api/thong-ke/loi-nhuan-so-bo: Tính lợi nhuận theo ngày, tháng, năm.
 
@@ -87,6 +89,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+CALL GetLoiNhuanSoBo('2025-09-01', '2025-09-30');
 
 -- GET /api/thong-ke/hieu-suat-san-pham: Thống kê sản phẩm bán chạy nhất (theo số lượng hoặc doanh thu).
 
@@ -121,5 +124,6 @@ BEGIN
 END$$
 
 DELIMITER ;
+CALL GetHieuSuatSanPham('2025-09-01', '2025-09-30', 5);
 
 -- Procedure: GetDoanhThuByDateRange, GetLoiNhuanSoBo, GetHieuSuatSanPham.
