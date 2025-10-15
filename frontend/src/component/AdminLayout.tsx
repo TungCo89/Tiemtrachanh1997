@@ -18,27 +18,11 @@ const AdminLayout: React.FC = () => {
     const menuItems = [
         { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
         // ---  NHÓM NGƯỜI DÙNG (SubMenu) ---
-        {
-            key: 'sub-users',
-            icon: <UserOutlined />,
-            label: 'Quản Lý Người Dùng',
-            children: [
-                { key: '/admin/users', icon: <UserOutlined />, label: 'Danh sách Người dùng' },
-                { key: '/admin/users/add', icon: <UserOutlined />, label: 'Thêm Người dùng' },
-                { key: '/admin/users/update', icon: <UserOutlined />, label: 'Cập nhật Người dùng' },
-            ],
-        },
+        { key: '/admin/users', icon: <UserOutlined />, label: 'Danh sách Người dùng' },
+
         // ---  NHÓM NHÀ CUNG CẤP (SubMenu) ---
-        {
-            key: 'sub-nhacungcap',
-            icon: <UserOutlined />,
-            label: 'Quản Lý Nhà Cung Cấp',
-            children: [
-                { key: '/admin/nhacungcap', icon: <UserOutlined />, label: 'Danh sách Nhà cung cấp' },
-                { key: '/admin/nhacungcap/add', icon: <UserOutlined />, label: 'Thêm Nhà cung cấp' },
-                { key: '/admin/nhacungcap/update', icon: <UserOutlined />, label: 'Cập nhật Nhà cung cấp' },
-            ],
-        },
+        { key: '/admin/nhacungcap', icon: <UserOutlined />, label: 'Danh sách Nhà cung cấp' },
+
         // ---  NHÓM BỐ CỤC BÀN (SubMenu) ---
         { key: '/admin/ban', icon: <SettingOutlined />, label: 'Quản lý Bàn' },
 
