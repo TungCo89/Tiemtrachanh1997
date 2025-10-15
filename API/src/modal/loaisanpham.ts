@@ -14,19 +14,19 @@ export class LoaiSanPhamModal {
     return await this.loaisanphamRepository.getByID(id);
   }
 
-  async createLoaiSanPham(ten_loai: string): Promise<void> {
-    if (!ten_loai) {
+  async createLoaiSanPham(ten_loai: string, mo_ta: string): Promise<void> {
+    if (!ten_loai || !mo_ta) {
       throw new Error("Dữ liệu không hợp lệ.");
     }
-    await this.loaisanphamRepository.createLoaiSanPham(ten_loai);
+    await this.loaisanphamRepository.createLoaiSanPham(ten_loai, mo_ta);
   }
 
-  async updateLoaiSanPham(id: number, ten_loai: string): Promise<void> {
-    if (!id || !ten_loai) {
+  async updateLoaiSanPham(id: number, ten_loai: string, mo_ta: string): Promise<void> {
+    if (!id || !ten_loai || !mo_ta) {
       throw new Error("Dữ liệu cập nhật không hợp lệ.");
     }
 
-    await this.loaisanphamRepository.updateLoaiSanPham(id, ten_loai);
+    await this.loaisanphamRepository.updateLoaiSanPham(id, ten_loai, mo_ta);
   }
 
   async deleteLoaiSanPham(id: number): Promise<void> {

@@ -25,9 +25,10 @@ INSERT INTO nguyen_lieu (ten_nguyen_lieu, don_vi) VALUES
 ('Vải', 'kg');
 
 -- Thêm dữ liệu vào bảng Loại sản phẩm
-INSERT INTO loai_san_pham (ten_loai) VALUES
-('Trà sữa'),
-('Đồ ăn vặt');
+INSERT INTO loai_san_pham (ten_loai, mo_ta) VALUES
+('Trà sữa', 'Các loại trà sữa béo thơm, nhiều hương vị, kết hợp cùng các loại topping đa dạng.'),
+('Đồ ăn vặt', 'Các món ăn nhẹ, ăn kèm hoặc ăn chơi hấp dẫn, phù hợp cho mọi lứa tuổi.'),
+('Coffee', 'Các món cà phê truyền thống và hiện đại, từ cà phê phin đậm đà đến espresso.');
 
 -- Thêm dữ liệu vào bảng Sản phẩm
 INSERT INTO san_pham (ten_san_pham, gia_ban, mo_ta, id_loai) VALUES

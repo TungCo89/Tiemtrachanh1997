@@ -6,7 +6,8 @@ CREATE PROCEDURE GetAllLoaiSanPham()
 BEGIN
     SELECT
         id,
-        ten_loai
+        ten_loai,
+        mo_ta
     FROM
         loai_san_pham ;
 END$$
@@ -20,7 +21,8 @@ CREATE PROCEDURE GetLoaiSanPhamByID(
 BEGIN
     SELECT
         id,
-        ten_loai
+        ten_loai, 
+        mo_ta
     FROM
         loai_san_pham
     WHERE
@@ -31,11 +33,12 @@ DELIMITER ;
 -- create 
 DELIMITER $$
 CREATE PROCEDURE CreateLoaiSanPham(
-    IN p_ten_loai VARCHAR(100)
+    IN p_ten_loai VARCHAR(100),
+    IN p_mo_ta VARCHAR(255)
 )
 BEGIN
-    INSERT INTO loai_san_pham (ten_loai)
-    VALUES (p_ten_loai);
+    INSERT INTO loai_san_pham (ten_loai,mo_ta)
+    VALUES (p_ten_loai,p_mo_ta);
 END$$
 DELIMITER ;
 
@@ -43,12 +46,14 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE UpdateLoaiSanPham(
     IN p_id INT,
-    IN p_ten_loai VARCHAR(100)
+    IN p_ten_loai VARCHAR(100),
+	IN p_mo_ta VARCHAR(255)
 )
 BEGIN
     UPDATE loai_san_pham
     SET
-        ten_loai = p_ten_loai
+        ten_loai = p_ten_loai,
+        mo_ta = p_mo_ta
     WHERE
         id = p_id;
 END$$

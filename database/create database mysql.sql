@@ -29,7 +29,8 @@ CREATE TABLE nguyen_lieu (
 -- Bảng loại sản phẩm
 CREATE TABLE loai_san_pham (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ten_loai VARCHAR(100) NOT NULL
+    ten_loai VARCHAR(100) NOT NULL,
+    mo_ta VARCHAR(255) NULL
 );
 
 -- Bảng sản phẩm

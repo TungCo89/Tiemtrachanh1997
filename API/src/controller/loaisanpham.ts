@@ -38,9 +38,9 @@ export class LoaiSanPhamController {
 
   async createLoaiSanPham(req: Request, res: Response): Promise<void> {
     try {
-      const { ten_loai } = req.body;
+      const { ten_loai,mo_ta } = req.body;
 
-      await this.loaisanphamModal.createLoaiSanPham(ten_loai);
+      await this.loaisanphamModal.createLoaiSanPham(ten_loai,mo_ta);
 
       res.status(201).json({
         success: true,
@@ -55,14 +55,14 @@ export class LoaiSanPhamController {
     try {
       const { id } = req.query;
       const ID = Number(id);
-      const { ten_loai } = req.body;
+      const { ten_loai, mo_ta } = req.body;
 
       if (isNaN(ID)) {
         res.status(400).json({ message: "ID không hợp lệ." });
         return;
       }
 
-      await this.loaisanphamModal.updateLoaiSanPham(ID, ten_loai);
+      await this.loaisanphamModal.updateLoaiSanPham(ID, ten_loai, mo_ta);
 
       res.status(200).json({
         success: true,

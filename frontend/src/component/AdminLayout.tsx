@@ -1,9 +1,9 @@
 // src/components/AdminLayout.tsx
 
 import React, { useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'; 
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-    MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, ShoppingOutlined, UserOutlined 
+    MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, ShoppingOutlined, UserOutlined, TableOutlined, PlusOutlined, SettingOutlined, BarChartOutlined, LineChartOutlined, DatabaseOutlined, DollarCircleOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 
@@ -15,17 +15,92 @@ const AdminLayout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Menu items 
     const menuItems = [
         { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
-        { key: '/admin/loaisanpham', icon: <ShoppingOutlined />, label: 'Quản lý Loại sản phẩm' },
-        { key: '/admin/products', icon: <ShoppingOutlined />, label: 'Quản lý Sản phẩm' },
-        { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Người dùng' },
+        // ---  NHÓM NGƯỜI DÙNG (SubMenu) ---
+        {
+            key: 'sub-users',
+            icon: <UserOutlined />,
+            label: 'Quản Lý Người Dùng',
+            children: [
+                { key: '/admin/users', icon: <UserOutlined />, label: 'Danh sách Người dùng' },
+                { key: '/admin/users/add', icon: <UserOutlined />, label: 'Thêm Người dùng' },
+                { key: '/admin/users/update', icon: <UserOutlined />, label: 'Cập nhật Người dùng' },
+            ],
+        },
+        // ---  NHÓM NHÀ CUNG CẤP (SubMenu) ---
+        {
+            key: 'sub-nhacungcap',
+            icon: <UserOutlined />,
+            label: 'Quản Lý Nhà Cung Cấp',
+            children: [
+                { key: '/admin/nhacungcap', icon: <UserOutlined />, label: 'Danh sách Nhà cung cấp' },
+                { key: '/admin/nhacungcap/add', icon: <UserOutlined />, label: 'Thêm Nhà cung cấp' },
+                { key: '/admin/nhacungcap/update', icon: <UserOutlined />, label: 'Cập nhật Nhà cung cấp' },
+            ],
+        },
+        // ---  NHÓM BỐ CỤC BÀN (SubMenu) ---
+        { key: '/admin/ban', icon: <SettingOutlined />, label: 'Quản lý Bàn' },
+
+        // ---  NHÓM HÀNG HÓA (SubMenu) ---
+        {
+            key: 'sub-hanghoa',
+            icon: <ShoppingOutlined />,
+            label: 'Sản Phẩm & Nguyên Liệu',
+            children: [
+                // Mục con 1: Quản lý Loại Sản phẩm
+                { key: '/admin/loaisanpham', icon: <TableOutlined />, label: 'Danh mục Loại SP' },
+                // Mục con 2: Quản lý Sản phẩm
+                { key: '/admin/sanpham', icon: <TableOutlined />, label: 'Quản lý Sản phẩm' },
+                // Mục con 3: Quản lý Nguyên liệu
+                { key: '/admin/nguyenlieu', icon: <TableOutlined />, label: 'Quản lý Nguyên liệu' },
+            ],
+        },
+
+        // ---  NHÓM HÓA ĐƠN (SubMenu) ---
+        {
+            key: 'sub-hoadon',
+            icon: <SettingOutlined />,
+            label: 'Quản Lý Hóa Đơn',
+            children: [
+                // Mục con 1: Hóa đơn nhập
+                {
+                    key: 'hoadonnhap',
+                    label: 'Quản lý Hóa đơn Nhập',
+                    children: [
+                        { key: '/admin/hoadonnhap', icon: <TableOutlined />, label: 'Hóa đơn Nhập' },
+                        { key: '/admin/hoadonnhap/add', icon: <PlusOutlined />, label: 'Thêm Hóa đơn Nhập' },
+                        { key: '/admin/hoadonnhap/update', icon: <PlusOutlined />, label: 'Cập nhật Hóa đơn Nhập' },
+                    ],
+                },
+                // Mục con 2: Hóa đơn bán
+                {
+                    key: 'hoadonban',
+                    label: 'Quản lý Hóa đơn Bán',
+                    children: [
+                        { key: '/admin/hoadonban', icon: <TableOutlined />, label: 'Hóa đơn Bán' },
+                        { key: '/admin/hoadonban/add', icon: <PlusOutlined />, label: 'Thêm Hóa đơn Bán' },
+                        { key: '/admin/hoadonban/update', icon: <PlusOutlined />, label: 'Cập nhật Hóa đơn Bán' },
+                    ],
+                },
+            ],
+        },
+        // ---  NHÓM BÁO CÁO - THỐNG KÊ (SubMenu) ---
+        {
+            key: 'sub-baocao',
+            icon: <BarChartOutlined />, // Icon Biểu đồ/Thống kê
+            label: 'Thống Kê & Báo Cáo',
+            children: [
+                { key: '/admin/reports/sales', icon: <LineChartOutlined />, label: 'Báo cáo Doanh thu' },
+                { key: '/admin/reports/inventory', icon: <DatabaseOutlined />, label: 'Báo cáo Tồn kho' },
+                { key: '/admin/reports/profit', icon: <DollarCircleOutlined />, label: 'Báo cáo Lợi nhuận' },
+            ],
+        },
     ];
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <Sider trigger={null} collapsible collapsed={collapsed}>
+            <Sider trigger={null} collapsible collapsed={collapsed} width={250} collapsedWidth={80}>
                 <div className="demo-logo-vertical" style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)', borderRadius: 6 }} />
 
                 <Menu
