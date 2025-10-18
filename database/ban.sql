@@ -73,7 +73,7 @@ BEGIN
 END$$
 
 DELIMITER ;
-
+call GetAllBan();
 -- GET /api/ban/get-by-id/:id: Lấy thông tin bàn theo ID.
 
 DELIMITER $$

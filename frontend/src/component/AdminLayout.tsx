@@ -48,25 +48,11 @@ const AdminLayout: React.FC = () => {
             label: 'Quản Lý Hóa Đơn',
             children: [
                 // Mục con 1: Hóa đơn nhập
-                {
-                    key: 'hoadonnhap',
-                    label: 'Quản lý Hóa đơn Nhập',
-                    children: [
-                        { key: '/admin/hoadonnhap', icon: <TableOutlined />, label: 'Hóa đơn Nhập' },
-                        { key: '/admin/hoadonnhap/add', icon: <PlusOutlined />, label: 'Thêm Hóa đơn Nhập' },
-                        { key: '/admin/hoadonnhap/update', icon: <PlusOutlined />, label: 'Cập nhật Hóa đơn Nhập' },
-                    ],
-                },
+                { key: '/admin/hoadonnhap', icon: <TableOutlined />, label: 'Hóa đơn Nhập' },
+
                 // Mục con 2: Hóa đơn bán
-                {
-                    key: 'hoadonban',
-                    label: 'Quản lý Hóa đơn Bán',
-                    children: [
-                        { key: '/admin/hoadonban', icon: <TableOutlined />, label: 'Hóa đơn Bán' },
-                        { key: '/admin/hoadonban/add', icon: <PlusOutlined />, label: 'Thêm Hóa đơn Bán' },
-                        { key: '/admin/hoadonban/update', icon: <PlusOutlined />, label: 'Cập nhật Hóa đơn Bán' },
-                    ],
-                },
+                { key: '/admin/hoadonban', icon: <TableOutlined />, label: 'Hóa đơn Bán' },
+
             ],
         },
         // ---  NHÓM BÁO CÁO - THỐNG KÊ (SubMenu) ---

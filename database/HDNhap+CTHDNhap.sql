@@ -78,6 +78,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+call GetAllHoaDonNhap(); 
 
 -- GET /api/hoadon-nhap/get-by-id/:id: Lấy hóa đơn nhập và chi tiết.
 
