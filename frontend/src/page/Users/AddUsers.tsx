@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Form, Input, Card, Space, Select, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import axios from 'axios';
 const { Option } = Select; 
 interface Users {
     id: number;
@@ -11,21 +12,45 @@ interface Users {
     soDienThoai: string;
     tenVaiTro: string;
 }
+interface AddUserProps {
+    onClose: () => void;
+    onSuccess: () => void;
+}
+const API_BASE_URL = 'http://localhost:7000/api/user';
 
-const AddUsers: React.FC = () => {
+
+const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
     const [form] = Form.useForm();
+        const [loading, setLoading] = useState(false);
+        const onFinish = async (values: Users) => {
+        setLoading(true);
+        try {
+            // Chuẩn bị payload để gửi lên backend
+            const payload = {
+                ...values,
+                // Mặc định công thức là mảng rỗng khi thêm mới, hoặc bạn cần thêm Form.List để nhập công thức
+                cong_thuc: [
+                ]
+            };
 
-    const onFinish = (values: Users) => {
-        console.log('Thông tin người dùng cần thêm:', values);
-        // Ở đây sẽ gọi API để thêm người dùng vào database
-        message.success(`Đã thêm người dùng: ${values.tenDangNhap}`);
-        form.resetFields();
+            // GỌI API create: POST http://localhost:7000/api/User/create
+            const response = await axios.post(`${API_BASE_URL}/create`, payload);
+
+            if (response.data.success) {
+                message.success(`Đã thêm sản phẩm thành công.`);
+                form.resetFields();
+                onSuccess();
+            } else {
+                message.error(response.data.message || 'Lỗi khi thêm sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Create:', error);
+            message.error('Lỗi kết nối máy chủ hoặc dữ liệu không hợp lệ.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const onFinishFailed = (errorInfo: any) => {
-        console.log('Gửi form thất bại:', errorInfo);
-        message.error('Vui lòng điền đầy đủ các trường bắt buộc.');
-    };
 
     return (
         <Card
@@ -42,8 +67,7 @@ const AddUsers: React.FC = () => {
                 form={form}
                 name="addUsersForm"
                 layout="vertical"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
+                onFinish={onFinish as (values: any) => void}
                 autoComplete="off"
             >
             {/* Trường Tên đăng nhập */}

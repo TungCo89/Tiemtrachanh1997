@@ -10,7 +10,7 @@ export class UserRepository {
 
   async getAll(): Promise<any> {
     try {
-      const sql = "CALL GetAllNguoiDung()";
+      const sql = "CALL GetAllUsers()";
       const [rows] = await this.db.query(sql);
       return rows;
     } catch (error: any) {
@@ -19,7 +19,7 @@ export class UserRepository {
   }
   async getByID(id: number): Promise<any> {
     try {
-      const sql = "CALL getNguoiDungByID(?)";
+      const sql = "CALL GetUserByID(?)";
       const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {
@@ -36,10 +36,27 @@ export class UserRepository {
     }
   }
 
-  async signup(id: number): Promise<any> {
+  async getUserByUserEmail(email: string): Promise<any> {
+    const sql = "CALL GetUserByEmail(?)";
+
+    const [results] = await this.db.query(sql, [email]);
+    if (Array.isArray(results)) {
+      return results[0];
+    }
+    return [];
+  }
+
+  async signup(user: any): Promise<any> {
     try {
-      const sql = "CALL signup(?)";
-      const [rows] = await this.db.query(sql, []);
+      const sql = "CALL CreateUser(?,?,?,?,?,?)";
+      const [rows] = await this.db.query(sql, [
+        user.ten_dang_nhap,
+        user.mat_khau,
+        user.ho_ten,
+        user.email,
+        user.so_dien_thoai,
+        user.id_vai_tro,
+      ]);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);
@@ -54,10 +71,18 @@ export class UserRepository {
       throw new Error(error.message);
     }
   }
-  async update(id: number): Promise<any> {
+  async update(user: any): Promise<any> {
     try {
-      const sql = "CALL updateNguoiDung(?)";
-      const [rows] = await this.db.query(sql, []);
+      const sql = "CALL UpdateUser(?,?,?,?,?,?,?)";
+      const [rows] = await this.db.query(sql, [
+        user.id,
+        user.ten_dang_nhap,
+        user.mat_khau,
+        user.ho_ten,
+        user.email,
+        user.so_dien_thoai,
+        user.id_vai_tro,
+      ]);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);

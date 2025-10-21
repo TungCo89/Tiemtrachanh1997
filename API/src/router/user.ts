@@ -10,10 +10,12 @@ const userController = new UserController(userModal);
 
 userRouter.get('/get-all', userController.getAll.bind(userController));
 userRouter.get('/get-by-id', userController.getByID.bind(userController));
+userRouter.get('/get-by-email', userController.getUserByUserEmail.bind(userController));
 userRouter.get('/roles', userController.getRoles.bind(userController));
 userRouter.post('/signup', userController.signup.bind(userController));
 userRouter.post('/login', userController.login.bind(userController));
 userRouter.put('/update', userController.update.bind(userController));
 userRouter.post('/delete', userController.delete.bind(userController));
+// userRouter.get('/search-by-name', userController.searchSanPhamByName.bind(sanphamController));
 
 export default userRouter;

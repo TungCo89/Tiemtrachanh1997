@@ -76,7 +76,7 @@ DELIMITER ;
 -- GetAllSanPhamVaCongThuc
 
 DELIMITER $$
-
+call GetAllSanPhamVaCongThuc();
 CREATE PROCEDURE GetAllSanPhamVaCongThuc()
 BEGIN
     SELECT
@@ -84,6 +84,7 @@ BEGIN
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
+		lsp.id as id_loai,
         lsp.ten_loai,
         ct.id_nguyen_lieu,
         ct.so_luong,
@@ -96,11 +97,16 @@ BEGIN
     LEFT JOIN
         cong_thuc ct ON sp.id = ct.id_san_pham
     LEFT JOIN
-        nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id;
+        nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
+	ORDER BY
+		sp.id ASC, 
+		lsp.id ASC,
+        sp.ten_san_pham ASC,  
+        nl.ten_nguyen_lieu ASC;
 END$$
 
 DELIMITER ;
-
+call GetSanPhamVaCongThucByID(1);
 -- GetSanPhamVaCongThucByID
 DELIMITER $$
 
@@ -113,6 +119,7 @@ BEGIN
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
+		lsp.id as id_loai,
         lsp.ten_loai,
         ct.id_nguyen_lieu,
         ct.so_luong,

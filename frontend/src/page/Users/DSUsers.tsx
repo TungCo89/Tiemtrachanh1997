@@ -1,61 +1,124 @@
-import React, { useState } from 'react';
-import { Table, Button, Input, Space, Tag } from 'antd';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Table, Button, Input, Space, Tag, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
+import { User } from '../../component/interface';
 import AddUsers from './AddUsers';
 import UpdateUsers from './UpdateUsers';
+import axios from 'axios';
 const { Search } = Input;
 
-interface Users {
-    id: number;
-    tenDangNhap: string;
-    hoTen: string;
-    email: string;
-    soDienThoai: string;
-    tenVaiTro: string;
-}
-
-const dataSource: Users[] = [
-    {
-        id: 1,
-        tenDangNhap: 'admin',
-        hoTen: 'Nguyễn Văn A',
-        email: 'admin@example.com',
-        soDienThoai: '0987654321',
-        tenVaiTro: 'Quản trị viên'
-    },
-    {
-        id: 2,
-        tenDangNhap: 'nv_lam',
-        hoTen: 'Nguyễn Thị B',
-        email: 'lam@example.com',
-        soDienThoai: '0123456789',
-        tenVaiTro: 'Nhân viên'
-    },
-];
-
 const DSUsers: React.FC = () => {
+    const [danhSachUser, setDanhSachUser] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isFormulaModalOpen, setIsFormulaModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<User | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [editingItemId, setEditingItemId] = useState<number | null>(null);
+    // State Lưu dữ liệu người dùng đang chỉnh sửa
+    const [dataToEdit, setDataToEdit] = useState<User | null>(null);
+
+    // Hàm gọi API lấy tất cả người dùng
+    const fetchUser = useCallback(async (searchQuery = '') => {
+        setLoading(true);
+        try {
+            const endpoint = searchQuery ?
+                `http://localhost:7000/api/user/search-by-name?name=${searchQuery}` :
+                `http://localhost:7000/api/user/get-all`;
+
+            const response = await axios.get<{ success: boolean; data: User[] }>(endpoint);
+
+            if (response.data.success) {
+                const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                setDanhSachUser(resultData.filter(Boolean));
+            } else {
+                message.error('Lỗi khi tải danh sách người dùng.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-All:', error);
+            message.error('Không thể kết nối đến máy chủ hoặc lỗi không xác định.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Hàm gọi API lấy chi tiết người dùng (dùng cho chỉnh sửa)
+    const fetchUserById = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: User }>(`http://localhost:7000/api/user/get-by-ID?id=${id}`);
+            if (response.data.success && response.data.data) {
+                setDataToEdit(response.data.data);
+                setIsModalOpen(true);
+            } else {
+                message.error('Không tìm thấy dữ liệu người dùng để sửa.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-by-ID:', error);
+            message.error('Lỗi khi lấy chi tiết người dùng.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser]);
 
     const onSearch = (value: string) => {
-        console.log('Đang tìm kiếm:', value);
-
+        fetchUser(value);
     };
 
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingItemId, setEditingItemId] = useState<number | null>(null); // null khi không sửa
 
+    // Xử lý Thêm mới
     const handleAdd = () => {
-        setIsAddModalOpen(true);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        setIsModalOpen(true);
     };
 
+    // Xử lý Sửa
     const handleEdit = (id: number) => {
-        setEditingItemId(id); // Set ID để mở Modal Sửa
+        setEditingItemId(id);
+        fetchUserById(id);
+    };
+    const handleSuccess = () => {
+        setIsModalOpen(false);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        fetchUser();
     };
 
+    // Xử lý Xóa 
     const handleDelete = (id: number) => {
-        // gọi api delete(id)
-        //hiển thị thông báo 'xác nhận xóa' --> xác nhận --> xóa
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa người dùng ID: ${id} này không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.delete(`http://localhost:7000/api/user/delete?id=${id}`);
+
+                    if (response.data.success) {
+                        message.success(`Đã xóa người dùng ID: ${id} thành công.`);
+                        fetchUser();
+                    } else {
+                        message.error(response.data.message || 'Lỗi khi xóa người dùng.');
+                    }
+                } catch (error) {
+                    console.error('Lỗi API Delete:', error);
+                    message.error('Lỗi máy chủ khi xóa người dùng.');
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
     };
 
     const handleCancel = () => {
@@ -88,6 +151,11 @@ const DSUsers: React.FC = () => {
             key: 'email',
         },
         {
+            title: 'Mật khẩu',
+            dataIndex: 'matKhau',
+            key: 'matKhau',
+        },
+        {
             title: 'Số điện thoại',
             dataIndex: 'soDienThoai',
             key: 'soDienThoai',
@@ -103,11 +171,11 @@ const DSUsers: React.FC = () => {
             title: 'Chức năng',
             key: 'action',
             width: 150,
-            render: (_: any, record: Users) => (
+            render: (_: any, record: User) => (
                 <Space size="small">
                     <Button
                         type="primary"
-                        onClick={() => handleEdit(record.id)} 
+                        onClick={() => handleEdit(record.id)}
                         style={{ backgroundColor: '#333', borderColor: '#333' }}
                         size="small"
                     >
@@ -116,7 +184,7 @@ const DSUsers: React.FC = () => {
                     <Button
                         type="primary"
                         danger
-                        onClick={() => handleDelete(record.id)} 
+                        onClick={() => handleDelete(record.id)}
                         size="small"
                     >
                         Xóa
@@ -130,63 +198,48 @@ const DSUsers: React.FC = () => {
         <div style={{ padding: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2>Quản lý người dùng</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
-                    Thêm người dùng
-                </Button>
-            </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <Search
+                        placeholder="Tìm kiếm người dùng"
+                        allowClear
+                        onSearch={onSearch}
+                        style={{ width: 300 }}
+                    />
+                    <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                        Thêm người dùng
+                    </Button>
+                </div>
 
-            {/* 1. MODAL THÊM MỚI (Add) */}
-            <Modal
-                title="Thêm người dùng mới"
-                open={isAddModalOpen} // 👈 Mở theo state Add
-                onCancel={handleCancel}
-                footer={null}
-            >
-                <AddUsers />
-            </Modal>
-
-            {/* 2. MODAL CẬP NHẬT (Update) */}
-            <Modal
-                title={`Cập nhật người dùng (ID: ${editingItemId})`} // Hiển thị ID đang sửa
-                open={editingItemId !== null} // 👈 Mở khi editingItemId có giá trị
-                onCancel={handleCancel}
-                footer={null}
-                destroyOnClose // Giúp component UpdateUsers reset mỗi lần mở
-            >
-                {/* 👈 TRUYỀN ID VÀO COMPONENT UPDATE */}
-                {editingItemId !== null && (
-                    <UpdateUsers id={editingItemId} onCancel={handleCancel} />
-                )}
-            </Modal>
-
-            {/* 1. Thanh tìm kiếm */}
-            <div style={{ marginBottom: 20 }}>
-                <Search
-                    placeholder="Tên người dùng cần tìm"
-                    allowClear
-                    enterButton={<SearchOutlined />}
-                    onSearch={onSearch}
-                    style={{ maxWidth: 400 }}
+                <Table
+                    columns={columns}
+                    dataSource={danhSachUser}
+                    rowKey="id"
+                    loading={loading}
                 />
-            </div>
 
-            {/* 2. Bảng hiển thị danh sách */}
-            <Table
-                pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 10,
-                    showSizeChanger: false,
-                    total: dataSource.length,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} mục`,
-                }}
-                dataSource={dataSource}
-                columns={columns}
-                rowKey="id"
-            />
+                {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
+                <Modal
+                    title={editingItemId ? "Cập nhật người dùng" : "Thêm mới người dùng"}
+                    open={isModalOpen}
+                    onCancel={() => setIsModalOpen(false)}
+                    footer={null}
+                    destroyOnClose={true}
+                >
+                    {editingItemId ? (
+                        <UpdateUsers
+                            id={editingItemId}
+                            initialData={dataToEdit}
+                            onClose={() => setIsModalOpen(false)}
+                            onSuccess={handleSuccess}
+                        />
+                    ) : (
+                        <AddUsers
+                            onClose={() => setIsModalOpen(false)}
+                            onSuccess={handleSuccess}
+                        />
+                    )}
+                </Modal>
+            </div>
         </div>
     );
 };

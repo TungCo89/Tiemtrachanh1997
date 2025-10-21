@@ -1,110 +1,152 @@
-import React, { useState } from 'react';
-import { Table, Button, Input, Space, Tag } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
+import { Table, Button, Input, message, notification, Space } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
-import AddSanPham from './AddSanPham';
+import { CongThucChiTiet } from '../../component/interface';
+import { SanPham } from '../../component/interface';
+import AddSanPham from './AddSanPham'
 import UpdateSanPham from './UpdateSanPham';
 const { Search } = Input;
 
-interface SanPham {
-    id: number;
-    idloai: number;
-    ten: string;
-    giaban: number;
-    mota: string;
-}
-
-const dataSource: SanPham[] = [
-    { id: 1, idloai: 1, ten: 'Trà Chanh', giaban: 15000, mota: 'Trà chanh truyền thống' },
-    { id: 2, idloai: 1, ten: 'Trà Đào Cam Sả', giaban: 25000, mota: 'Trà đào thơm ngon' },
-    { id: 3, idloai: 1, ten: 'Trà Vải', giaban: 20000, mota: 'Trà vải tươi mát' },
-    { id: 4, idloai: 2, ten: 'Hướng Dương', giaban: 10000, mota: 'Hạt hướng dương rang muối' },
-    { id: 5, idloai: 2, ten: 'Khô Gà', giaban: 20000, mota: 'Khô gà lá chanh' },
-];
-
-
 const DSSanPham: React.FC = () => {
+    const [danhSachSP, setDanhSachSP] = useState<SanPham[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isFormulaModalOpen, setIsFormulaModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<SanPham | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItemId, setEditingItemId] = useState<number | null>(null);
+    // State Lưu dữ liệu sản phẩm đang chỉnh sửa
+    const [dataToEdit, setDataToEdit] = useState<SanPham | null>(null);
 
-    const onSearch = (value: string) => {
-        console.log('Đang tìm kiếm:', value);
+    // Hàm gọi API lấy tất cả sản phẩm
+    const fetchSanPham = useCallback(async (searchQuery = '') => {
+        setLoading(true);
+        try {
+            const endpoint = searchQuery ?
+                `http://localhost:7000/api/sanpham/search-by-name?name=${searchQuery}` :
+                `http://localhost:7000/api/sanpham/get-all`;
 
+            const response = await axios.get<{ success: boolean; data: SanPham[] }>(endpoint);
+
+            if (response.data.success) {
+                const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                setDanhSachSP(resultData.filter(Boolean));
+            } else {
+                message.error('Lỗi khi tải danh sách sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-All:', error);
+            message.error('Không thể kết nối đến máy chủ hoặc lỗi không xác định.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Hàm gọi API lấy chi tiết sản phẩm (dùng cho chỉnh sửa)
+    const fetchSanPhamById = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: SanPham }>(`http://localhost:7000/api/sanpham/get-by-ID?id=${id}`);
+            if (response.data.success && response.data.data) {
+                setDataToEdit(response.data.data);
+                setIsModalOpen(true);
+            } else {
+                message.error('Không tìm thấy dữ liệu sản phẩm để sửa.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-by-ID:', error);
+            message.error('Lỗi khi lấy chi tiết sản phẩm.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Giả sử đây là bên trong DSSanPham.tsx
+    useEffect(() => {
+        fetchSanPham();
+    }, [fetchSanPham]);
 
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [editingItemId, setEditingItemId] = useState<number | null>(null); // null khi không sửa
+    const onSearch = (value: string) => {
+        fetchSanPham(value);
+    };
 
     // Xử lý Thêm mới
     const handleAdd = () => {
-        setIsAddModalOpen(true);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        setIsModalOpen(true);
     };
 
-    // Xử lý Cập nhật (nhận ID)
+    // Xử lý Sửa
     const handleEdit = (id: number) => {
-        setEditingItemId(id); // Set ID để mở Modal Sửa
+        setEditingItemId(id);
+        fetchSanPhamById(id);
+    };
+    const handleSuccess = () => {
+        setIsModalOpen(false);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        fetchSanPham();
     };
 
-    // Xử lý xóa (nhận ID)
+    // Xử lý Xóa 
     const handleDelete = (id: number) => {
-        // gọi api delete(id)
-        //hiển thị thông báo 'xác nhận xóa' --> xác nhận --> xóa
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa sản phẩm ID: ${id} này không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.delete(`http://localhost:7000/api/sanpham/delete?id=${id}`);
+
+                    if (response.data.success) {
+                        message.success(`Đã xóa sản phẩm ID: ${id} thành công.`);
+                        fetchSanPham();
+                    } else {
+                        message.error(response.data.message || 'Lỗi khi xóa sản phẩm.');
+                    }
+                } catch (error) {
+                    console.error('Lỗi API Delete:', error);
+                    message.error('Lỗi máy chủ khi xóa sản phẩm.');
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
+    };
+    // Xử lý Xem Công thức
+    const handleView = (id: number) => {
+        const product = danhSachSP.find(sp => sp.id === id);
+
+        if (!product) {
+            message.warning('Không tìm thấy sản phẩm này.');
+            return;
+        }
+
+        setSelectedProduct(product);
+        setIsFormulaModalOpen(true);
     };
 
-    // Xử lý Đóng Modal chung
-    const handleCancel = () => {
-        setIsAddModalOpen(false); // Đóng Modal Thêm
-        setEditingItemId(null); // Đóng Modal Sửa và reset ID
-    };
-
-    // Cấu hình các cột cho Table
     const columns = [
-        {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
-            width: 80,
-        },
-        {
-            title: 'ID Loại',
-            dataIndex: 'idloai',
-            key: 'id_loai',
-            width: 80,
-        },
-        {
-            title: 'Tên sản phẩm',
-            dataIndex: 'ten',
-            key: 'ten_san_pham',
-        },
-        {
-            title: 'Giá bán',
-            dataIndex: 'giaban',
-            key: 'gia_ban',
-        },
-        {
-            title: 'Mô tả',
-            dataIndex: 'mota',
-            key: 'mo_ta',
-        },
+        { title: 'ID', dataIndex: 'id', key: 'id' },
+        { title: 'Loại', dataIndex: 'ten_loai', key: 'ten_loai' },
+        { title: 'Tên sản phẩm', dataIndex: 'ten_san_pham', key: 'ten_san_pham' },
+        { title: 'Giá bán', dataIndex: 'gia_ban', key: 'gia_ban' },
+        { title: 'Mô tả', dataIndex: 'mo_ta', key: 'mo_ta' },
         {
             title: 'Chức năng',
             key: 'action',
-            width: 150,
             render: (_: any, record: SanPham) => (
-                <Space size="small">
+                <Space size="middle">
+                    <Button type="link" onClick={() => handleView(record.id)}>CT</Button>
+                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record.id)}>Sửa</Button>
                     <Button
-                        type="primary"
-                        onClick={() => handleEdit(record.id)}
-                        style={{ backgroundColor: '#333', borderColor: '#333' }}
-                        size="small"
-                    >
-                        Sửa
-                    </Button>
-                    <Button
-                        type="primary"
                         danger
+                        icon={<DeleteOutlined />}
                         onClick={() => handleDelete(record.id)}
-                        size="small"
                     >
                         Xóa
                     </Button>
@@ -114,66 +156,80 @@ const DSSanPham: React.FC = () => {
     ];
 
     return (
-        <div style={{ padding: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2>Quản lý sản phẩm</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
+        <div>
+            <h2>Quản lý sản phẩm</h2>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Search
+                    placeholder="Tìm kiếm sản phẩm"
+                    allowClear
+                    onSearch={onSearch}
+                    style={{ width: 300 }}
+                />
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                     Thêm sản phẩm
                 </Button>
             </div>
 
-            {/* 1. MODAL THÊM MỚI (Add) */}
-            <Modal
-                title="Thêm  sản phẩm mới"
-                open={isAddModalOpen} // 👈 Mở theo state Add
-                onCancel={handleCancel}
-                footer={null}
-            >
-                <AddSanPham />
-            </Modal>
+            <Table
+                columns={columns}
+                dataSource={danhSachSP}
+                rowKey="id"
+                loading={loading}
+            />
 
-            {/* 2. MODAL CẬP NHẬT (Update) */}
+            {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                title={`Cập nhật sản phẩm (ID: ${editingItemId})`} // Hiển thị ID đang sửa
-                open={editingItemId !== null} // 👈 Mở khi editingItemId có giá trị
-                onCancel={handleCancel}
+                title={editingItemId ? "Cập nhật Sản phẩm" : "Thêm mới Sản phẩm"}
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                destroyOnClose // Giúp component UpdateSanPham reset mỗi lần mở
+                destroyOnClose={true}
             >
-                {/* 👈 TRUYỀN ID VÀO COMPONENT UPDATE */}
-                {editingItemId !== null && (
-                    <UpdateSanPham id={editingItemId} onCancel={handleCancel} />
+                {editingItemId ? (
+                    <UpdateSanPham
+                        id={editingItemId}
+                        initialData={dataToEdit}
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
+                ) : (
+                    <AddSanPham
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
                 )}
             </Modal>
 
-            {/* 1. Thanh tìm kiếm */}
-            <div style={{ marginBottom: 20 }}>
-                <Search
-                    placeholder="Tên loại sản phẩm cần tìm"
-                    allowClear
-                    enterButton={<SearchOutlined />}
-                    onSearch={onSearch}
-                    style={{ maxWidth: 400 }}
-                />
-            </div>
-
-            {/* 2. Bảng hiển thị danh sách */}
-            <Table
-                pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 10,
-                    showSizeChanger: false,
-                    total: dataSource.length,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} mục`,
+            {/* Modal Xem Công thức */}
+            <Modal
+                title={`Công thức: ${selectedProduct?.ten_san_pham || 'Chi tiết sản phẩm'}`}
+                open={isFormulaModalOpen}
+                onCancel={() => {
+                    setIsFormulaModalOpen(false);
+                    setSelectedProduct(null); 
                 }}
-                dataSource={dataSource}
-                columns={columns}
-                rowKey="id"
-            />
+                footer={[
+                    <Button key="close" onClick={() => setIsFormulaModalOpen(false)}>
+                        Đóng
+                    </Button>,
+                ]}
+                width={700} 
+            >
+                {selectedProduct && (
+                    <Table
+                        size="small"
+                        dataSource={selectedProduct.cong_thuc}
+                        rowKey="id_nguyen_lieu"
+                        pagination={false}
+                        columns={[
+                            { title: 'Nguyên liệu', dataIndex: 'ten_nguyen_lieu', key: 'ten_nguyen_lieu' },
+                            { title: 'Số lượng', dataIndex: 'so_luong', key: 'so_luong' },
+                            { title: 'Đơn vị', dataIndex: 'don_vi', key: 'don_vi' },
+                        ]}
+                    />
+                )}
+            </Modal>
         </div>
     );
 };

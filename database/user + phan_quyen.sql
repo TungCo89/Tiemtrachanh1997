@@ -49,12 +49,16 @@ BEGIN
     UPDATE nguoi_dung
     SET
         ten_dang_nhap = p_ten_dang_nhap,
-        mat_khau = p_mat_khau,
         ho_ten = p_ho_ten,
         email = p_email,
         so_dien_thoai = p_so_dien_thoai,
         id_vai_tro = p_id_vai_tro
     WHERE id = p_id;
+    IF p_mat_khau IS NOT NULL THEN
+        UPDATE nguoi_dung
+        SET mat_khau = p_mat_khau
+        WHERE id = p_id;
+    END IF;
 END$$
 
 DELIMITER ;
@@ -75,12 +79,13 @@ DELIMITER ;
 -- GET /api/users/get-all: Lấy danh sách tất cả người dùng.
 
 DELIMITER $$
-
+call GetAllUsers();
 CREATE PROCEDURE GetAllUsers()
 BEGIN
     SELECT 
         nd.id, 
         nd.ten_dang_nhap, 
+		nd.mat_khau,
         nd.ho_ten, 
         nd.email, 
         nd.so_dien_thoai,
@@ -93,7 +98,7 @@ DELIMITER ;
 call GetAllUsers();
 
 -- GET /api/users/get-by-id/:id: Lấy thông tin người dùng theo ID.
-
+call GetUserByID(1);
 DELIMITER $$
 
 CREATE PROCEDURE GetUserByID(
@@ -103,6 +108,7 @@ BEGIN
     SELECT 
         nd.id, 
         nd.ten_dang_nhap, 
+		nd.mat_khau,
         nd.ho_ten, 
         nd.email, 
         nd.so_dien_thoai,
@@ -114,6 +120,30 @@ END$$
 
 DELIMITER ;
 call GetUserByID(1);
+-- get user by name
+call GetUserByName();
+
+DELIMITER $$
+CREATE PROCEDURE GetAllUsers(
+	IN p_ten_dang_nhap VARCHAR(50)
+)
+BEGIN
+    SELECT 
+        nd.id, 
+        nd.ten_dang_nhap, 
+		nd.mat_khau,
+        nd.ho_ten, 
+        nd.email, 
+        nd.so_dien_thoai,
+        vt.ten_vai_tro
+    FROM nguoi_dung AS nd
+    JOIN vai_tro AS vt ON nd.id_vai_tro = vt.id
+	WHERE nd.ten_dang_nhap =  p_ten_dang_nhap;
+        
+END$$
+
+DELIMITER ;
+
 
 -- GET /api/users/search: Tìm kiếm người dùng.
 
@@ -126,6 +156,7 @@ BEGIN
     SELECT 
         nd.id, 
         nd.ten_dang_nhap, 
+		nd.mat_khau,
         nd.ho_ten, 
         nd.email, 
         nd.so_dien_thoai,

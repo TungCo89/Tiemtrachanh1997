@@ -20,6 +20,7 @@ export class SanPhamModal {
           ten_san_pham: row.ten_san_pham,
           gia_ban: row.gia_ban,
           mo_ta: row.mo_ta,
+          id_loai: row.id_loai,
           ten_loai: row.ten_loai,
           cong_thuc: [],
         });
