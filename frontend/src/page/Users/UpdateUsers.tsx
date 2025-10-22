@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Card, Space, Select, message, Spin, InputNumber } from 'antd';
+import { Button, Form, Input, Space, Select, message, Spin, InputNumber } from 'antd';
 import { MinusCircleOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
 import { User } from '../../component/interface';
 import axios from 'axios';
@@ -53,7 +53,7 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
         }
     }, [form, initialData]);
 
-    const onFinish = async (values: UsersFormValues) => { 
+    const onFinish = async (values: UsersFormValues) => {
         setLoading(true);
         try {
             const payload: UserUpdateValues = {
@@ -92,31 +92,6 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
         );
     }
 
-    //
-    useEffect(() => {
-        const fetchUsersData = async () => {
-            setLoading(true);
-            // GỌI API để lấy dữ liệu chi tiết của id
-            // await UsersService.getByID(id);
-            const mockData = {
-                tenDangNhap: `Tên đăng nhập Cũ ID ${id}`,
-                matKhau: `Mật khẩu cũ ID ${id}`,
-                hoTen: `Họ và tên cũ ID ${id}`,
-                email: `Email đăng nhập Cũ ID ${id}`,
-                soDienThoai: `SDT Cũ ID ${id}`,
-                tenVaiTro: `Vai trò Cũ ID ${id}`,
-            };
-
-            form.setFieldsValue(mockData);
-            setLoading(false);
-        };
-
-        if (id) {
-            fetchUsersData();
-        }
-    }, [form, id]);
-
-
     return (
         <div style={{ padding: 20 }}>
             <Form
@@ -130,77 +105,75 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
                 autoComplete="off"
             >
 
+                {/* Trường Tên đăng nhập */}
                 <Form.Item
-                    label="Tên người dùng"
-                    name="ten_san_pham"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên người dùng!' }]}
+                    label="Tên đăng nhập"
+                    name="tenDangNhap"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
+                        { min: 4, message: 'Tên đăng nhập phải có ít nhất 4 ký tự.' }
+                    ]}
                 >
-                    <Input placeholder="Nhập tên người dùng" />
+                    <Input placeholder="admin, nv_lam,..." />
+                </Form.Item>
+                {/* Trường Mật khẩu */}
+                <Form.Item
+                    label="Mật khẩu"
+                    name="matKhau"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập Mật khẩu!' },
+                        { min: 1, message: 'Mật khẩu phải có ít nhất 1 ký tự.' }
+                    ]}
+                >
+                    <Input placeholder="6666888,11111111" />
                 </Form.Item>
 
+                {/* Trường Họ tên */}
                 <Form.Item
-                    label="Giá bán"
-                    name="gia_ban"
-                    rules={[{ required: true, message: 'Vui lòng nhập giá bán!' }]}
+                    label="Họ và Tên"
+                    name="hoTen"
+                    rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
                 >
-                    <InputNumber min={1} placeholder="Giá bán" />
+                    <Input placeholder="Nguyễn Văn A" />
                 </Form.Item>
 
+                {/* Trường Email */}
                 <Form.Item
-                    label="Mô tả"
-                    name="mo_ta"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                    label="Email"
+                    name="email"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập Email!' },
+                        { type: 'email', message: 'Email không đúng định dạng!' }
+                    ]}
                 >
-                    <Input placeholder="Nhập mô tả" />
-
+                    <Input placeholder="user@example.com" />
                 </Form.Item>
-                <h3 style={{ marginTop: 20 }}>Công thức</h3>
-                <List
-                    name="cong_thuc"
+
+                {/* Trường Số điện thoại */}
+                <Form.Item
+                    label="Số điện thoại"
+                    name="soDienThoai"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                        { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ.' }
+                    ]}
                 >
-                    {(fields, { add, remove }) => (
-                        <>
-                            {fields.map(({ key, name, fieldKey, ...restField }) => (
-                                <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                                    <Form.Item
-                                        {...restField}
-                                        name={[name, 'idNguyenLieu']}
-                                        fieldKey={[fieldKey as number, 'idNguyenLieu']} rules={[{ required: true, message: 'Chọn NL' }]}
-                                        style={{ width: 150 }}
-                                    >
-                                        <Select placeholder="Nguyên liệu">
-                                            <Option value={1}>Trà đen</Option>
-                                            <Option value={2}>Chanh</Option>
-                                            <Option value={3}>Đường</Option>
-                                            <Option value={4}>Đào</Option>
-                                        </Select>
-                                    </Form.Item>
+                    <Input placeholder="09xxxxxxxx" maxLength={11} />
+                </Form.Item>
 
-                                    <Form.Item
-                                        {...restField}
-                                        name={[name, 'soLuong']}
-                                        fieldKey={[fieldKey as number, 'soLuong']}
-                                        rules={[{ required: true, message: 'SL' }]}
-                                        style={{ width: 120 }}
-                                    >
-                                        <InputNumber min={1} placeholder="SL" />
-                                    </Form.Item>
-
-                                    {fields.length > 1 ? (
-                                        <MinusCircleOutlined onClick={() => remove(name)} />
-                                    ) : null}
-                                </Space>
-                            ))}
-
-                            <Form.Item>
-                                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                    Thêm Nguyên liệu
-                                </Button>
-                            </Form.Item>
-                        </>
-                    )}
-                </List>
-
+                {/* Trường Vai trò */}
+                <Form.Item
+                    label="Vai trò"
+                    name="tenVaiTro"
+                    rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+                >
+                    <Select placeholder="Chọn vai trò người dùng">
+                        {/* Dữ liệu các vai trò thường được fetch từ API */}
+                        <Option value="Quản trị viên">Quản trị viên</Option>
+                        <Option value="Nhân viên">Nhân viên</Option>
+                        <Option value="Khách hàng">Khách hàng</Option>
+                    </Select>
+                </Form.Item>
 
                 <Form.Item style={{ textAlign: 'center', marginTop: 30 }}>
                     <Button

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Card, Space, Select, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Card, Select, message } from 'antd';
 import axios from 'axios';
 const { Option } = Select; 
 interface Users {
@@ -87,7 +86,7 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
                 name="matKhau"
                 rules={[
                     { required: true, message: 'Vui lòng nhập Mật khẩu!' },
-                    { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự.' }
+                    { min: 1, message: 'Mật khẩu phải có ít nhất 1 ký tự.' }
                 ]}
             >
                 <Input placeholder="6666888,11111111" />

@@ -1,59 +1,121 @@
-import React, { useState } from 'react';
-import { Table, Button, Input, Space, Tag } from 'antd';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Table, Button, Input, Space, Tag, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
+import { LoaiSanPham } from '../../component/interface';
 import AddLoaiSanPham from './AddLoaiSanPham';
 import UpdateLoaiSanPham from './UpdateLoaiSanPham';
+import axios from 'axios';
 const { Search } = Input;
-
-interface LoaiSanPham {
-    id: number;
-    tenloai: string;
-    mota: string;
-}
-
-const dataSource: LoaiSanPham[] = [
-    { id: 1, tenloai: 'Đồ uống', mota: 'Đồ uống có ga' },
-    { id: 2, tenloai: 'Đồ ăn vặt', mota: 'Đồ ăn nhẹ, ăn kèm' },
-    { id: 3, tenloai: 'Kem', mota: 'Kem tươi mát lạnh' },
-    { id: 4, tenloai: 'Cà phê', mota: 'Coffe nguyên chất' },
-    { id: 5, tenloai: 'Trà sữa', mota: 'Trà sữa béo ngậy' },
-];
 
 
 const DSLoaiSanPham: React.FC = () => {
+    const [danhSachSP, setDanhSachSP] = useState<LoaiSanPham[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItemId, setEditingItemId] = useState<number | null>(null);
+    // State Lưu dữ liệu loại sản phẩm đang chỉnh sửa
+    const [dataToEdit, setDataToEdit] = useState<LoaiSanPham | null>(null);
 
-    const onSearch = (value: string) => {
-        console.log('Đang tìm kiếm:', value);
+    // Hàm gọi API lấy tất cả danh mục sản phẩm
+    const fetchSanPham = useCallback(async (searchQuery = '') => {
+        setLoading(true);
+        try {
+            const endpoint = searchQuery ?
+                `http://localhost:7000/api/loaisanpham/search-by-name?name=${searchQuery}` :
+                `http://localhost:7000/api/loaisanpham/get-all`;
 
+            const response = await axios.get<{ success: boolean; data: LoaiSanPham[] }>(endpoint);
+            console.log(response);
+            if (response.data.success) {
+                const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                setDanhSachSP(resultData.filter(Boolean));
+            } else {
+                message.error('Lỗi khi tải danh sách danh mục sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-All:', error);
+            message.error('Không thể kết nối đến máy chủ hoặc lỗi không xác định.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Hàm gọi API lấy chi tiết sản phẩm (dùng cho chỉnh sửa)
+    const fetchSanPhamById = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: LoaiSanPham }>(`http://localhost:7000/api/sanpham/get-by-ID?id=${id}`);
+            if (response.data.success && response.data.data) {
+                setDataToEdit(response.data.data);
+                setIsModalOpen(true);
+            } else {
+                message.error('Không tìm thấy dữ liệu loại sản phẩm để sửa.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-by-ID:', error);
+            message.error('Lỗi khi lấy chi tiết loại sản phẩm.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Giả sử đây là bên trong DSLoaiSanPham.tsx
+    useEffect(() => {
+        fetchSanPham();
+    }, [fetchSanPham]);
 
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [editingItemId, setEditingItemId] = useState<number | null>(null); // null khi không sửa
+    const onSearch = (value: string) => {
+        fetchSanPham(value);
+    };
 
     // Xử lý Thêm mới
     const handleAdd = () => {
-        setIsAddModalOpen(true);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        setIsModalOpen(true);
     };
 
-    // Xử lý Cập nhật (nhận ID)
+    // Xử lý Sửa
     const handleEdit = (id: number) => {
-        setEditingItemId(id); // Set ID để mở Modal Sửa
+        setEditingItemId(id);
+        fetchSanPhamById(id);
+    };
+    const handleSuccess = () => {
+        setIsModalOpen(false);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        fetchSanPham();
     };
 
-    // Xử lý xóa (nhận ID)
+    // Xử lý Xóa 
     const handleDelete = (id: number) => {
-        // gọi api delete(id)
-        //hiển thị thông báo 'xác nhận xóa' --> xác nhận --> xóa
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa loại sản phẩm ID: ${id} này không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.delete(`http://localhost:7000/api/loaisanpham/delete?id=${id}`);
+
+                    if (response.data.success) {
+                        message.success(`Đã xóa loại sản phẩm ID: ${id} thành công.`);
+                        fetchSanPham();
+                    } else {
+                        message.error(response.data.message || 'Lỗi khi xóa sản phẩm.');
+                    }
+                } catch (error) {
+                    console.error('Lỗi API Delete:', error);
+                    message.error('Lỗi máy chủ khi xóa loại sản phẩm.');
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
     };
 
-    // Xử lý Đóng Modal chung
-    const handleCancel = () => {
-        setIsAddModalOpen(false); // Đóng Modal Thêm
-        setEditingItemId(null); // Đóng Modal Sửa và reset ID
-    };
 
     // Cấu hình các cột cho Table
     const columns = [
@@ -65,12 +127,12 @@ const DSLoaiSanPham: React.FC = () => {
         },
         {
             title: 'Tên loại',
-            dataIndex: 'tenloai',
+            dataIndex: 'ten_loai',
             key: 'ten_loai',
         },
         {
             title: 'Mô tả',
-            dataIndex: 'mota',
+            dataIndex: 'mo_ta',
             key: 'mo_ta',
         },
         {
@@ -101,66 +163,50 @@ const DSLoaiSanPham: React.FC = () => {
     ];
 
     return (
-        <div style={{ padding: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2>Quản lý Loại sản phẩm</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
-                    Thêm Loại sản phẩm
+        <div>
+            <h2>Quản Lý Danh Mục Sản Phẩm</h2>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Search
+                    placeholder="Tìm kiếm loại sản phẩm"
+                    allowClear
+                    onSearch={onSearch}
+                    style={{ width: 300 }}
+                />
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                    Thêm sản phẩm
                 </Button>
             </div>
 
-            {/* 1. MODAL THÊM MỚI (Add) */}
-            <Modal
-                title="Thêm Loại sản phẩm mới"
-                open={isAddModalOpen} // 👈 Mở theo state Add
-                onCancel={handleCancel}
-                footer={null}
-            >
-                <AddLoaiSanPham />
-            </Modal>
+            <Table
+                columns={columns}
+                dataSource={danhSachSP}
+                rowKey="id"
+                loading={loading}
+            />
 
-            {/* 2. MODAL CẬP NHẬT (Update) */}
+            {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                title={`Cập nhật Loại sản phẩm (ID: ${editingItemId})`} // Hiển thị ID đang sửa
-                open={editingItemId !== null} // 👈 Mở khi editingItemId có giá trị
-                onCancel={handleCancel}
+                title={editingItemId ? "Cập nhật Loại sản phẩm" : "Thêm mới Loại sản phẩm"}
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                destroyOnClose // Giúp component UpdateLoaiSanPham reset mỗi lần mở
+                destroyOnClose={true}
             >
-                {/* 👈 TRUYỀN ID VÀO COMPONENT UPDATE */}
-                {editingItemId !== null && (
-                    <UpdateLoaiSanPham id={editingItemId} onCancel={handleCancel} />
+                {editingItemId ? (
+                    <UpdateLoaiSanPham
+                        id={editingItemId}
+                        initialData={dataToEdit}
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
+                ) : (
+                    <AddLoaiSanPham
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
                 )}
             </Modal>
-
-            {/* 1. Thanh tìm kiếm */}
-            <div style={{ marginBottom: 20 }}>
-                <Search
-                    placeholder="Tên loại sản phẩm cần tìm"
-                    allowClear
-                    enterButton={<SearchOutlined />}
-                    onSearch={onSearch}
-                    style={{ maxWidth: 400 }}
-                />
-            </div>
-
-            {/* 2. Bảng hiển thị danh sách */}
-            <Table
-                pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 10,
-                    showSizeChanger: false,
-                    total: dataSource.length,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} mục`,
-                }}
-                dataSource={dataSource}
-                columns={columns}
-                rowKey="id"
-            />
         </div>
     );
 };

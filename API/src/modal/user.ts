@@ -8,16 +8,20 @@ export class UserModal {
   }
 
   async getAll(): Promise<any> {
-    return await this.userRepository.getAll();
+    const results = await this.userRepository.getAll();
+    return results[0];
   }
   async getByID(id: number): Promise<any> {
-    return await this.userRepository.getByID(id);
+    const results = await this.userRepository.getByID(id);
+    return results[0];
   }
   async getRoles(): Promise<any> {
-    return await this.userRepository.getRoles();
+    const results = await this.userRepository.getRoles();
+    return results[0];
   }
   async getUserByUserEmail(email: string): Promise<any> {
-    return await this.userRepository.getUserByUserEmail(email);
+    const results = await this.userRepository.getUserByUserEmail(email);
+    results[0];
   }
   async signup(user: any): Promise<any> {
     return await this.userRepository.signup(user);
@@ -30,6 +34,9 @@ export class UserModal {
   }
   async delete(id: number): Promise<any> {
     return await this.userRepository.delete(id);
+  }
+  async searchByKeyword(keyword: string): Promise<any[]> {
+    return await this.userRepository.searchByKeyword(keyword);
   }
 }
 

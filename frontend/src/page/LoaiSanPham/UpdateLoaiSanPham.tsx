@@ -1,109 +1,119 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Card, Space, message, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
-
-interface LoaiSanPhamFormValues {
-    tenLoai: string;
-    moTa?: string;
+import { LoaiSanPham } from '../../component/interface';
+import axios from 'axios';
+interface LoaiSanPhamUpdateValues {
+    ten_loai: string;
+    mo_ta: string;
 }
 interface UpdateLoaiSanPhamProps {
     id: number;
-    onCancel: () => void;
+    initialData: LoaiSanPham | null;
+    onClose: () => void;
+    onSuccess: () => void;
 }
+const API_BASE_URL = 'http://localhost:7000/api/loaisanpham';
 
 // Thay đổi định kiểu component
-const UpdateLoaiSanPham: React.FC<UpdateLoaiSanPhamProps> = ({ id, onCancel }) => {
+const UpdateLoaiSanPham: React.FC<UpdateLoaiSanPhamProps> = ({ id,  initialData, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchLoaiSanPhamData = async () => {
+        if (initialData) {
+            form.setFieldsValue({
+                id: initialData.id,
+                ten_loai: initialData.ten_loai,
+                mo_ta: initialData.mo_ta,
+
+            });
+            setLoading(false);
+        } else {
             setLoading(true);
-            // GỌI API để lấy dữ liệu chi tiết của id
-            // await loaiSanPhamService.getByID(id);
-            const mockData = {
-                tenLoai: `Tên Loại Cũ ID ${id}`,
-                moTa: `Mô tả cũ ID ${id}`
+        }
+    }, [form, initialData]);
+
+    const onFinish = async (values: LoaiSanPhamUpdateValues) => {
+        setLoading(true);
+        try {
+            const payload : LoaiSanPhamUpdateValues={
+                ten_loai: values.ten_loai,
+                mo_ta: values.mo_ta,
             };
 
-            form.setFieldsValue(mockData);
+            const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
+
+            if (response.data.success) {
+                message.success(`Đã cập nhật loại sản phẩm ID ${id} thành công.`);
+                onSuccess();
+            } else {
+                message.error(response.data.message || 'Lỗi khi cập nhật loại sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Update:', error);
+            message.error('Lỗi kết nối máy chủ hoặc dữ liệu không hợp lệ.');
+        } finally {
             setLoading(false);
-        };
-
-        if (id) {
-            fetchLoaiSanPhamData();
         }
-    }, [form, id]);
-
-    const onFinish = (values: LoaiSanPhamFormValues) => {
-        // GỌI API update: loaiSanPhamService.updateLoaiSanPham(loaiSanPhamId, values);
-        message.success(`Đã cập nhật Loại sản phẩm ID ${id}`);
-        onCancel(); // Đóng modal sau khi cập nhật thành công
     };
+
     const onFinishFailed = (errorInfo: any) => {
         console.log('Gửi form thất bại:', errorInfo);
         message.error('Vui lòng điền đầy đủ các trường bắt buộc.');
     };
 
+    if (loading || !initialData) {
+        return (
+            <div style={{ padding: 20, textAlign: 'center' }}>
+                <Spin tip="Đang tải dữ liệu loại sản phẩm..." />
+            </div>
+        );
+    }
     return (
-        <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật loại sản phẩm</h2>}
-            bordered={false}
-            style={{
-                maxWidth: 600,
-                margin: '50px auto',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                borderRadius: 8,
-            }}
-        >
-            <Spin spinning={loading} tip="Đang tải dữ liệu...">
-                <Form
-                    form={form}
-                    name="updateLoaiSanPhamForm"
-                    layout="vertical"
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
+        <div style={{ padding: 20 }}>
+            <Form
+                form={form}
+                name="updateSanPhamForm"
+                layout="vertical"
+                onFinish={onFinish as (values: any) => void}
+                onFinishFailed={onFinishFailed}
+                initialValues={{ cong_thuc: [{}] }}
 
+                autoComplete="off"
+            >
+
+                <Form.Item
+                    label="Tên danh mục"
+                    name="ten_loai"
+                    rules={[{ required: true, message: 'Vui lòng nhập tên loại sản phẩm!' }]}
                 >
-                    {/* Trường Tên loại */}
-                    <Form.Item
-                        label="Tên loại"
-                        name="tenLoai"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên loại sản phẩm!' }]}
+                    <Input placeholder="Nhập tên loại sản phẩm" />
+                </Form.Item>
+
+                <Form.Item
+                    label="Mô tả"
+                    name="mo_ta"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                >
+                    <Input placeholder="Nhập mô tả" />
+
+                </Form.Item>
+
+                <Form.Item style={{ textAlign: 'center', marginTop: 30 }}>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        size="large"
+                        icon={<SaveOutlined />}
+                        loading={loading}
+                        style={{ width: '100%', maxWidth: 300 }}
                     >
-                        <Input placeholder="Nhập tên loại sản phẩm" />
-                    </Form.Item>
-
-                    {/* Trường Mô tả */}
-                    <Form.Item
-                        label="Mô tả"
-                        name="moTa"
-                    >
-                        <Input.TextArea placeholder="Nhập mô tả (không bắt buộc)" autoSize={{ minRows: 2, maxRows: 6 }} />
-                    </Form.Item>
-
-
-                    <Form.Item style={{ textAlign: 'center', marginTop: 30 }}>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            size="large"
-                            icon={<SaveOutlined />}
-                            style={{
-                                width: '100%',
-                                maxWidth: 300,
-                                backgroundColor: '#1890ff',
-                                borderColor: '#1890ff',
-                                color: '#fff',
-                            }}
-                        >
-                            Lưu Thay Đổi
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Spin>
-        </Card>
+                        Lưu Thay Đổi
+                    </Button>
+                </Form.Item>
+            </Form>
+        </div>
     );
 };
 

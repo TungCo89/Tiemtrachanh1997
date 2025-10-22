@@ -121,11 +121,12 @@ END$$
 DELIMITER ;
 call GetUserByID(1);
 -- get user by name
-call GetUserByName();
+
+call GetUserByEmail('nguyenvana@example.com');
 
 DELIMITER $$
-CREATE PROCEDURE GetAllUsers(
-	IN p_ten_dang_nhap VARCHAR(50)
+CREATE PROCEDURE GetUserByEmail(
+	IN p_email VARCHAR(50)
 )
 BEGIN
     SELECT 
@@ -138,7 +139,7 @@ BEGIN
         vt.ten_vai_tro
     FROM nguoi_dung AS nd
     JOIN vai_tro AS vt ON nd.id_vai_tro = vt.id
-	WHERE nd.ten_dang_nhap =  p_ten_dang_nhap;
+	WHERE nd.email =  p_email;
         
 END$$
 

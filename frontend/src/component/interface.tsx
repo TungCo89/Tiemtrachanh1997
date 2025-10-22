@@ -53,3 +53,9 @@ interface UserUpdateValues {
     so_dien_thoai: string; 
     ten_vai_tro: string; 
 }
+
+export interface LoaiSanPham {
+    id: number;
+    ten_loai: string;
+    mo_ta: string;
+}

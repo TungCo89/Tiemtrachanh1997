@@ -1,20 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Card, Space, message, DatePicker, Select, InputNumber } from 'antd';
+import { Button, Form, Input, Card, Space, message, Select, InputNumber } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { SanPham } from '../../component/interface';
 import axios from 'axios';
 const { Option } = Select;
 const { List } = Form;
-interface SanPhamFormValues {
-    ten_san_pham: string;
-    gia_ban: number;
-    mo_ta: string;
-    id_loai: number;
-    cong_thuc: {
-        idNguyenLieu: number;
-        soLuong: number;
-    }[];
-}
 
 interface AddSanPhamProps {
     onClose: () => void;
@@ -62,7 +52,7 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Hóa đơn Nhập</h2>}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Sản Phẩm</h2>}
             bordered={false}
         >
             <Form

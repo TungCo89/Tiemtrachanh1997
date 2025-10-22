@@ -4,7 +4,6 @@ import { PlusOutlined, MinusCircleOutlined, SaveOutlined } from '@ant-design/ico
 import { SanPham } from '../../component/interface';
 import axios from 'axios';
 
-
 const { Option } = Select;
 const { List } = Form;
 

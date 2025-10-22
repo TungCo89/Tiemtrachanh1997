@@ -28,7 +28,7 @@ const DSSanPham: React.FC = () => {
                 `http://localhost:7000/api/sanpham/get-all`;
 
             const response = await axios.get<{ success: boolean; data: SanPham[] }>(endpoint);
-
+            console.log(response);
             if (response.data.success) {
                 const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
                 setDanhSachSP(resultData.filter(Boolean));

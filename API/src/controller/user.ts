@@ -187,6 +187,26 @@ export class UserController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+    async searchByKeyword(req: Request, res: Response): Promise<void> {
+    try {
+      const { keyword } = req.query;
+      if (!keyword) {
+        res.status(400).json({ message: "Từ khóa không được để trống" });
+        return;
+      }
+      const result = await this.userModal.searchByKeyword(
+        keyword as string
+      );
+      res.status(200).json({
+        success: true,
+        message: "Tìm kiếm người dùng thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
+
 }
 
 export default UserController;

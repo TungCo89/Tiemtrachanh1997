@@ -21,7 +21,11 @@ export class LoaiSanPhamModal {
     await this.loaisanphamRepository.createLoaiSanPham(ten_loai, mo_ta);
   }
 
-  async updateLoaiSanPham(id: number, ten_loai: string, mo_ta: string): Promise<void> {
+  async updateLoaiSanPham(
+    id: number,
+    ten_loai: string,
+    mo_ta: string
+  ): Promise<void> {
     if (!id || !ten_loai || !mo_ta) {
       throw new Error("Dữ liệu cập nhật không hợp lệ.");
     }
