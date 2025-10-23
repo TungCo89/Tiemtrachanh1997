@@ -26,7 +26,6 @@ const DSUsers: React.FC = () => {
 
             const response = await axios.get<{ success: boolean; data: User[] }>(endpoint);
             console.log(response);
-
             if (response.data.success) {
                 const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
                 setDanhSachUser(resultData.filter(Boolean));
@@ -201,7 +200,7 @@ const DSUsers: React.FC = () => {
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                destroyOnClose={true}
+                destroyOnHidden={true}
             >
                 {editingItemId ? (
                     <UpdateUsers

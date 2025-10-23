@@ -36,9 +36,9 @@ export class UserController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
-    async getUserByUserEmail(req: Request, res: Response): Promise<void> {
+  async getUserByUserEmail(req: Request, res: Response): Promise<void> {
     try {
-      const { email } = req.params;
+      const { email } = req.query;
       const result = await this.userModal.getUserByUserEmail(email as string);
       res.status(200).json({
         success: true,
@@ -97,42 +97,44 @@ export class UserController {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, mat_khau } = req.body;
+
       if (!email || !mat_khau) {
         res.status(400).json({
           success: false,
           message: "Vui lòng nhập email và mật khẩu.",
-        }); return
+        });
+        return;
       }
       const userFromDB = await this.userModal.getUserByUserEmail(email);
-      if (!userFromDB) {
+      if (!userFromDB || userFromDB.length === 0) {
         res.status(401).json({
           success: false,
           message: "Email hoặc mật khẩu không đúng.",
-        }); return
+        });
+        return;
       }
-      const isPasswordValid = await bcrypt.compare(
-        mat_khau,
-        userFromDB.mat_khau
-      );
-
+      const user = userFromDB[0]; 
+      const isPasswordValid = await bcrypt.compare(mat_khau, user.mat_khau);
       if (!isPasswordValid) {
         res.status(401).json({
           success: false,
           message: "Email hoặc mật khẩu không đúng.",
-        }); return
+        });
+        return;
       }
-      const { mat_khau: _, ...userData } = userFromDB;
-      console.log(userFromDB);
+      const { mat_khau: _, ...userData } = user;
+
       res.status(200).json({
         success: true,
         message: "Đăng nhập thành công",
         data: userData,
       });
     } catch (error: any) {
-      console.error("Lỗi khi lấy thông tin:", error);
+      console.error("Lỗi khi đăng nhập:", error);
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+
   async update(req: Request, res: Response): Promise<void> {
     try {
       const id = req.query.id as string;
@@ -187,16 +189,14 @@ export class UserController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
-    async searchByKeyword(req: Request, res: Response): Promise<void> {
+  async searchByKeyword(req: Request, res: Response): Promise<void> {
     try {
       const { keyword } = req.query;
       if (!keyword) {
         res.status(400).json({ message: "Từ khóa không được để trống" });
         return;
       }
-      const result = await this.userModal.searchByKeyword(
-        keyword as string
-      );
+      const result = await this.userModal.searchByKeyword(keyword as string);
       res.status(200).json({
         success: true,
         message: "Tìm kiếm người dùng thành công",
@@ -206,7 +206,6 @@ export class UserController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
-
 }
 
 export default UserController;

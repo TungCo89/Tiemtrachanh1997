@@ -11,7 +11,9 @@ export class NguyenLieuModal {
   }
 
   async getByID(id: number): Promise<any> {
-    return await this.nguyenlieuRepository.getByID(id);
+    const results = await this.nguyenlieuRepository.getByID(id);
+    const processed = results[0];
+    return processed.length > 0 ? processed[0] : null;
   }
 
   async getByIDNCC(id: number): Promise<any> {

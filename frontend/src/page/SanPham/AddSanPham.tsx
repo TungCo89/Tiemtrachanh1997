@@ -24,12 +24,8 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
     const onFinish = async (values: SanPham) => {
         setLoading(true);
         try {
-            // Chuẩn bị payload để gửi lên backend
             const payload = {
                 ...values,
-                // Mặc định công thức là mảng rỗng khi thêm mới, hoặc bạn cần thêm Form.List để nhập công thức
-                cong_thuc: [
-                ]
             };
 
             // GỌI API create: POST http://localhost:7000/api/sanpham/create
@@ -53,7 +49,6 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
     return (
         <Card
             title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Sản Phẩm</h2>}
-            bordered={false}
         >
             <Form
                 form={form}
@@ -113,8 +108,8 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
                                 <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'idNguyenLieu']}
-                                        fieldKey={[fieldKey as number, 'idNguyenLieu']} rules={[{ required: true, message: 'Chọn NL' }]}
+                                        name={[name, 'id']}
+                                        fieldKey={[fieldKey as number, 'id_nguyen_lieu']} rules={[{ required: true, message: 'Chọn NL' }]}
                                         style={{ width: 150 }}
                                     >
                                         <Select placeholder="Nguyên liệu">
@@ -127,7 +122,7 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
 
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'soLuong']}
+                                        name={[name, 'so_luong']}
                                         fieldKey={[fieldKey as number, 'soLuong']}
                                         rules={[{ required: true, message: 'SL' }]}
                                         style={{ width: 120 }}

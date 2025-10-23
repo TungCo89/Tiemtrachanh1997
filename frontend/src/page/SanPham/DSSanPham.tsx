@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Input, message, notification, Space } from 'antd';
@@ -184,7 +185,7 @@ const DSSanPham: React.FC = () => {
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                destroyOnClose={true}
+                destroyOnHidden={true}
             >
                 {editingItemId ? (
                     <UpdateSanPham

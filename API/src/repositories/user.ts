@@ -38,7 +38,6 @@ export class UserRepository {
 
   async getUserByUserEmail(email: string): Promise<any> {
     const sql = "CALL GetUserByEmail(?)";
-
     const [results] = await this.db.query(sql, [email]);
     if (Array.isArray(results)) {
       return results[0];
@@ -57,15 +56,6 @@ export class UserRepository {
         user.so_dien_thoai,
         user.id_vai_tro,
       ]);
-      return rows;
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }
-  async login(user: any): Promise<any> {
-    try {
-      const sql = "CALL login(?)";
-      const [rows] = await this.db.query(sql, []);
       return rows;
     } catch (error: any) {
       throw new Error(error.message);

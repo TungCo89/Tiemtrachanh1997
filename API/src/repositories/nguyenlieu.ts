@@ -13,7 +13,6 @@ export class NguyenLieuRepository {
     try {
       const sql = "CALL GetAllNguyenLieu()";
       const [rows] = await this.db.query(sql);
-      console.log(rows);
       if (Array.isArray(rows) && rows.length > 0) {
         return rows[0];
       }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Card, Space, message, DatePicker, Select, InputNumber, Spin } from 'antd';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Button, Form, Input, Space, message, Select, InputNumber, Spin } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { SanPham } from '../../component/interface';
 import axios from 'axios';
@@ -16,7 +17,7 @@ interface SanPhamUpdateValues {
     cong_thuc: {
         idNguyenLieu: number;
         ten_nguyen_lieu: string;
-        don_vi: number
+        don_vi: string;
         soLuong: number;
     }[];
 }
@@ -42,14 +43,16 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
 
     useEffect(() => {
         if (initialData) {
+            console.log(initialData);
             form.setFieldsValue({
                 id_loai: initialData.id_loai,
                 ten_san_pham: initialData.ten_san_pham,
                 gia_ban: parseFloat(initialData.gia_ban),
                 mo_ta: initialData.mo_ta,
-                cong_thuc_list: initialData.cong_thuc.map(ct => ({
-                    id_nguyen_lieu: ct.id_nguyen_lieu,
-                    so_luong: parseFloat(ct.so_luong), 
+                cong_thuc: initialData.cong_thuc.map(ct => ({
+                    ten_nguyen_lieu: ct.ten_nguyen_lieu,
+                    so_luong: parseFloat(ct.so_luong),
+                    don_vi: ct.don_vi,
                 }))
 
             });
@@ -108,7 +111,6 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                 onFinish={onFinish as (values: any) => void}
                 onFinishFailed={onFinishFailed}
                 initialValues={{ cong_thuc: [{}] }}
-
                 autoComplete="off"
             >
                 <Form.Item
@@ -159,8 +161,8 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                                 <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'idNguyenLieu']}
-                                        fieldKey={[fieldKey as number, 'idNguyenLieu']} rules={[{ required: true, message: 'Chọn NL' }]}
+                                        name={[name, 'ten_nguyen_lieu']}
+                                        fieldKey={[fieldKey as number, 'ten_nguyen_lieu']} rules={[{ required: true, message: 'Chọn Nguyên Liệu' }]}
                                         style={{ width: 150 }}
                                     >
                                         <Select placeholder="Nguyên liệu">
@@ -173,13 +175,29 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
 
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'soLuong']}
-                                        fieldKey={[fieldKey as number, 'soLuong']}
-                                        rules={[{ required: true, message: 'SL' }]}
-                                        style={{ width: 120 }}
+                                        name={[name, 'so_luong']}
+                                        fieldKey={[fieldKey as number, 'so_luong']}
+                                        rules={[{ required: true, message: 'Chọn số lượng' }]}
                                     >
                                         <InputNumber min={1} placeholder="SL" />
                                     </Form.Item>
+                                    <Form.Item
+                                        {...restField}
+                                        name={[name, 'don_vi']}
+                                        fieldKey={[fieldKey as number, 'don_vi']}
+                                        rules={[{ required: true, message: 'Chọn đơn vị' }]}
+                                        style={{ width: 50}}
+                                    >
+                                        <Input placeholder="Đơn vị" readOnly />
+                                    </Form.Item>
+                                    {/* <Form.Item
+                                        {...restField}
+                                        name={[name, 'don_vi']}
+                                        fieldKey={[fieldKey as number, 'don_vi']}
+                                        rules={[{ required: true, message: 'Chọn đơn vị' }]}
+                                    >
+                                        <Input placeholder="Đơn vị" readOnly />
+                                    </Form.Item> */}
 
                                     {fields.length > 1 ? (
                                         <MinusCircleOutlined onClick={() => remove(name)} />

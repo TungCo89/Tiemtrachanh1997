@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Table, Button, Input, Space, Tag, message } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
@@ -18,7 +19,7 @@ const DSLoaiSanPham: React.FC = () => {
     const [dataToEdit, setDataToEdit] = useState<LoaiSanPham | null>(null);
 
     // Hàm gọi API lấy tất cả danh mục sản phẩm
-    const fetchSanPham = useCallback(async (searchQuery = '') => {
+    const fetchLoaiSanPham = useCallback(async (searchQuery = '') => {
         setLoading(true);
         try {
             const endpoint = searchQuery ?
@@ -42,7 +43,7 @@ const DSLoaiSanPham: React.FC = () => {
     }, []);
 
     // Hàm gọi API lấy chi tiết sản phẩm (dùng cho chỉnh sửa)
-    const fetchSanPhamById = async (id: number) => {
+    const fetchLoaiSanPhamById = async (id: number) => {
         setLoading(true);
         try {
             const response = await axios.get<{ success: boolean; data: LoaiSanPham }>(`http://localhost:7000/api/sanpham/get-by-ID?id=${id}`);
@@ -61,11 +62,11 @@ const DSLoaiSanPham: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchSanPham();
-    }, [fetchSanPham]);
+        fetchLoaiSanPham();
+    }, [fetchLoaiSanPham]);
 
     const onSearch = (value: string) => {
-        fetchSanPham(value);
+        fetchLoaiSanPham(value);
     };
 
     // Xử lý Thêm mới
@@ -78,13 +79,13 @@ const DSLoaiSanPham: React.FC = () => {
     // Xử lý Sửa
     const handleEdit = (id: number) => {
         setEditingItemId(id);
-        fetchSanPhamById(id);
+        fetchLoaiSanPhamById(id);
     };
     const handleSuccess = () => {
         setIsModalOpen(false);
         setEditingItemId(null);
         setDataToEdit(null);
-        fetchSanPham();
+        fetchLoaiSanPham();
     };
 
     // Xử lý Xóa 
@@ -102,7 +103,7 @@ const DSLoaiSanPham: React.FC = () => {
 
                     if (response.data.success) {
                         message.success(`Đã xóa loại sản phẩm ID: ${id} thành công.`);
-                        fetchSanPham();
+                        fetchLoaiSanPham();
                     } else {
                         message.error(response.data.message || 'Lỗi khi xóa sản phẩm.');
                     }
@@ -141,19 +142,11 @@ const DSLoaiSanPham: React.FC = () => {
             width: 150,
             render: (_: any, record: LoaiSanPham) => (
                 <Space size="small">
+                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record.id)}>Sửa</Button>
                     <Button
-                        type="primary"
-                        onClick={() => handleEdit(record.id)}
-                        style={{ backgroundColor: '#333', borderColor: '#333' }}
-                        size="small"
-                    >
-                        Sửa
-                    </Button>
-                    <Button
-                        type="primary"
                         danger
+                        icon={<DeleteOutlined />}
                         onClick={() => handleDelete(record.id)}
-                        size="small"
                     >
                         Xóa
                     </Button>
@@ -191,7 +184,7 @@ const DSLoaiSanPham: React.FC = () => {
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                destroyOnClose={true}
+                destroyOnHidden={true}
             >
                 {editingItemId ? (
                     <UpdateLoaiSanPham

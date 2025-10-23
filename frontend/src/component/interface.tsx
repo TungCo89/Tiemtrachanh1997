@@ -59,3 +59,15 @@ export interface LoaiSanPham {
     ten_loai: string;
     mo_ta: string;
 }
+
+export interface NguyenLieu {
+    id: number;
+    ten_nguyen_lieu: string;
+    don_vi: string;
+}
+export interface CongThuc {
+    id: number;
+    id_san_pham: string;
+    id_nguyen_lieu: string;
+    so_luong: string; 
+}

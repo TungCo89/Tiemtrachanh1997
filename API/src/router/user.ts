@@ -16,6 +16,6 @@ userRouter.post('/signup', userController.signup.bind(userController));
 userRouter.post('/login', userController.login.bind(userController));
 userRouter.put('/update', userController.update.bind(userController));
 userRouter.post('/delete', userController.delete.bind(userController));
-userRouter.get('/search-by-keyword', userController.delete.bind(userController));
+userRouter.get('/search-by-keyword', userController.searchByKeyword.bind(userController));
 
 export default userRouter;

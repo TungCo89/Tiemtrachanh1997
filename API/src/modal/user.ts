@@ -13,21 +13,18 @@ export class UserModal {
   }
   async getByID(id: number): Promise<any> {
     const results = await this.userRepository.getByID(id);
-    return results[0];
+    const processed = results[0];
+    return processed.length > 0 ? processed[0] : null;
   }
   async getRoles(): Promise<any> {
     const results = await this.userRepository.getRoles();
     return results[0];
   }
   async getUserByUserEmail(email: string): Promise<any> {
-    const results = await this.userRepository.getUserByUserEmail(email);
-    results[0];
+    return await this.userRepository.getUserByUserEmail(email);
   }
   async signup(user: any): Promise<any> {
     return await this.userRepository.signup(user);
-  }
-  async login(user: any): Promise<any> {
-    return await this.userRepository.login(user);
   }
   async update(user: any): Promise<any> {
     return await this.userRepository.update(user);

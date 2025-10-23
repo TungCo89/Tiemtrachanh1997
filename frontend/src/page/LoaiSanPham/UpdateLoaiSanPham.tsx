@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Card, Space, message, Spin } from 'antd';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Button, Form, Input, message, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { LoaiSanPham } from '../../component/interface';
 import axios from 'axios';
@@ -74,12 +75,10 @@ const UpdateLoaiSanPham: React.FC<UpdateLoaiSanPhamProps> = ({ id,  initialData,
         <div style={{ padding: 20 }}>
             <Form
                 form={form}
-                name="updateSanPhamForm"
+                name="updateLoaiSanPhamForm"
                 layout="vertical"
                 onFinish={onFinish as (values: any) => void}
                 onFinishFailed={onFinishFailed}
-                initialValues={{ cong_thuc: [{}] }}
-
                 autoComplete="off"
             >
 

@@ -41,7 +41,6 @@ const AddLoaiSanPham: React.FC<AddLoaiSanPhamProps> = ({ onClose, onSuccess }) =
     return (
         <Card
             title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Loại Sản Phẩm</h2>}
-            bordered={false}
             style={{
                 maxWidth: 600,
                 margin: '50px auto',
@@ -69,8 +68,10 @@ const AddLoaiSanPham: React.FC<AddLoaiSanPhamProps> = ({ onClose, onSuccess }) =
                 <Form.Item
                     label="Mô tả"
                     name="mo_ta"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả cho loại sản phẩm!' }]}
+
                 >
-                    <Input.TextArea placeholder="Nhập mô tả (không bắt buộc)" autoSize={{ minRows: 2, maxRows: 6 }} />
+                    <Input.TextArea placeholder="Nhập mô tả " autoSize={{ minRows: 2, maxRows: 6 }} />
                 </Form.Item>
 
                 {/* Nút Thêm */}

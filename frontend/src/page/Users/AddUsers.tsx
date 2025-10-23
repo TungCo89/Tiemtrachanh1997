@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 import { Button, Form, Input, Card, Select, message } from 'antd';
 import axios from 'axios';
@@ -54,7 +55,6 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
     return (
         <Card
             title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm người dùng</h2>}
-            bordered={false}
             style={{
                 maxWidth: 600,
                 margin: '50px auto',
@@ -72,7 +72,7 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
             {/* Trường Tên đăng nhập */}
             <Form.Item
                 label="Tên đăng nhập"
-                name="tenDangNhap"
+                name="ten_dang_nhap"
                 rules={[
                     { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
                     { min: 4, message: 'Tên đăng nhập phải có ít nhất 4 ký tự.' }
@@ -83,7 +83,7 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
                         {/* Trường Mật khẩu */}
             <Form.Item
                 label="Mật khẩu"
-                name="matKhau"
+                name="mat_khau"
                 rules={[
                     { required: true, message: 'Vui lòng nhập Mật khẩu!' },
                     { min: 1, message: 'Mật khẩu phải có ít nhất 1 ký tự.' }
@@ -95,7 +95,7 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
             {/* Trường Họ tên */}
             <Form.Item
                 label="Họ và Tên"
-                name="hoTen"
+                name="ho_ten"
                 rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
             >
                 <Input placeholder="Nguyễn Văn A" />
@@ -116,7 +116,7 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
             {/* Trường Số điện thoại */}
             <Form.Item
                 label="Số điện thoại"
-                name="soDienThoai"
+                name="so_dien_thoai"
                 rules={[
                     { required: true, message: 'Vui lòng nhập số điện thoại!' },
                     { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ.' }
@@ -128,14 +128,13 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
             {/* Trường Vai trò */}
             <Form.Item
                 label="Vai trò"
-                name="tenVaiTro"
+                name="ten_vai_tro"
                 rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
             >
                 <Select placeholder="Chọn vai trò người dùng">
                     {/* Dữ liệu các vai trò thường được fetch từ API */}
                     <Option value="Quản trị viên">Quản trị viên</Option>
                     <Option value="Nhân viên">Nhân viên</Option>
-                    <Option value="Khách hàng">Khách hàng</Option>
                 </Select>
             </Form.Item>
 

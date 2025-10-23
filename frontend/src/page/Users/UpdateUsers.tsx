@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Space, Select, message, Spin, InputNumber } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Button, Form, Input, Space, Select, message, Spin } from 'antd';
+import {  SaveOutlined } from '@ant-design/icons';
 import { User } from '../../component/interface';
 import axios from 'axios';
 const { Option } = Select;
 const { List } = Form;
-interface UsersFormValues {
-    id: number;
-    tenDangNhap: string;
-    matKhau: string;
-    hoTen: string;
-    email: string;
-    soDienThoai: string;
-    tenVaiTro: string;
-}
 interface UserUpdateValues {
     ten_dang_nhap: string;
     mat_khau: string;
@@ -37,15 +29,14 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (initialData) {
+            console.log(initialData);
             form.setFieldsValue({
                 id: initialData.id,
                 ten_dang_nhap: initialData.ten_dang_nhap,
-                mat_khau: parseFloat(initialData.mat_khau),
                 email: initialData.email,
                 ho_ten: initialData.ho_ten,
                 so_dien_thoai: initialData.so_dien_thoai,
                 ten_vai_tro: initialData.ten_vai_tro
-
             });
             setLoading(false);
         } else {
@@ -53,16 +44,16 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
         }
     }, [form, initialData]);
 
-    const onFinish = async (values: UsersFormValues) => {
+    const onFinish = async (values: UserUpdateValues) => {
         setLoading(true);
         try {
             const payload: UserUpdateValues = {
-                ten_dang_nhap: values.tenDangNhap,
-                mat_khau: values.matKhau,
-                ho_ten: values.hoTen,
+                ten_dang_nhap: values.ten_dang_nhap,
+                mat_khau: values.mat_khau,
+                ho_ten: values.ho_ten,
                 email: values.email,
-                so_dien_thoai: values.soDienThoai,
-                ten_vai_tro: values.tenVaiTro,
+                so_dien_thoai: values.so_dien_thoai,
+                ten_vai_tro: values.ten_vai_tro,
             };
             const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
             if (response.data.success) {
@@ -87,7 +78,9 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
     if (loading || !initialData) {
         return (
             <div style={{ padding: 20, textAlign: 'center' }}>
-                <Spin tip="Đang tải dữ liệu người dùng..." />
+                <Spin tip="Đang tải dữ liệu người dùng..." >
+                    <div />
+                </Spin>
             </div>
         );
     }
@@ -100,41 +93,38 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
                 layout="vertical"
                 onFinish={onFinish as (values: any) => void}
                 onFinishFailed={onFinishFailed}
-                initialValues={{ cong_thuc: [{}] }}
-
                 autoComplete="off"
             >
 
                 {/* Trường Tên đăng nhập */}
                 <Form.Item
                     label="Tên đăng nhập"
-                    name="tenDangNhap"
+                    name="ten_dang_nhap"
                     rules={[
                         { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
                         { min: 4, message: 'Tên đăng nhập phải có ít nhất 4 ký tự.' }
                     ]}
                 >
-                    <Input placeholder="admin, nv_lam,..." />
+                    <Input placeholder="Nhập tên đăng nhập" />
                 </Form.Item>
                 {/* Trường Mật khẩu */}
                 <Form.Item
                     label="Mật khẩu"
-                    name="matKhau"
+                    name="mat_khau"
                     rules={[
                         { required: true, message: 'Vui lòng nhập Mật khẩu!' },
-                        { min: 1, message: 'Mật khẩu phải có ít nhất 1 ký tự.' }
                     ]}
                 >
-                    <Input placeholder="6666888,11111111" />
+                    <Input placeholder="Nhập mật khẩu mới (bỏ qua)" />
                 </Form.Item>
 
                 {/* Trường Họ tên */}
                 <Form.Item
                     label="Họ và Tên"
-                    name="hoTen"
+                    name="ho_ten"
                     rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
                 >
-                    <Input placeholder="Nguyễn Văn A" />
+                    <Input placeholder="Vui lòng nhập họ và tên" />
                 </Form.Item>
 
                 {/* Trường Email */}
@@ -152,26 +142,24 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
                 {/* Trường Số điện thoại */}
                 <Form.Item
                     label="Số điện thoại"
-                    name="soDienThoai"
+                    name="so_dien_thoai"
                     rules={[
                         { required: true, message: 'Vui lòng nhập số điện thoại!' },
                         { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ.' }
                     ]}
                 >
-                    <Input placeholder="09xxxxxxxx" maxLength={11} />
+                    <Input placeholder="Vui lòng nhập số điện thoại" maxLength={11} />
                 </Form.Item>
 
                 {/* Trường Vai trò */}
                 <Form.Item
                     label="Vai trò"
-                    name="tenVaiTro"
+                    name="ten_vai_tro"
                     rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
                 >
                     <Select placeholder="Chọn vai trò người dùng">
-                        {/* Dữ liệu các vai trò thường được fetch từ API */}
                         <Option value="Quản trị viên">Quản trị viên</Option>
                         <Option value="Nhân viên">Nhân viên</Option>
-                        <Option value="Khách hàng">Khách hàng</Option>
                     </Select>
                 </Form.Item>
 
