@@ -14,6 +14,9 @@ interface Ban {
     idKhuVuc: number;
     tenKhuVuc: string;
 }
+interface BanProps {
+    trangThai: Ban['trangThai'];
+}
 const rawDataSource: Ban[] = [
     { id: 1, tenBan: 'Bàn 1', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
     { id: 2, tenBan: 'Bàn 2', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
@@ -25,6 +28,65 @@ const rawDataSource: Ban[] = [
     { id: 8, tenBan: 'Bàn 11', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
     { id: 9, tenBan: 'Bàn 12', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
 ];
+
+const KhuVucContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: start;
+`;
+
+const KhuVucBox = styled(Card)`
+    flex: 0 0 auto; 
+    width: 350px; 
+    padding: 10px;
+    background-color: #f0f0f0; 
+    border-radius: 8px;
+    .ant-card-head {
+        text-align: center;
+        font-weight: bold;
+        border-bottom: none;
+    }
+`;
+
+const BanGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 15px;
+    padding: 10px;
+`;
+const getBanColor = (trangThai: Ban['trangThai']) => {
+    switch (trangThai) {
+        case 'Đang hoạt động':
+            return '#ff4d4f';
+        case 'Trong':
+        default:
+            return '#52c41a';
+    }
+};
+
+const BanItem = styled.div<BanProps>`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80px; 
+    padding: 5px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid ${props => getBanColor(props.trangThai)}; 
+    color: ${props => getBanColor(props.trangThai)}; 
+
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+`;
+// --- END STYLED COMPONENTS ---
 
 const DSBan: React.FC = () => {
 
@@ -72,69 +134,6 @@ const DSBan: React.FC = () => {
         message.success(`Đã xóa Bàn ID: ${id}`);
     };
 
-    const KhuVucContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    justify-content: start;
-`;
-
-    const KhuVucBox = styled(Card)`
-    flex: 0 0 auto; 
-    width: 350px; 
-    padding: 10px;
-    background-color: #f0f0f0; 
-    border-radius: 8px;
-    .ant-card-head {
-        text-align: center;
-        font-weight: bold;
-        border-bottom: none;
-    }
-`;
-
-    const BanGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 15px;
-    padding: 10px;
-`;
-
-    interface BanProps {
-        trangThai: Ban['trangThai'];
-    }
-
-    const getBanColor = (trangThai: Ban['trangThai']) => {
-        switch (trangThai) {
-            case 'Đang hoạt động':
-                return '#ff4d4f';
-            case 'Trong':
-            default:
-                return '#52c41a';
-        }
-    };
-
-    const BanItem = styled.div<BanProps>`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 80px; 
-    padding: 5px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    border: 2px solid ${props => getBanColor(props.trangThai)}; 
-    color: ${props => getBanColor(props.trangThai)}; 
-
-    &:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-`;
-    // --- END STYLED COMPONENTS ---
 
 
     // --- RENDER COMPONENT BÀN ---
@@ -188,11 +187,11 @@ const DSBan: React.FC = () => {
                 }
                 okText="Xem chi tiết"
                 cancelText="Đóng"
-                icon={null} 
+                icon={null}
                 placement="rightTop"
             >
                 <BanItem trangThai={ban.trangThai}>
-                    {ban.tenBan.split(' ').pop()} 
+                    {ban.tenBan.split(' ').pop()}
                     <div style={{ fontSize: 10, fontWeight: 'normal', color: 'gray', marginTop: 2 }}>
                         {ban.trangThai}
                     </div>

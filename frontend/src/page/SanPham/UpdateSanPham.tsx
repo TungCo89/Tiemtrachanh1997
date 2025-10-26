@@ -8,7 +8,6 @@ import axios from 'axios';
 const { Option } = Select;
 const { List } = Form;
 
-
 interface SanPhamUpdateValues {
     ten_san_pham: string;
     gia_ban: number;

@@ -88,21 +88,33 @@ END$$
 DELIMITER ;
 
 -- GET /api/hoadon-ban/get-all: Lấy danh sách hóa đơn bán.
-
+drop PROCEDURE GetAllHoaDonBan;
 DELIMITER $$
 
 CREATE PROCEDURE GetAllHoaDonBan()
 BEGIN
-    SELECT 
-        hdb.id,
+    SELECT
+        hdb.id AS id, 
+        hdb.id_ban,
+        b.ten_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
-        b.ten_ban
+        cthdb.id AS id_cthdb, 
+        cthdb.id_san_pham,
+        sp.ten_san_pham,
+        cthdb.so_luong,
+        cthdb.don_gia
     FROM
         hoa_don_ban AS hdb
     JOIN
         ban AS b ON hdb.id_ban = b.id
-    ORDER BY hdb.ngay_lap DESC;
+    JOIN
+        chi_tiet_hoa_don_ban AS cthdb ON hdb.id = cthdb.id_hoa_don_ban
+    JOIN
+        san_pham AS sp ON cthdb.id_san_pham = sp.id
+    ORDER BY
+        hdb.ngay_lap DESC,
+        hdb.id DESC;
 END$$
 
 DELIMITER ;
@@ -119,7 +131,9 @@ BEGIN
         hdb.id AS id_hoa_don_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
+		b.id as id_ban,
         b.ten_ban,
+        cthdb.id as id_cthdb,
         cthdb.id_san_pham,
         sp.ten_san_pham,
         cthdb.so_luong,
@@ -139,7 +153,48 @@ END$$
 
 DELIMITER ;
 
--- Thanh toán và chốt hóa đơn
+-- GET /api/hoadonban/search: Tìm kiếm hóa đơn bán.
+-- Tên Procedure: Tìm kiếm hóa đơn bán dựa trên từ khóa
+-- Từ khóa tìm kiếm: ID Hóa đơn, Tên Bàn, Tên Sản phẩm
+DELIMITER $$
+
+CREATE PROCEDURE SearchHoaDonBan(
+    IN p_keyword VARCHAR(255)
+)
+BEGIN
+    SELECT
+        hdb.id,
+        hdb.id_ban,
+        b.ten_ban,
+        hdb.ngay_lap,
+        hdb.tong_tien,
+        hdb.ghi_chu,
+        cthdb.id AS id_cthdb,
+        cthdb.id_san_pham,
+        sp.ten_san_pham,
+        cthdb.so_luong,
+        cthdb.don_gia
+    FROM 
+        hoa_don_ban AS hdb
+    JOIN 
+        ban AS b ON hdb.id_ban = b.id 
+    JOIN 
+        chi_tiet_hoa_don_ban AS cthdb ON hdb.id = cthdb.id_hoa_don_ban
+    JOIN
+        san_pham AS sp ON cthdb.id_san_pham = sp.id 
+    WHERE
+        -- 1. Tìm kiếm theo ID hóa đơn (Chuyển từ khóa thành số để so sánh với ID)
+        CAST(hdb.id AS CHAR) = p_keyword 
+        -- 2. Tìm kiếm theo Tên Bàn
+        OR b.ten_ban LIKE CONCAT('%', p_keyword, '%')
+        -- 3. Tìm kiếm theo Tên Sản phẩm
+        OR sp.ten_san_pham LIKE CONCAT('%', p_keyword, '%')
+    ORDER BY
+        hdb.ngay_lap DESC;
+END$$
+
+DELIMITER ;
+-- Thanh toán và chốt hóa đơn (no)
 
 DELIMITER $$
 CREATE PROCEDURE ThanhToanHoaDon(

@@ -15,7 +15,7 @@ hdnhapRouter.get('/get-by-ID', hdnhapController.getByID.bind(hdnhapController));
 hdnhapRouter.post('/create', hdnhapController.createHDNhap.bind(hdnhapController));
 // hdnhapRouter.put('/update', hdnhapController.updateHDNhap.bind(hdnhapController));
 hdnhapRouter.delete('/delete', hdnhapController.deleteHDNhap.bind(hdnhapController));
-// hdnhapRouter.get('/search-by-name', hdnhapController.searchHDNhapByName.bind(hdnhapController));
+hdnhapRouter.get('/search-by-keyword', hdnhapController.searchByKeyword.bind(hdnhapController));
 
 
 export default hdnhapRouter;

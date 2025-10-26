@@ -49,14 +49,14 @@ export class HDBanRepository {
     await this.db.query(sql, [id]);
   }
 
-  // async searchHDBanByName(name: string): Promise<any> {
-  //   const sql = "CALL SearchHDBanByName(?)";
-  //   const [results] = await this.db.query(sql, [name]);
-  //   if (Array.isArray(results)) {
-  //     return results[0];
-  //   }
-  //   return [];
-  // }
+  async searchByKeyword(keyword: string): Promise<any> {
+    const sql = "CALL SearchHoaDonBan(?)";
+    const [results] = await this.db.query(sql, [keyword]);
+    if (Array.isArray(results)) {
+      return results[0];
+    }
+    return [];
+  }
 }
 
 export default HDBanRepository;

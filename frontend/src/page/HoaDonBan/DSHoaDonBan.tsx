@@ -1,192 +1,273 @@
-import React, { useState } from 'react';
-import { Button, Input, Space, Modal, Table, Popconfirm, message } from 'antd'; 
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Input, Space, Modal, Table, message } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { HoaDonBan } from '../../component/interface';
 import AddHoaDonBan from './AddHoaDonBan';
 import UpdateHoaDonBan from './UpdateHoaDonBan';
-
-// Khai báo component Search từ Input của Ant Design
-const { Search } = Input; 
-
-// ----------------------------------------------------------------------
-// --- CẬP NHẬT INTERFACE VÀ DATA SOURCE CHO HÓA ĐƠN BÁN ---
-
-interface HoaDonBan {
-    id: number;
-    idBan: number; // Đổi từ idNhaCungCap sang idBan
-    tenBan?: string; // Tên Bàn để hiển thị
-    ngayLap: string; // Đổi từ ngayBan sang ngayLap (theo SQL: ngay_lap)
-    tongTien: number;
-}
-
-// Cập nhật Data source dựa trên dữ liệu SQL của bạn
-const initialDataSource: HoaDonBan[] = [
-    // (1, '2025-09-15 19:30:00', 40000)
-    { id: 1, idBan: 1, tenBan: 'Bàn 1 (Lầu 1)', ngayLap: '2025-09-15 19:30:00', tongTien: 40000 },
-    // (2, '2025-09-15 20:15:00', 25000)
-    { id: 2, idBan: 2, tenBan: 'Bàn 2 (Lầu 1)', ngayLap: '2025-09-15 20:15:00', tongTien: 25000 },
-];
-// --- KẾT THÚC CẬP NHẬT ---
-// ----------------------------------------------------------------------
-
-
+import axios from 'axios';
+const { Search } = Input;
 const DSHoaDonBan: React.FC = () => {
-    const [dataSource, setDataSource] = useState<HoaDonBan[]>(initialDataSource);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [danhSachHoaDonBan, setDanhSachHoaDonBan] = useState<HoaDonBan[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isFormulaModalOpen, setIsFormulaModalOpen] = useState(false);
+    const [selectedHoaDon, setSelectedHoaDon] = useState<HoaDonBan | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItemId, setEditingItemId] = useState<number | null>(null);
+    // State Lưu dữ liệu hóa đơn bán đang chỉnh sửa
+    const [dataToEdit, setDataToEdit] = useState<HoaDonBan | null>(null);
 
-    // Xử lý Tìm kiếm (hiện tại chỉ log)
+    // Hàm gọi API lấy tất cả hóa đơn bán
+    const fetchHoaDonBan = useCallback(async (searchQuery = '') => {
+        setLoading(true);
+        try {
+            const endpoint = searchQuery ?
+                `http://localhost:7000/api/hoadonban/search-by-keyword?keyword=${searchQuery}` :
+                `http://localhost:7000/api/hoadonban/get-all`;
+
+            const response = await axios.get<{ success: boolean; data: HoaDonBan[] }>(endpoint);
+            console.log(response);
+            if (response.data.success) {
+                const resultData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                setDanhSachHoaDonBan(resultData.filter(Boolean));
+            } else {
+                message.error('Lỗi khi tải danh sách hóa đơn bán.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-All:', error);
+            message.error('Không thể kết nối đến máy chủ hoặc lỗi không xác định.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Hàm gọi API lấy chi tiết hóa đơn bán (dùng cho chỉnh sửa)
+    const fetchHoaDonBanById = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: HoaDonBan }>(`http://localhost:7000/api/hoadonban/get-by-ID?id=${id}`);
+            if (response.data.success && response.data.data) {
+                setDataToEdit(response.data.data);
+                setIsModalOpen(true);
+            } else {
+                message.error('Không tìm thấy dữ liệu hóa đơn bán để sửa.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-by-ID:', error);
+            message.error('Lỗi khi lấy chi tiết hóa đơn bán.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchHoaDonBan();
+    }, [fetchHoaDonBan]);
+
     const onSearch = (value: string) => {
-        console.log('Đang tìm kiếm hóa đơn theo ID Bàn:', value);
-        // THỰC TẾ: Cần lọc dataSource dựa trên value
+        fetchHoaDonBan(value);
     };
 
     // Xử lý Thêm mới
     const handleAdd = () => {
-        setIsAddModalOpen(true);
+        setEditingItemId(null);
+        setDataToEdit(null);
+        setIsModalOpen(true);
     };
 
-    // Xử lý Cập nhật (nhận ID)
+    // Xử lý Sửa
     const handleEdit = (id: number) => {
         setEditingItemId(id);
+        fetchHoaDonBanById(id);
     };
-
-    // Xử lý xóa (nhận ID) - Dùng Popconfirm để xác nhận
-    const handleDelete = (id: number) => {
-        // THỰC TẾ: Gọi API xóa
-        setDataSource(prev => prev.filter(hd => hd.id !== id));
-        // Đã sửa thông báo từ Hóa đơn Nhập sang Hóa đơn Bán
-        message.success(`Đã xóa Hóa đơn Bán ID: ${id}`); 
-    };
-
-    // Xử lý Đóng Modal chung
-    const handleCancel = () => {
-        setIsAddModalOpen(false);
+    const handleSuccess = () => {
+        setIsModalOpen(false);
         setEditingItemId(null);
+        setDataToEdit(null);
+        fetchHoaDonBan();
     };
+
+    // Xử lý Xóa 
+    const handleDelete = (id: number) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: `Bạn có chắc chắn muốn xóa hóa đơn bán ID: ${id} này không?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.delete(`http://localhost:7000/api/hoadonnhap/delete?id=${id}`);
+
+                    if (response.data.success) {
+                        message.success(`Đã xóa hóa đơn bán ID: ${id} thành công.`);
+                        fetchHoaDonBan();
+                    } else {
+                        message.error(response.data.message || 'Lỗi khi xóa hóa đơn bán.');
+                    }
+                } catch (error) {
+                    console.error('Lỗi API Delete:', error);
+                    message.error('Lỗi máy chủ khi xóa hóa đơn bán.');
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
+    };
+    // Xử lý Xem Chi Tiết Hóa Đơn
+    const handleView = (id: number) => {
+        const product = danhSachHoaDonBan.find(sp => sp.id === id);
+
+        if (!product) {
+            message.warning('Không tìm thấy hóa đơn bán này.');
+            return;
+        }
+
+        setSelectedHoaDon(product);
+        setIsFormulaModalOpen(true);
+    };
+
 
     // Cấu hình các cột cho Table (ĐÃ SỬA CHO HÓA ĐƠN BÁN)
     const columns = [
+        { title: 'ID', dataIndex: 'id', key: 'id' },
+        { title: 'Bàn', dataIndex: 'ten_ban', key: 'ten_ban' },
         {
-            title: 'ID HĐ',
-            dataIndex: 'id',
-            key: 'id',
-            width: 80,
-        },
-        {
-            title: 'Bàn', // 👈 Đã sửa từ 'Nhà cung cấp'
-            // Hiển thị tên Bàn
-            dataIndex: 'tenBan', 
-            key: 'tenBan',
-        },
-        {
-            title: 'Ngày lập', // 👈 Đã sửa từ 'Ngày nhập'
-            dataIndex: 'ngayLap',
-            key: 'ngayLap',
-            width: 180,
+            title: 'Ngày lập',
+            dataIndex: 'ngay_lap',
+            key: 'ngay_lap',
+            render: (ngay_lap: string) => {
+                if (!ngay_lap) return '';
+                const date = new Date(ngay_lap);
+
+                const formattedDate = date.toLocaleDateString('en-CA', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\//g, '-');
+
+                const formattedTime = date.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                return `${formattedDate} ${formattedTime}`;
+            }
         },
         {
             title: 'Tổng tiền',
-            dataIndex: 'tongTien',
-            key: 'tongTien',
-            width: 150,
-            // Format tiền tệ
-            render: (tien: number) => `${tien.toLocaleString('vi-VN')} VNĐ`,
+            dataIndex: 'tong_tien',
+            key: 'tong_tien',
+            render: (tong_tien: string) => {
+                if (!tong_tien) return '0 VNĐ';
+                const amount = parseFloat(tong_tien);
+
+                const formattedAmount = amount.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+
+                return `${formattedAmount} VNĐ`;
+            }
         },
+
         {
             title: 'Chức năng',
             key: 'action',
             width: 150,
             render: (_: any, record: HoaDonBan) => (
-                <Space size="small">
+                <Space size="middle">
+                    <Button type="link" onClick={() => handleView(record.id)}>CT</Button>
+                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record.id)}>Sửa</Button>
                     <Button
-                        type="primary"
-                        onClick={() => handleEdit(record.id)} 
-                        style={{ backgroundColor: '#333', borderColor: '#333' }}
-                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(record.id)}
                     >
-                        Chi tiết / Sửa
+                        Xóa
                     </Button>
-                    <Popconfirm
-                        title={`Xác nhận xóa HĐ ID: ${record.id}?`}
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Xóa"
-                        cancelText="Hủy"
-                    >
-                        <Button
-                            type="primary"
-                            danger
-                            size="small"
-                        >
-                            Xóa
-                        </Button>
-                    </Popconfirm>
                 </Space>
             ),
         },
     ];
 
     return (
-        <div style={{ padding: 0 }}>
-            {/* --- TIÊU ĐỀ VÀ NÚT THÊM --- */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2>Quản lý Hóa đơn Bán</h2> {/* 👈 ĐÃ SỬA TIÊU ĐỀ */}
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={handleAdd}
-                >
-                    Thêm Hóa đơn Bán {/* 👈 ĐÃ SỬA NÚT */}
+        <div>
+            <h2>Quản Lý Hóa Đơn Bán</h2>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Search
+                    placeholder="Tìm kiếm hóa đơn bán"
+                    allowClear
+                    onSearch={onSearch}
+                    style={{ width: 300 }}
+                />
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                    Thêm hóa đơn bán
                 </Button>
             </div>
 
-            {/* --- MODAL THÊM MỚI (Add) --- */}
-            <Modal
-                title="Thêm Hóa đơn Bán mới" 
-                open={isAddModalOpen} 
-                onCancel={handleCancel}
-                footer={null}
-            >
-                <AddHoaDonBan onCancel={handleCancel} /> 
-            </Modal>
+            <Table
+                columns={columns}
+                dataSource={danhSachHoaDonBan}
+                rowKey="id"
+                loading={loading}
+            />
 
-            {/* --- MODAL CẬP NHẬT (Update) --- */}
+            {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                // title={`Cập nhật Hóa đơn Bán (ID: ${editingItemId})`} 
-                open={editingItemId !== null}
-                onCancel={handleCancel}
+                title={editingItemId ? "Cập nhật Sản phẩm" : "Thêm mới Sản phẩm"}
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
                 footer={null}
-                width={800} 
-                destroyOnClose
+                destroyOnHidden={true}
             >
-                {editingItemId !== null && (
-                    <UpdateHoaDonBan id={editingItemId} onCancel={handleCancel} />
+                {editingItemId ? (
+                    <UpdateHoaDonBan
+                        id={editingItemId}
+                        initialData={dataToEdit}
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
+                ) : (
+                    <AddHoaDonBan
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
                 )}
             </Modal>
 
-            {/* --- THANH TÌM KIẾM --- */}
-            <div style={{ marginBottom: 20 }}>
-                <Search
-                    placeholder="Tìm kiếm theo ID hoặc Tên Bàn" 
-                    allowClear
-                    enterButton={<SearchOutlined />}
-                    onSearch={onSearch}
-                    style={{ maxWidth: 400 }}
-                />
-            </div>
-
-            {/* --- BẢNG HIỂN THỊ DANH SÁCH --- */}
-            <Table
-                pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 10,
-                    showSizeChanger: false,
-                    total: dataSource.length,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} trên tổng ${total} mục`,
+            {/* Modal Xem Chi Tiết Hóa Đơn */}
+            <Modal
+                title={`Chi Tiết Hóa Đơn: ${selectedHoaDon?.id || 'Chi tiết hóa đơn bán'}`}
+                open={isFormulaModalOpen}
+                onCancel={() => {
+                    setIsFormulaModalOpen(false);
+                    setSelectedHoaDon(null);
                 }}
-                dataSource={dataSource}
-                columns={columns}
-                rowKey="id"
-            />
+                footer={[
+                    <Button key="close" onClick={() => setIsFormulaModalOpen(false)}>
+                        Đóng
+                    </Button>,
+                ]}
+                width={700}
+            >
+                {selectedHoaDon && (
+                    <Table
+                        size="small"
+                        dataSource={selectedHoaDon.chi_tiet}
+                        rowKey="id_san_pham"
+                        pagination={false}
+                        columns={[
+                            { title: 'Sản phẩm', dataIndex: 'ten_san_pham', key: 'ten_san_pham' },
+                            { title: 'Số lượng', dataIndex: 'so_luong', key: 'so_luong' },
+                            { title: 'Đơn giá', dataIndex: 'don_gia', key: 'don_gia' },
+                        ]}
+                    />
+                )}
+            </Modal>
         </div>
     );
 };

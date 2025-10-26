@@ -121,26 +121,24 @@ export class HDNhapController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+    async searchByKeyword(req: Request, res: Response): Promise<void> {
+    try {
+      const { keyword } = req.query;
+      if (!keyword) {
+        res.status(400).json({ message: "Từ khóa không được để trống" });
+        return;
+      }
+      const result = await this.hdnhapModal.searchByKeyword(keyword as string);
+      res.status(200).json({
+        success: true,
+        message: "Tìm kiếm hóa đơn thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
 
-  // async searchHDNhapByName(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     const { name } = req.query;
-  //     if (!name) {
-  //       res.status(400).json({ message: "Tên không được để trống" });
-  //       return;
-  //     }
-  //     const result = await this.hdnhapModal.searchHDNhapByName(
-  //       name as string
-  //     );
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "Tìm kiếm thành công",
-  //       data: result,
-  //     });
-  //   } catch (error: any) {
-  //     res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
-  //   }
-  // }
 }
 
 export default HDNhapController;

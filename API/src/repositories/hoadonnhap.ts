@@ -35,7 +35,7 @@ export class HDNhapRepository {
   async createHDNhap(
     id_ncc: number,
     ghi_chu: string,
-    chiTietJson: string 
+    chiTietJson: string
   ): Promise<void> {
     const sql = "CALL CreateHoaDonNhap(?, ?, ?)";
     await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
@@ -44,7 +44,8 @@ export class HDNhapRepository {
   async updateHDNhap(
     id_ncc: number,
     ghi_chu: string,
-    chiTietJson: string   ): Promise<void> {
+    chiTietJson: string
+  ): Promise<void> {
     const sql = "CALL UpdateHDNhap(?, ?, ?)";
     await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
   }
@@ -53,15 +54,14 @@ export class HDNhapRepository {
     const sql = "CALL DeleteHoaDonNhap(?)";
     await this.db.query(sql, [id]);
   }
-
-  // async searchHDNhapByName(name: string): Promise<any> {
-  //   const sql = "CALL SearchHDNhapByName(?)";
-  //   const [results] = await this.db.query(sql, [name]);
-  //   if (Array.isArray(results)) {
-  //     return results[0];
-  //   }
-  //   return [];
-  // }
+  async searchByKeyword(keyword: string): Promise<any> {
+    const sql = "CALL SearchHoaDonNhap(?)";
+    const [results] = await this.db.query(sql, [keyword]);
+    if (Array.isArray(results)) {
+      return results[0];
+    }
+    return [];
+  }
 }
 
 export default HDNhapRepository;

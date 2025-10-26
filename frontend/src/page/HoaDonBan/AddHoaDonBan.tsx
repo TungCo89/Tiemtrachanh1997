@@ -1,79 +1,78 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState } from 'react';
 import { Button, Form, Input, Card, Space, message, DatePicker, Select, InputNumber } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs'; // Import dayjs
+import { HoaDonBan } from '../../component/interface';
+import axios from 'axios';
 
 const { Option } = Select;
 const { List } = Form;
 
-// --- CẬP NHẬT INTERFACE CHO HÓA ĐƠN BÁN (Sales Invoice) ---
-interface HoaDonBanFormValues {
-    idBan: number; // Đổi từ idNhaCungCap (Nhập) sang idBan (Bán)
-    ngayLap: dayjs.Dayjs; // Đổi từ ngayBan sang ngayLap (Dùng Dayjs cho DatePicker)
-    chiTiet: {
-        idSanPham: number; // Đổi từ idNguyenLieu sang idSanPham
-        soLuong: number;
-        donGia: number;
-    }[];
-}
-
 interface AddHoaDonBanProps {
-    onCancel: () => void;
+    onClose: () => void;
+    onSuccess: () => void;
 }
-// -----------------------------------------------------------
+const API_BASE_URL = 'http://localhost:7000/api/hoadonban';
 
 
-const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onCancel }) => {
+const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onClose, onSuccess }) => {
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
+    const onFinish = async (values: HoaDonBan) => {
+        setLoading(true);
+        try {
+            const payload = {
+                ...values,
+            };
 
-    const onFinish = (values: HoaDonBanFormValues) => {
-        // Log dữ liệu để kiểm tra
-        console.log('Thông tin hóa đơn bán cần thêm:', values);
-        
-        // Tính tổng tiền từ chi tiết sản phẩm
-        const tongTien = values.chiTiet.reduce((sum, item) => sum + (item.soLuong * item.donGia), 0);
-        
-        // Gọi API...
-        message.success(`Đã thêm Hóa đơn Bán thành công. Tổng tiền: ${tongTien.toLocaleString('vi-VN')} VNĐ`);
-        
-        onCancel(); // Đóng Modal
-        form.resetFields(); 
+            // GỌI API create: POST http://localhost:7000/api/hoadonban/create
+            const response = await axios.post(`${API_BASE_URL}/create`, payload);
+
+            if (response.data.success) {
+                message.success(`Đã thêm hóa đơn bán thành công.`);
+                form.resetFields();
+                onSuccess();
+            } else {
+                message.error(response.data.message || 'Lỗi khi thêm hóa đơn bán.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Create:', error);
+            message.error('Lỗi kết nối máy chủ hoặc dữ liệu không hợp lệ.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Card
-            // 👈 ĐÃ SỬA TIÊU ĐỀ
             title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Hóa đơn Bán</h2>}
-            bordered={false}
         >
             <Form
                 form={form}
                 name="addHoaDonBanForm"
                 layout="vertical"
-                onFinish={onFinish as any} 
+                onFinish={onFinish as (values: any) => void}
                 autoComplete="off"
-                initialValues={{ chiTiet: [{}] }} // Khởi tạo 1 dòng trống cho chi tiết
+                initialValues={{ chiTiet: [{}] }} 
             >
 
                 {/* -------------------- 1. THÔNG TIN CHUNG (HEADER) -------------------- */}
                 <Form.Item
-                    // 👈 ĐÃ SỬA NHÃN
                     label="Bàn"
-                    name="idBan"
+                    name="id_ban"
                     rules={[{ required: true, message: 'Vui lòng chọn Bàn!' }]}
                 >
                     <Select placeholder="Chọn Bàn">
                         {/* Dữ liệu Bàn (ví dụ) */}
                         <Option value={1}>Bàn 1</Option>
                         <Option value={2}>Bàn 2</Option>
-                        <Option value={3}>Mang về</Option>
+                        <Option value={3}>Bàn 3</Option>
                     </Select>
                 </Form.Item>
 
                 <Form.Item
-                    // 👈 ĐÃ SỬA NHÃN
                     label="Ngày lập"
-                    name="ngayLap"
+                    name="ngay_lap"
                     rules={[{ required: true, message: 'Vui lòng chọn ngày lập!' }]}
                 >
                     <DatePicker format="YYYY/MM/DD" style={{ width: '100%' }} />
@@ -83,24 +82,21 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onCancel }) => {
                 {/* -------------------- 2. CHI TIẾT HÓA ĐƠN (FORM LIST) -------------------- */}
                 <h3 style={{ marginTop: 20 }}>Chi tiết Sản phẩm</h3>
                 <List
-                    name="chiTiet" 
+                    name="chi_tet" 
                 >
                     {(fields, { add, remove }) => (
                         <>
                             {fields.map(({ key, name, fieldKey, ...restField }) => (
-                                // Ép kiểu key để tránh lỗi TS nếu có
                                 <Space key={key as number} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                                     
                                     {/* Cột 1: Sản phẩm */}
                                     <Form.Item
                                         {...restField}
-                                        // 👈 ĐÃ SỬA TÊN TRƯỜNG: idSanPham
-                                        name={[name, 'idSanPham']}
-                                        fieldKey={[fieldKey as number, 'idSanPham']} rules={[{ required: true, message: 'Chọn SP' }]}
+                                        name={[name, 'id_san_pham']}
+                                        fieldKey={[fieldKey as number, 'id_san_pham']} rules={[{ required: true, message: 'Chọn SP' }]}
                                         style={{ width: 150 }}
                                     >
                                         <Select placeholder="Sản phẩm">
-                                            {/* Giả định: 1=Trà chanh, 2=Trà đào, 3=Cà phê */}
                                             <Option value={1}>Trà chanh</Option>
                                             <Option value={2}>Trà đào</Option>
                                             <Option value={3}>Cà phê</Option>
@@ -111,8 +107,8 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onCancel }) => {
                                     {/* Cột 2: Số lượng */}
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'soLuong']}
-                                        fieldKey={[fieldKey as number, 'soLuong']}
+                                        name={[name, 'so_luong']}
+                                        fieldKey={[fieldKey as number, 'so_luong']}
                                         rules={[{ required: true, message: 'SL' }]}
                                         style={{ width: 80 }}
                                     >
@@ -122,8 +118,8 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onCancel }) => {
                                     {/* Cột 3: Đơn giá (Đã thêm step=1 để sửa lỗi TS) */}
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'donGia']}
-                                        fieldKey={[fieldKey as number, 'donGia']}
+                                        name={[name, 'don_gia']}
+                                        fieldKey={[fieldKey as number, 'don_gia']}
                                         rules={[{ required: true, message: 'ĐG' }]}
                                         style={{ width: 120 }}
                                     >
@@ -151,20 +147,18 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onCancel }) => {
                 </List>
 
 
-                {/* -------------------- 3. NÚT SUBMIT VÀ HỦY -------------------- */}
-                <Form.Item style={{ textAlign: 'right', marginTop: 30 }}>
-                    <Space>
-                        <Button onClick={onCancel}>
-                            Hủy
-                        </Button>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            icon={<PlusOutlined />}
-                        >
-                            Lưu Hóa đơn
-                        </Button>
-                    </Space>
+                {/* Nút Thêm */}
+                <Form.Item style={{ textAlign: 'center', marginTop: 30 }}>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        size="large"
+                        icon={<PlusOutlined />}
+                        loading={loading}
+                        style={{ width: '100%', maxWidth: 300 }}
+                    >
+                        Thêm Hóa Đơn
+                    </Button>
                 </Form.Item>
             </Form>
         </Card>

@@ -15,7 +15,7 @@ hdbanRouter.get('/get-by-ID', hdbanController.getByID.bind(hdbanController));
 hdbanRouter.post('/create', hdbanController.createHDBan.bind(hdbanController));
 hdbanRouter.put('/update', hdbanController.updateHDBan.bind(hdbanController));
 hdbanRouter.delete('/delete', hdbanController.deleteHDBan.bind(hdbanController));
-// hdbanRouter.get('/search-by-name', hdbanController.searchHDBanByName.bind(hdbanController));
+hdbanRouter.get('/search-by-keyword', hdbanController.searchByKeyword.bind(hdbanController));
 
 
 export default hdbanRouter;

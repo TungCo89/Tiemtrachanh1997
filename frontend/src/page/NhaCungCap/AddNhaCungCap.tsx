@@ -1,33 +1,51 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState } from 'react';
 import { Button, Form, Input, Card, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { NhaCungCap } from '../../component/interface';
+import axios from 'axios';
 
-interface NhaCungCap {
-    id: number;
-    tenNhaCungCap: string;
-    diaChi: string;
-    soDienThoai: number;
+interface AddNhaCungCapProps {
+    onClose: () => void;
+    onSuccess: () => void;
 }
-
-const AddNhaCungCap: React.FC = () => {
+const API_BASE_URL = 'http://localhost:7000/api/nhacungcap';
+const AddNhaCungCap: React.FC<AddNhaCungCapProps> = ({ onClose, onSuccess }) => {
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
+    const onFinish = async (values: NhaCungCap) => {
+        setLoading(true);
+        try {
+            // Chuẩn bị payload để gửi lên backend
+            const payload = {
+                ...values,
+                // Mặc định công thức là mảng rỗng khi thêm mới
+                cong_thuc: [
+                ]
+            };
 
-    const onFinish = (values: NhaCungCap) => {
-        console.log('Thông tin cần thêm:', values);
-        // Ở đây sẽ gọi API để thêm vào database
-        message.success(`Đã thêm: ${values.tenNhaCungCap}`);
-        form.resetFields();
+            // GỌI API create: POST http://localhost:7000/api/NhaCungCap/create
+            const response = await axios.post(`${API_BASE_URL}/create`, payload);
+
+            if (response.data.success) {
+                message.success(`Đã thêm người dùng thành công.`);
+                form.resetFields();
+                onSuccess();
+            } else {
+                message.error(response.data.message || 'Lỗi khi thêm người dùng.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Create:', error);
+            message.error('Lỗi kết nối máy chủ hoặc dữ liệu không hợp lệ.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const onFinishFailed = (errorInfo: any) => {
-        console.log('Gửi form thất bại:', errorInfo);
-        message.error('Vui lòng điền đầy đủ các trường bắt buộc.');
-    };
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm</h2>}
-            bordered={false}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Nhà Cung Cấp</h2>}
             style={{
                 maxWidth: 600,
                 margin: '50px auto',
@@ -39,37 +57,36 @@ const AddNhaCungCap: React.FC = () => {
                 form={form}
                 name="addNhaCungCapForm"
                 layout="vertical"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
+                onFinish={onFinish as (values: any) => void}
                 autoComplete="off"
             >
                 {/* Trường Tên nhà cung cấp */}
                 <Form.Item
                     label="Tên nhà cung cấp"
-                    name="tenNhaCungCap"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
+                    name="ten_ncc"
+                    rules={[{ required: true, message: 'Vui lòng nhập tên nhà cung cấp!' }]}
                 >
-                    <Input placeholder="Nhập tên" />
+                    <Input placeholder="Nhập tên nhà cung cấp" />
                 </Form.Item>
 
                 {/* Trường Địa chỉ */}
                 <Form.Item
                     label="Địa chỉ"
-                    name="diaChi"
-                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+                    name="dia_chi"
+                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ nhà cung cấp!' }]}
 
                 >
-                    <Input placeholder="Nhập địa chỉ" />
+                    <Input placeholder="Nhập địa chỉ nhà cung cấp" />
                 </Form.Item>
 
                 {/* Trường SDT */}
                 <Form.Item
                     label="Số điện thoại"
-                    name="soDienThoai"
-                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+                    name="so_dien_thoai"
+                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại nhà cung cấp!' }]}
 
                 >
-                    <Input placeholder="Nhập số điện thoại" />
+                    <Input placeholder="Nhập số điện thoại nhà cung cấp" />
                 </Form.Item>
 
                 {/* Nút Thêm */}
@@ -78,13 +95,9 @@ const AddNhaCungCap: React.FC = () => {
                         type="primary"
                         htmlType="submit"
                         size="large"
-                        style={{
-                            width: '100%',
-                            maxWidth: 300,
-                            backgroundColor: '#d9d9d9',
-                            borderColor: '#d9d9d9',
-                            color: '#000',
-                        }}
+                        icon={<PlusOutlined />}
+                        loading={loading}
+                        style={{ width: '100%', maxWidth: 300 }}
                     >
                         Thêm
                     </Button>

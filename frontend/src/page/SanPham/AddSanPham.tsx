@@ -108,7 +108,7 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
                                 <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'id']}
+                                        name={[name, 'id_nguyen_lieu']}
                                         fieldKey={[fieldKey as number, 'id_nguyen_lieu']} rules={[{ required: true, message: 'Chọn NL' }]}
                                         style={{ width: 150 }}
                                     >

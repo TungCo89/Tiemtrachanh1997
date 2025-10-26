@@ -59,29 +59,47 @@ END$$
 DELIMITER ;
 
 -- GET /api/hoadon-nhap/get-all: Lấy danh sách hóa đơn nhập.
-
+call GetAllHoaDonNhap();
+drop PROCEDURE GetAllHoaDonNhap;
 DELIMITER $$
 
 CREATE PROCEDURE GetAllHoaDonNhap()
 BEGIN
-    SELECT 
-        hdn.id,
+	SELECT
+        hdn.id AS id_hoa_don_nhap,
         hdn.ngay_nhap,
-        hdn.tong_tien,
         hdn.ghi_chu,
-        ncc.ten_ncc
+        hdn.id_ncc,
+        ncc.ten_ncc,
+        cthdn.id as id_cthdn,
+        cthdn.id_nguyen_lieu,
+        nl.ten_nguyen_lieu,
+        cthdn.so_luong,
+        cthdn.don_gia,
+        cthdn.thanh_tien,
+		hdn.tong_tien
     FROM
         hoa_don_nhap AS hdn
     JOIN
         nha_cung_cap AS ncc ON hdn.id_ncc = ncc.id
-    ORDER BY hdn.ngay_nhap DESC;
+    JOIN
+        chi_tiet_hoa_don_nhap AS cthdn ON hdn.id = cthdn.id_hoa_don_nhap
+    JOIN
+        nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
+	ORDER BY
+		hdn.ngay_nhap DESC, 
+		hdn.id DESC,
+        hdn.id_ncc DESC,  
+        cthdn.id DESC,
+		ncc.ten_ncc DESC, 
+		nl.ten_nguyen_lieu DESC;
 END$$
 
 DELIMITER ;
-call GetAllHoaDonNhap(); 
+
 
 -- GET /api/hoadon-nhap/get-by-id/:id: Lấy hóa đơn nhập và chi tiết.
-
+call GetHoaDonNhapByID(4);
 DELIMITER $$
 
 CREATE PROCEDURE GetHoaDonNhapByID(
@@ -91,14 +109,16 @@ BEGIN
     SELECT
         hdn.id AS id_hoa_don_nhap,
         hdn.ngay_nhap,
-        hdn.tong_tien,
         hdn.ghi_chu,
+        hdn.id_ncc,
         ncc.ten_ncc,
+        cthdn.id as id_cthdn,
         cthdn.id_nguyen_lieu,
         nl.ten_nguyen_lieu,
         cthdn.so_luong,
         cthdn.don_gia,
-        cthdn.thanh_tien
+        cthdn.thanh_tien,
+		hdn.tong_tien
     FROM
         hoa_don_nhap AS hdn
     JOIN
@@ -109,6 +129,40 @@ BEGIN
         nguyen_lieu AS nl ON cthdn.id_nguyen_lieu = nl.id
     WHERE
         hdn.id = p_id_hoa_don;
+END$$
+
+DELIMITER ;
+
+-- GET /api/hoadonnhap/search: Tìm kiếm hóa đơn nhập.
+
+DELIMITER $$
+
+CREATE PROCEDURE SearchHoaDonNhap(
+    IN p_keyword VARCHAR(255)
+)
+BEGIN
+    SELECT
+        hdn.id,
+        hdn.id_ncc,
+        ncc.ten_ncc,
+        hdn.ngay_nhap,
+        hdn.ghi_chu,
+        ct.id AS id_cthdn,
+        ct.id_nguyen_lieu,
+        nl.ten_nguyen_lieu,
+        ct.so_luong,
+        ct.don_gia,
+        ct.thanh_tien,
+        hdn.tong_tien
+    FROM hoa_don_nhap AS hdn
+    JOIN chi_tiet_hoa_don_nhap AS ct ON hdn.id = ct.id_hoa_don_nhap
+    JOIN nha_cung_cap AS ncc ON hdn.id_ncc = ncc.id
+    JOIN nguyen_lieu AS nl ON ct.id_nguyen_lieu = nl.id
+    WHERE
+        hdn.id = p_keyword -- Allows searching by exact ID
+        OR ncc.ten_ncc LIKE CONCAT('%', p_keyword, '%')
+        OR hdn.ghi_chu LIKE CONCAT('%', p_keyword, '%')
+        OR nl.ten_nguyen_lieu LIKE CONCAT('%', p_keyword, '%');
 END$$
 
 DELIMITER ;

@@ -87,7 +87,7 @@ export class UserRepository {
       throw new Error(error.message);
     }
   }
-    async searchByKeyword(keyword: string): Promise<any> {
+  async searchByKeyword(keyword: string): Promise<any> {
     const sql = "CALL SearchUsers(?)";
     const [results] = await this.db.query(sql, [keyword]);
     if (Array.isArray(results)) {

@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Table, Button, Input, message, notification, Space } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
-import { CongThucChiTiet } from '../../component/interface';
 import { SanPham } from '../../component/interface';
 import AddSanPham from './AddSanPham'
 import UpdateSanPham from './UpdateSanPham';
