@@ -113,7 +113,7 @@ export class UserController {
         });
         return;
       }
-      const user = userFromDB[0]; 
+      const user = userFromDB[0];
       const isPasswordValid = await bcrypt.compare(mat_khau, user.mat_khau);
       if (!isPasswordValid) {
         res.status(401).json({
@@ -164,6 +164,7 @@ export class UserController {
         const hashedPassword = await bcrypt.hash(mat_khau, SALT_ROUNDS);
         user.mat_khau = hashedPassword;
       }
+
       const result = await this.userModal.update(user);
       res.status(200).json({
         success: true,
@@ -177,8 +178,9 @@ export class UserController {
   }
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.query.is as string);
-      const result = await this.userModal.delete(id);
+      const { id } = req.query;
+      const userId = Number(id);
+      const result = await this.userModal.delete(userId);
       res.status(200).json({
         success: true,
         message: "Xóa thông tin thành công",

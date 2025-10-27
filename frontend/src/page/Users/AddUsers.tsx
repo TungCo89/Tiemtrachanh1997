@@ -24,8 +24,8 @@ const AddUsers: React.FC<AddUserProps> = ({ onClose, onSuccess }) => {
                 ...values,
             };
 
-            // GỌI API create: POST http://localhost:7000/api/user/create
-            const response = await axios.post(`${API_BASE_URL}/create`, payload);
+            // GỌI API create: POST http://localhost:7000/api/user/signup
+            const response = await axios.post(`${API_BASE_URL}/signup`, payload);
 
             if (response.data.success) {
                 message.success(`Đã thêm người dùng thành công.`);

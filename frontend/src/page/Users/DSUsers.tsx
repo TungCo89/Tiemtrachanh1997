@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import '@ant-design/v5-patch-for-react-19';
 import { Table, Button, Input, Space, message } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
@@ -97,7 +98,7 @@ const DSUsers: React.FC = () => {
                 try {
                     setLoading(true);
                     const response = await axios.delete(`http://localhost:7000/api/user/delete?id=${id}`);
-
+                    console.log("id tuwf front",id);
                     if (response.data.success) {
                         message.success(`Đã xóa người dùng ID: ${id} thành công.`);
                         fetchUser();

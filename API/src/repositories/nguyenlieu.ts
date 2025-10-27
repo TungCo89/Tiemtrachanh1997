@@ -56,7 +56,8 @@ export class NguyenLieuRepository {
     ten_nguyen_lieu: string,
     don_vi: number
   ): Promise<void> {
-    const sql = "CALL CreateNguyeLieu(?, ?)";
+    console.log("du lieu nguyenlieu.res", ten_nguyen_lieu, don_vi);
+    const sql = "CALL CreateNguyeLieu(?, ?)"; // 
     await this.db.query(sql, [ten_nguyen_lieu, don_vi]);
   }
 
@@ -65,12 +66,14 @@ export class NguyenLieuRepository {
     ten_nguyen_lieu: string,
     don_vi: number
   ): Promise<void> {
-    const sql = "CALL UpdateNguyenLieu(?, ?, ?)";
+    console.log("du lieu nguyenlieu.res", ten_nguyen_lieu, don_vi);
+    const sql = "CALL UpdateNguyenLieu(?, ?, ?)"; //
     await this.db.query(sql, [id, ten_nguyen_lieu, don_vi]);
   }
 
   async deleteNguyenLieu(id: number): Promise<void> {
-    const sql = "CALL DeleteNguyenLieu(?)";
+    console.log(id);
+    const sql = "CALL DeleteNguyenLieu(?)"; //
     await this.db.query(sql, [id]);
   }
 

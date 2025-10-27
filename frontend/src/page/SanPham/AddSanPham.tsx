@@ -127,7 +127,7 @@ const AddSanPham: React.FC<AddSanPhamProps> = ({ onClose, onSuccess }) => {
                                         rules={[{ required: true, message: 'SL' }]}
                                         style={{ width: 120 }}
                                     >
-                                        <InputNumber min={1} placeholder="SL" />
+                                        <InputNumber min={0.01} placeholder="SL" />
                                     </Form.Item>
 
                                     {fields.length > 1 ? (

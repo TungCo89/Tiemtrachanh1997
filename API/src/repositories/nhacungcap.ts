@@ -48,7 +48,8 @@ export class NCCRepository {
     dia_chi: string,
     so_dien_thoai: number
   ): Promise<void> {
-    const sql = "CALL CreateNCC(?, ?, ?)";
+    console.log("du lieu ncc.res", ten_ncc, dia_chi, so_dien_thoai);
+    const sql = "CALL CreateNCC(?, ?, ?)"; //
     await this.db.query(sql, [ten_ncc, dia_chi, so_dien_thoai]);
   }
 
@@ -58,12 +59,14 @@ export class NCCRepository {
     dia_chi: string,
     so_dien_thoai: number
   ): Promise<void> {
-    const sql = "CALL UpdateNCC(?, ?, ?, ?)";
+    console.log("du lieu ncc.res", id, ten_ncc, dia_chi, so_dien_thoai);
+    const sql = "CALL UpdateNCC(?, ?, ?, ?)"; //
     await this.db.query(sql, [id, ten_ncc, dia_chi, so_dien_thoai]);
   }
 
   async deleteNCC(id: number): Promise<void> {
-    const sql = "CALL DeleteNCC(?)";
+    console.log(id);
+    const sql = "CALL DeleteNCC(?)"; //
     await this.db.query(sql, [id]);
   }
 

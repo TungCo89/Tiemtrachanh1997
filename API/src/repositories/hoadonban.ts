@@ -34,18 +34,19 @@ export class HDBanRepository {
   }
 
   async createHDBan(id_ban: number, chiTietJson: string): Promise<void> {
-    const sql = "CALL CreateHoaDonBan(?, ?)";
+    console.log("du lieu hoadonban.res", id_ban, chiTietJson);
+    const sql = "CALL CreateHoaDonBan(?, ?)"; //
     await this.db.query(sql, [id_ban, chiTietJson]);
   }
 
-  async updateHDBan(id: number, chi_tiet: any[]): Promise<void> {
-    const congThucJson = JSON.stringify(chi_tiet);
-    const sql = "CALL UpdateHoaDonBan(?,?)";
-    await this.db.query(sql, [id, congThucJson]);
+  async updateHDBan(id: number, chiTietJson: string): Promise<void> {
+    console.log("du lieu hoadonban.res", id, chiTietJson);
+    const sql = "CALL UpdateHoaDonBan(?,?)"; //
+    await this.db.query(sql, [id, chiTietJson]);
   }
 
   async deleteHDBan(id: number): Promise<void> {
-    const sql = "CALL DeleteHoaDonBan(?)";
+    const sql = "CALL DeleteHoaDonBan(?)"; //
     await this.db.query(sql, [id]);
   }
 

@@ -37,7 +37,15 @@ export class SanPhamRepository {
     cong_thuc: any[]
   ): Promise<void> {
     const congThucJson = JSON.stringify(cong_thuc);
-    const sql = "CALL ThemSanPhamVaCongThuc(?, ?, ?, ?, ?)";
+    console.log(
+      "du lieu sanpham.res",
+      ten_san_pham,
+      gia_ban,
+      mo_ta,
+      id_loai,
+      congThucJson
+    );
+    const sql = "CALL ThemSanPhamVaCongThuc(?, ?, ?, ?, ?)"; //
     await this.db.query(sql, [
       ten_san_pham,
       gia_ban,
@@ -56,7 +64,16 @@ export class SanPhamRepository {
     cong_thuc: any[]
   ): Promise<void> {
     const congThucJson = JSON.stringify(cong_thuc);
-    const sql = "CALL UpdateSanPhamVaCongThuc(?, ?, ?, ?, ?, ?)";
+    console.log(
+      "du lieu sanpham.res",
+      id,
+      ten_san_pham,
+      gia_ban,
+      mo_ta,
+      id_loai,
+      congThucJson
+    );
+    const sql = "CALL UpdateSanPhamVaCongThuc(?, ?, ?, ?, ?, ?)"; // 
     await this.db.query(sql, [
       id,
       ten_san_pham,
@@ -68,7 +85,8 @@ export class SanPhamRepository {
   }
 
   async deleteSanPham(id: number): Promise<void> {
-    const sql = "CALL DeleteSanPham(?)";
+    console.log(id);
+    const sql = "CALL DeleteSanPham(?)"; //
     await this.db.query(sql, [id]);
   }
 

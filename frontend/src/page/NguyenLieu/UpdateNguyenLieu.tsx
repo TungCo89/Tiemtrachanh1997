@@ -15,7 +15,7 @@ interface UpdateNguyenLieuProps {
     onClose: () => void;
     onSuccess: () => void;
 }
-const API_BASE_URL = 'http://localhost:7000/api/loaisanpham';
+const API_BASE_URL = 'http://localhost:7000/api/nguyenlieu';
 
 // Thay đổi định kiểu component
 const UpdateNguyenLieu: React.FC<UpdateNguyenLieuProps> = ({ id, initialData, onClose, onSuccess }) => {
@@ -48,10 +48,10 @@ const UpdateNguyenLieu: React.FC<UpdateNguyenLieuProps> = ({ id, initialData, on
             const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
 
             if (response.data.success) {
-                message.success(`Đã cập nhật loại sản phẩm ID ${id} thành công.`);
+                message.success(`Đã cập nhật nguyên liệu ID ${id} thành công.`);
                 onSuccess();
             } else {
-                message.error(response.data.message || 'Lỗi khi cập nhật loại sản phẩm.');
+                message.error(response.data.message || 'Lỗi khi cập nhật nguyên liệu.');
             }
         } catch (error) {
             console.error('Lỗi API Update:', error);

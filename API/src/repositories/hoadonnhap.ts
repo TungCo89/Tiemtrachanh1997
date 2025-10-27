@@ -37,21 +37,25 @@ export class HDNhapRepository {
     ghi_chu: string,
     chiTietJson: string
   ): Promise<void> {
-    const sql = "CALL CreateHoaDonNhap(?, ?, ?)";
+    console.log("du lieu hoadonnhap.res", id_ncc, ghi_chu, chiTietJson);
+    const sql = "CALL CreateHoaDonNhap(?, ?, ?)"; //
     await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
   }
 
   async updateHDNhap(
+    id:number,
     id_ncc: number,
     ghi_chu: string,
     chiTietJson: string
   ): Promise<void> {
-    const sql = "CALL UpdateHDNhap(?, ?, ?)";
+    console.log("du lieu hoadonnhap.res",id, id_ncc, ghi_chu, chiTietJson);
+    const sql = "CALL UpdateHDNhap(?, ?, ?, ?)"; //
     await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
   }
 
   async deleteHDNhap(id: number): Promise<void> {
-    const sql = "CALL DeleteHoaDonNhap(?)";
+    console.log(id);
+    const sql = "CALL DeleteHoaDonNhap(?)"; //
     await this.db.query(sql, [id]);
   }
   async searchByKeyword(keyword: string): Promise<any> {

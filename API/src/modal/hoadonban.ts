@@ -52,20 +52,20 @@ export class HDBanModal {
     return processed.length > 0 ? processed[0] : null;
   }
 
-  async createHDBan(id_ban: number, chi_tiet: any[]): Promise<void> {
-    if (!id_ban || !chi_tiet || chi_tiet.length === 0) {
+  async createHDBan(id_ban: number, chiTietHoanChinh: any[]): Promise<void> {
+    if (!id_ban || !chiTietHoanChinh || chiTietHoanChinh.length === 0) {
       throw new Error("Dữ liệu tạo hóa đơn bán không hợp lệ.");
     }
-    const chiTietJson = JSON.stringify(chi_tiet);
+    const chiTietJson = JSON.stringify(chiTietHoanChinh);
     await this.hdbanRepository.createHDBan(id_ban, chiTietJson);
   }
 
-  async updateHDBan(id: number, chi_tiet: any[]): Promise<void> {
-    if (!id || !chi_tiet) {
+  async updateHDBan(id: number, chiTietHoanChinh: any[]): Promise<void> {
+    if (!id || !chiTietHoanChinh) {
       throw new Error("Dữ liệu cập nhật không hợp lệ.");
     }
-
-    await this.hdbanRepository.updateHDBan(id, chi_tiet);
+    const chiTietJson = JSON.stringify(chiTietHoanChinh);
+    await this.hdbanRepository.updateHDBan(id, chiTietJson);
   }
 
   async deleteHDBan(id: number): Promise<void> {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { Card, Statistic, Row, Col, Space, Progress, Button } from 'antd';
 import { ShoppingCartOutlined, DollarCircleOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';

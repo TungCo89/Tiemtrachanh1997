@@ -33,17 +33,24 @@ export class LoaiSanPhamRepository {
   }
 
   async createLoaiSanPham(ten_loai: string, mo_ta: string): Promise<void> {
-    const sql = "CALL CreateLoaiSanPham(?,?)";
+    console.log("du lieu loaisp.res", ten_loai, mo_ta);
+    const sql = "CALL CreateLoaiSanPham(?,?)"; //
     await this.db.query(sql, [ten_loai, mo_ta]);
   }
 
-  async updateLoaiSanPham(id: number, ten_loai: string, mo_ta: string): Promise<void> {
-    const sql = "CALL UpdateLoaiSanPham(?, ?, ?)";
+  async updateLoaiSanPham(
+    id: number,
+    ten_loai: string,
+    mo_ta: string
+  ): Promise<void> {
+    console.log("du lieu loaisp.res", id, ten_loai, mo_ta);
+    const sql = "CALL UpdateLoaiSanPham(?, ?, ?)"; //
     await this.db.query(sql, [id, ten_loai, mo_ta]);
   }
 
   async deleteLoaiSanPham(id: number): Promise<void> {
-    const sql = "CALL DeleteLoaiSanPham(?)";
+    console.log(id);
+    const sql = "CALL DeleteLoaiSanPham(?)"; //
     await this.db.query(sql, [id]);
   }
 

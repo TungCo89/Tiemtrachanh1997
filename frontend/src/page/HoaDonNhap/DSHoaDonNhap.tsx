@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
+import '@ant-design/v5-patch-for-react-19';
 import { Button, Input, Space, Modal, Table, message } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { HoaDonNhap } from '../../component/interface';
@@ -243,7 +244,7 @@ const DSHoaDonNhap: React.FC = () => {
 
             {/* Modal Xem Chi Tiết Hóa Đơn */}
             <Modal
-                title={`Chi Tiết Hóa Đơn: ${selectedHoaDon?.id || 'Chi tiết hóa đơn nhập'}`}
+                title={`Chi Tiết Hóa Đơn Nhập: ${selectedHoaDon?.id || 'Chi tiết hóa đơn nhập'}`}
                 open={isFormulaModalOpen}
                 onCancel={() => {
                     setIsFormulaModalOpen(false);

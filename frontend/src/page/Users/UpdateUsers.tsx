@@ -111,11 +111,8 @@ const UpdateUsers: React.FC<UpdateUsersProps> = ({ id, initialData, onClose, onS
                 <Form.Item
                     label="Mật khẩu"
                     name="mat_khau"
-                    rules={[
-                        { required: true, message: 'Vui lòng nhập Mật khẩu!' },
-                    ]}
                 >
-                    <Input placeholder="Nhập mật khẩu mới (bỏ qua)" />
+                    <Input placeholder="Nhập mật khẩu mới (để trống nếu không muốn thay đổi)" />
                 </Form.Item>
 
                 {/* Trường Họ tên */}

@@ -69,17 +69,18 @@ export class HDNhapModal {
   }
 
   async updateHDNhap(
+    id:number,
     id_ncc: number,
     ghi_chu: string,
-    chiTiet: any[]
+    chiTietHoanChinh: any[]
   ): Promise<void> {
-    if (!id_ncc || !chiTiet || chiTiet.length === 0) {
+    if (!id_ncc || !chiTietHoanChinh || chiTietHoanChinh.length === 0) {
       throw new Error(
         "Dữ liệu hóa đơn nhập (Nhà cung cấp và Chi tiết) không hợp lệ."
       );
     }
-    const chiTietJson = JSON.stringify(chiTiet);
-    await this.hdnhapRepository.updateHDNhap(id_ncc, ghi_chu, chiTietJson);
+    const chiTietJson = JSON.stringify(chiTietHoanChinh);
+    await this.hdnhapRepository.updateHDNhap(id,id_ncc, ghi_chu, chiTietJson);
   }
 
   async deleteHDNhap(id: number): Promise<void> {

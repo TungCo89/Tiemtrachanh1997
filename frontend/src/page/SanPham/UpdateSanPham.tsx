@@ -17,7 +17,7 @@ interface SanPhamUpdateValues {
         idNguyenLieu: number;
         ten_nguyen_lieu: string;
         don_vi: string;
-        soLuong: number;
+        so_luong: number;
     }[];
 }
 
@@ -178,25 +178,16 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                                         fieldKey={[fieldKey as number, 'so_luong']}
                                         rules={[{ required: true, message: 'Chọn số lượng' }]}
                                     >
-                                        <InputNumber min={1} placeholder="SL" />
+                                        <InputNumber min={0.01} placeholder="SL" />
                                     </Form.Item>
                                     <Form.Item
                                         {...restField}
                                         name={[name, 'don_vi']}
                                         fieldKey={[fieldKey as number, 'don_vi']}
-                                        rules={[{ required: true, message: 'Chọn đơn vị' }]}
                                         style={{ width: 50}}
                                     >
                                         <Input placeholder="Đơn vị" readOnly />
                                     </Form.Item>
-                                    {/* <Form.Item
-                                        {...restField}
-                                        name={[name, 'don_vi']}
-                                        fieldKey={[fieldKey as number, 'don_vi']}
-                                        rules={[{ required: true, message: 'Chọn đơn vị' }]}
-                                    >
-                                        <Input placeholder="Đơn vị" readOnly />
-                                    </Form.Item> */}
 
                                     {fields.length > 1 ? (
                                         <MinusCircleOutlined onClick={() => remove(name)} />

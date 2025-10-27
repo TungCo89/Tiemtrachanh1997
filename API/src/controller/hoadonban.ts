@@ -75,12 +75,23 @@ export class HDBanController {
       const hdbanId = Number(id);
       const { chi_tiet } = req.body;
 
-      if (isNaN(hdbanId)) {
-        res.status(400).json({ message: "ID không hợp lệ." });
-        return;
-      }
+      const chiTietHoanChinh = chi_tiet.map((item: any) => {
+        const soLuong = parseFloat(item.so_luong);
+        const donGia = parseFloat(item.don_gia);
 
-      await this.hdbanModal.updateHDBan(hdbanId, chi_tiet);
+        if (isNaN(soLuong) || isNaN(donGia) || soLuong <= 0) {
+          throw new Error("Số lượng hoặc đơn giá của sản phẩm không hợp lệ.");
+        }
+        const thanhTien = soLuong * donGia;
+        return {
+          ...item,
+          so_luong: soLuong,
+          don_gia: donGia,
+          thanh_tien: thanhTien,
+        };
+      });
+
+      await this.hdbanModal.updateHDBan(hdbanId, chiTietHoanChinh);
 
       res.status(200).json({
         success: true,
@@ -108,7 +119,7 @@ export class HDBanController {
     }
   }
 
-    async searchByKeyword(req: Request, res: Response): Promise<void> {
+  async searchByKeyword(req: Request, res: Response): Promise<void> {
     try {
       const { keyword } = req.query;
       if (!keyword) {

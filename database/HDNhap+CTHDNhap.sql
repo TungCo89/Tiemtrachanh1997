@@ -44,7 +44,45 @@ END$$
 DELIMITER ;
 
 -- PUT /api/hoadon-nhap/update/:id: Cập nhật hóa đơn nhập. (Lưu ý: Thường không cho phép update hóa đơn nhập đã hoàn thành).
+DELIMITER $$
 
+CREATE PROCEDURE UpdateHoaDonNhap(
+    IN p_id_hoa_don_nhap INT,
+    IN p_id_ncc INT,          
+    IN p_ghi_chu TEXT,        
+    IN p_chi_tiet_json TEXT   
+)
+BEGIN
+    -- 1. Xóa toàn bộ chi tiết cũ của hóa đơn nhập
+    DELETE FROM chi_tiet_hoa_don_nhap WHERE id_hoa_don_nhap = p_id_hoa_don_nhap;
+
+    -- 2. Chèn lại toàn bộ chi tiết mới từ JSON
+    INSERT INTO chi_tiet_hoa_don_nhap (id_hoa_don_nhap, id_nguyen_lieu, so_luong, don_gia, thanh_tien)
+    SELECT
+        p_id_hoa_don_nhap,
+        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_nguyen_lieu'))),
+        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].so_luong'))),
+        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].don_gia'))),
+        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')))
+    -- Giả định tối đa 4 chi tiết như trong Create procedure
+    FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
+    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_nguyen_lieu')) IS NOT NULL;
+    
+    -- 3. Cập nhật lại thông tin chung (NCC, Ghi chú) và Tổng tiền của hóa đơn nhập
+    UPDATE hoa_don_nhap
+    SET 
+        id_ncc = p_id_ncc,
+        ghi_chu = p_ghi_chu,
+        tong_tien = (
+            SELECT SUM(thanh_tien) 
+            FROM chi_tiet_hoa_don_nhap 
+            WHERE id_hoa_don_nhap = p_id_hoa_don_nhap
+        )
+    WHERE id = p_id_hoa_don_nhap;
+
+END$$
+
+DELIMITER ;
 -- DELETE /api/hoadon-nhap/delete/:id: Xóa hóa đơn nhập (cần xóa chi tiết trước).
 
 DELIMITER $$

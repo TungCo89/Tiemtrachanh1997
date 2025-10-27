@@ -47,7 +47,8 @@ export class UserRepository {
 
   async signup(user: any): Promise<any> {
     try {
-      const sql = "CALL CreateUser(?,?,?,?,?,?)";
+      console.log("du lieu user.res", user);
+      const sql = "CALL CreateUser(?,?,?,?,?,?)"; //
       const [rows] = await this.db.query(sql, [
         user.ten_dang_nhap,
         user.mat_khau,
@@ -63,11 +64,13 @@ export class UserRepository {
   }
   async update(user: any): Promise<any> {
     try {
-      const sql = "CALL UpdateUser(?,?,?,?,?,?,?)";
+      const matKhauToSend = user.mat_khau || null;
+      console.log("du lieu update user.res : mk ",matKhauToSend, user);
+      const sql = "CALL UpdateUser(?,?,?,?,?,?,?)"; //
       const [rows] = await this.db.query(sql, [
         user.id,
         user.ten_dang_nhap,
-        user.mat_khau,
+        matKhauToSend,
         user.ho_ten,
         user.email,
         user.so_dien_thoai,
@@ -80,7 +83,8 @@ export class UserRepository {
   }
   async delete(id: number): Promise<any> {
     try {
-      const sql = "CALL deleteNguoiDung(?)";
+      console.log("id",id);
+      const sql = "CALL DeleteUser(?)"; //
       const [rows] = await this.db.query(sql, [id]);
       return rows;
     } catch (error: any) {

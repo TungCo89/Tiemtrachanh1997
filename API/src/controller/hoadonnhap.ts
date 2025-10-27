@@ -69,10 +69,10 @@ export class HDNhapController {
 
   async updateHDNhap(req: Request, res: Response): Promise<void> {
     try {
-      const { id} = req.body;
+      const { id} = req.query;
       const hdnhapId = Number(id);
       const { id_ncc, ghi_chu, chi_tiet } = req.body;
-      const chiTiet = chi_tiet.map((item: any) => {
+      const chiTietHoanChinh = chi_tiet.map((item: any) => {
             const soLuong = parseFloat(item.so_luong);
             const donGia = parseFloat(item.don_gia);
             if (isNaN(soLuong) || isNaN(donGia) || soLuong <= 0 || donGia <= 0) {
@@ -92,7 +92,7 @@ export class HDNhapController {
         res.status(400).json({ message: "ID không hợp lệ." });
         return;
       }
-      await this.hdnhapModal.updateHDNhap(id_ncc, ghi_chu, chiTiet);
+      await this.hdnhapModal.updateHDNhap(hdnhapId,id_ncc, ghi_chu, chiTietHoanChinh);
 
       res.status(200).json({
         success: true,

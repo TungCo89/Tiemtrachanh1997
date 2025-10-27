@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Card, Space, message, Spin, Select, DatePicker, InputNumber } from 'antd';
+import { Button, Form, Card, Space, message, Spin, Select, DatePicker, InputNumber } from 'antd';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -95,7 +95,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
     if (loading || !initialData) {
         return (
             <div style={{ padding: 20, textAlign: 'center' }}>
-                <Spin tip="Đang tải dữ liệu hóa đơn bán..." />
+                <Spin />
             </div>
         );
     }
@@ -103,7 +103,6 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
     return (
         <Card
             title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Hóa đơn BÁN ID: {id}</h2>}
-            bordered={false}
         >
             <Spin spinning={loading} tip="Đang tải dữ liệu...">
                 <Form
@@ -150,8 +149,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                                         {/* Cột 1: Sản phẩm */}
                                         <Form.Item
                                             {...restField}
-                                            // 👈 Sửa tên trường: idSanPham
-                                            name={[name, 'id_san_pham,']}
+                                            name={[name, 'id_san_pham']}
                                             fieldKey={[fieldKey as number, 'id_san_pham']}
                                             rules={[{ required: true, message: 'Chọn SP' }]}
                                             style={{ width: 150 }}

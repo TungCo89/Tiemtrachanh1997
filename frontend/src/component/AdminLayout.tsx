@@ -1,6 +1,7 @@
 // src/components/AdminLayout.tsx
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
+import '@ant-design/v5-patch-for-react-19';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
     MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, ShoppingOutlined, UserOutlined, TableOutlined, PlusOutlined, SettingOutlined, BarChartOutlined, LineChartOutlined, DatabaseOutlined, DollarCircleOutlined
