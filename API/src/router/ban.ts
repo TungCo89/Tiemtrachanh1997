@@ -15,7 +15,8 @@ banRouter.get('/get-ban-by-IDKhuVuc', banController.getByID.bind(banController))
 banRouter.post('/create', banController.createBan.bind(banController));
 banRouter.put('/update', banController.updateBan.bind(banController));
 banRouter.delete('/delete', banController.deleteBan.bind(banController));
-// banRouter.get('/search-by-name', banController.searchBanByName.bind(banController));
+banRouter.post('/don-ban', banController.donBan.bind(banRouter));
+banRouter.post('/thanh-toan-by-IDBan', banController.thanhToan.bind(banRouter));
 
 
 export default banRouter;

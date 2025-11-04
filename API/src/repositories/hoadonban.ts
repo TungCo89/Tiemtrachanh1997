@@ -58,6 +58,14 @@ export class HDBanRepository {
     }
     return [];
   }
+  async thanhToan(id: number): Promise<void> {
+    try {
+      const sql = "CALL SearchHoaDonBan(?)";
+      await this.db.query(sql, [id]);
+    } catch (error: any) {
+      throw new Error(`Không thể thanh toán hóa đơn ${id}: ${error.message}`);
+    }
+  }
 }
 
 export default HDBanRepository;

@@ -7,6 +7,7 @@ import { HoaDonNhap } from '../../component/interface';
 import AddHoaDonNhap from './AddHoaDonNhap';
 import UpdateHoaDonNhap from './UpdateHoaDonNhap';
 import axios from 'axios';
+import dayjs from 'dayjs';
 const { Search } = Input;
 
 const DSHoaDonNhap: React.FC = () => {
@@ -139,24 +140,18 @@ const DSHoaDonNhap: React.FC = () => {
             key: 'ngay_nhap',
             render: (ngay_nhap: string) => {
                 if (!ngay_nhap) return '';
-                const date = new Date(ngay_nhap);
+                const INPUT_FORMAT = 'DD/MM/YYYY HH:mm:ss';
+                // Định dạng hiển thị mong muốn
+                const DISPLAY_FORMAT = 'YYYY-MM-DD HH:mm';
 
-                // Định dạng YYYY-MM-DD
-                const formattedDate = date.toLocaleDateString('en-CA', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).replace(/\//g, '-'); // Đảm bảo dấu gạch ngang
-
-                // Định dạng HH:MM (24h)
-                const formattedTime = date.toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
-
-                return `${formattedDate} ${formattedTime}`;
+                const date = dayjs(ngay_nhap, INPUT_FORMAT);
+                // Kiểm tra tính hợp lệ và định dạng
+                if (date.isValid()) {
+                    return date.format(DISPLAY_FORMAT);
+                }
+                return ngay_nhap;
             }
+
         },
         {
             title: 'Tổng tiền',
@@ -166,7 +161,7 @@ const DSHoaDonNhap: React.FC = () => {
                 if (!tong_tien) return '0 VNĐ';
                 const amount = parseFloat(tong_tien);
 
-                // Định dạng tiền tệ (560.000)
+                // Định dạng tiền tệ 
                 const formattedAmount = amount.toLocaleString('vi-VN', {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0

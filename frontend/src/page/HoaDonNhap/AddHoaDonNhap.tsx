@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Form, Input, Card, Space, message, DatePicker, Select, InputNumber } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'; // Cần MinusCircleOutlined cho danh sách
-import { HoaDonNhap } from '../../component/interface';
+import { HoaDonNhap, NhaCungCap, NguyenLieu } from '../../component/interface';
+import dayjs from 'dayjs';
 import axios from 'axios';
 const { Option } = Select;
 const { List } = Form;
@@ -10,11 +11,68 @@ interface AddHoaDonNhapProps {
     onClose: () => void;
     onSuccess: () => void;
 }
-const API_BASE_URL = 'http://localhost:7000/api/hoadonnhap';
+const API_BASE_URL = 'http://localhost:7000/api';
 
 const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [nhaCungCaps, setNhaCungCaps] = useState<NhaCungCap[]>([]);
+    const [isLoadingNCC, setIsLoadingNCC] = useState(false);
+    const [nguyenLieus, setNguyenLieus] = useState<NguyenLieu[]>([]);
+    const [isLoadingNguyenLieu, setIsLoadingNguyenLieu] = useState(false);
+    const fetchNhaCungCaps = useCallback(async () => {
+        setIsLoadingNCC(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/nhacungcap/get-all`);
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: NhaCungCap[] = [];
+
+                // Xử lý API trả về mảng lồng nhau (SQL rows)
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setNhaCungCaps(resultData.filter(item => item && item.id && item.ten_ncc));
+            } else {
+                message.error('Lỗi khi tải danh sách Loại Sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Loại Sản phẩm:', error);
+            message.error('Không thể kết nối để tải Loại Sản phẩm.');
+        } finally {
+            setIsLoadingNCC(false);
+        }
+    }, []);
+    const fetchNguyenLieus = useCallback(async () => {
+        setIsLoadingNguyenLieu(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/nguyenlieu/get-all`);
+
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: NguyenLieu[] = [];
+
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setNguyenLieus(resultData.filter(item => item && item.id && item.ten_nguyen_lieu));
+            }
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách Nguyên liệu.');
+        } finally {
+            setIsLoadingNguyenLieu(false);
+        }
+    }, []);
+    useEffect(() => {
+        fetchNhaCungCaps();
+        fetchNguyenLieus();
+    }, [fetchNhaCungCaps, fetchNguyenLieus]);
     const onFinish = async (values: HoaDonNhap) => {
         setLoading(true);
         try {
@@ -23,7 +81,7 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
             };
 
             // GỌI API create: POST http://localhost:7000/api/hoadonnhap/create
-            const response = await axios.post(`${API_BASE_URL}/create`, payload);
+            const response = await axios.post(`${API_BASE_URL}/hoadonnhap/create`, payload);
 
             if (response.data.success) {
                 message.success(`Đã thêm hóa đơn nhập thành công.`);
@@ -50,6 +108,10 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
                 layout="vertical"
                 onFinish={onFinish as (values: any) => void}
                 autoComplete="off"
+                initialValues={{
+                    ngay_nhap: dayjs(),
+                    chi_tiet: [{}],
+                }}
             >
 
                 <Form.Item
@@ -57,10 +119,15 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
                     name="id_ncc"
                     rules={[{ required: true, message: 'Vui lòng chọn Nhà cung cấp!' }]}
                 >
-                    <Select placeholder="Chọn Nhà cung cấp">
-                        <Option value={1}>Công ty Trà Xanh (ID: 1)</Option>
-                        <Option value={2}>Kho Nguyên Liệu Tổng Hợp (ID: 2)</Option>
-                        <Option value={3}>Bách hóa Xanh (ID: 3)</Option>
+                    <Select placeholder="Chọn Nhà cung cấp"
+                        loading={isLoadingNCC}
+                        disabled={isLoadingNCC || nhaCungCaps.length === 0}
+                    >
+                        {nhaCungCaps.map(ncc => (
+                            <Option key={ncc.id} value={ncc.id}>
+                                {ncc.ten_ncc}
+                            </Option>
+                        ))}
                     </Select>
                 </Form.Item>
 
@@ -96,11 +163,16 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
                                         fieldKey={[fieldKey as number, 'id_nguyen_lieu']} rules={[{ required: true, message: 'Chọn NL' }]}
                                         style={{ width: 150 }}
                                     >
-                                        <Select placeholder="Nguyên liệu">
-                                            <Option value={1}>Trà đen</Option>
-                                            <Option value={2}>Chanh</Option>
-                                            <Option value={3}>Đường</Option>
-                                            <Option value={4}>Đào</Option>
+                                        <Select
+                                            placeholder="Nguyên liệu"
+                                            loading={isLoadingNguyenLieu}
+                                            disabled={isLoadingNguyenLieu || nguyenLieus.length === 0}
+                                        >
+                                            {nguyenLieus.map(nl => (
+                                                <Option key={nl.id} value={nl.id}>
+                                                    {nl.ten_nguyen_lieu}
+                                                </Option>
+                                            ))}
                                         </Select>
                                     </Form.Item>
 
@@ -122,8 +194,8 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
                                         style={{ width: 120 }}
                                     >
                                         <InputNumber
-                                            min={100}
-                                            step={1}
+                                            min={1000}
+                                            step={500}
                                             parser={value => Number(value!.replace(/\$\s?|(,*)/g, ''))}
                                             placeholder="Đơn giá"
                                         />

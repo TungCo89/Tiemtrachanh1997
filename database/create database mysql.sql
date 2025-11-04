@@ -75,7 +75,7 @@ CREATE TABLE chi_tiet_hoa_don_nhap (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_hoa_don_nhap INT,
     id_nguyen_lieu INT,
-    so_luong DECIMAL(10,2),
+    so_luong INT,
     don_gia DECIMAL(15,2),
     thanh_tien DECIMAL(15,2),
     FOREIGN KEY (id_hoa_don_nhap) REFERENCES hoa_don_nhap(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -88,9 +88,9 @@ CREATE TABLE hoa_don_ban (
     id_ban INT,
     ngay_lap DATETIME DEFAULT CURRENT_TIMESTAMP,
     tong_tien DECIMAL(15,2) DEFAULT 0,
+    trang_thai ENUM('cho_xac_nhan', 'da_thanh_toan') ,
     FOREIGN KEY (id_ban) REFERENCES ban(id) ON UPDATE CASCADE ON DELETE SET NULL -- giữ hóa đơn dù bàn bị xóa 
 );
-
 
 -- Bảng chi tiết hóa đơn bán
 CREATE TABLE chi_tiet_hoa_don_ban (

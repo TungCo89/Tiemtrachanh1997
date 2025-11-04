@@ -136,6 +136,30 @@ export class HDBanController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+  async thanhToan(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.body;
+      if (!id || isNaN(Number(id))) {
+        res.status(400).json({
+          success: false,
+          message: "ID hóa đơn không hợp lệ",
+        });
+        return;
+      }
+      await this.hdbanModal.thanhToan(Number(id));
+      res.status(200).json({
+        success: true,
+        message: "Thanh toán thành công",
+      });
+    } catch (error: any) {
+      console.error("Lỗi khi thanh toán:", error);
+      res.status(500).json({
+        success: false,
+        message: "Lỗi máy chủ",
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default HDBanController;

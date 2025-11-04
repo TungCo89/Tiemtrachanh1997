@@ -136,6 +136,7 @@ BEGIN
         nd.ho_ten, 
         nd.email, 
         nd.so_dien_thoai,
+        vt.id as id_vai_tro,
         vt.ten_vai_tro
     FROM nguoi_dung AS nd
     JOIN vai_tro AS vt ON nd.id_vai_tro = vt.id

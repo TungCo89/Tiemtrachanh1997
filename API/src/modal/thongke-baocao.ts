@@ -1,4 +1,42 @@
 import ThongKeRepository from "../repositories/thongke-baocao";
+import dayjs from "dayjs";
+
+const DATE_FORMAT = "YYYY-MM-DD";
+
+interface RawDoanhThuData {
+  ngay: string;
+  tong_doanh_thu: string;
+}
+
+interface RawLoiNhuanData extends RawDoanhThuData {
+  tong_chi_phi_nguyen_lieu: string;
+  loi_nhuan_so_bo: string;
+}
+
+interface RawHieuSuatSanPhamData {
+  ten_san_pham: string;
+  ten_loai: string;
+  tong_so_luong_ban: string;
+  tong_doanh_thu_san_pham: string;
+}
+
+export interface FormattedDoanhThuData {
+  ngay: string;
+  tong_doanh_thu: number;
+}
+
+export interface FormattedLoiNhuanData extends FormattedDoanhThuData {
+  tong_chi_phi_nguyen_lieu: number;
+  loi_nhuan_so_bo: number;
+}
+
+export interface FormattedHieuSuatSanPhamData {
+  ten_san_pham: string;
+  ten_loai: string;
+  tong_so_luong_ban: number;
+  tong_doanh_thu_san_pham: number;
+}
+
 export class ThongKeModal {
   private thongkeRepository: ThongKeRepository;
 
@@ -15,33 +53,97 @@ export class ThongKeModal {
     }
   }
 
-  async getDoanhThu(startDate: string, endDate: string): Promise<any> {
-    this.validateDates(startDate, endDate);
-    return await this.thongkeRepository.getDoanhThuByDateRange(
-      startDate,
-      endDate
-    );
+  private generateDateRange(startDate: string, endDate: string): string[] {
+    const dates: string[] = [];
+    let currentDate = dayjs(startDate);
+    const lastDate = dayjs(endDate);
+
+    while (currentDate.isBefore(lastDate) || currentDate.isSame(lastDate)) {
+      dates.push(currentDate.format("YYYY-MM-DD"));
+      currentDate = currentDate.add(1, "day");
+    }
+    return dates;
   }
 
-  async getLoiNhuanSoBo(startDate: string, endDate: string): Promise<any> {
+  async getDoanhThu(
+    startDate: string,
+    endDate: string
+  ): Promise<FormattedDoanhThuData[]> {
     this.validateDates(startDate, endDate);
-    return await this.thongkeRepository.getLoiNhuanSoBo(startDate, endDate);
+
+    const rawData: RawDoanhThuData[] =
+      await this.thongkeRepository.getDoanhThuByDateRange(startDate, endDate);
+
+    return rawData.map((item) => ({
+      ngay: dayjs(item.ngay).format(DATE_FORMAT),
+      tong_doanh_thu: parseFloat(item.tong_doanh_thu),
+    }));
   }
 
-  async getHieuSuatThongKe(
+  async getLoiNhuanSoBo(
+    startDate: string,
+    endDate: string
+  ): Promise<FormattedLoiNhuanData[]> {
+    this.validateDates(startDate, endDate);
+
+    // 1. Lấy dữ liệu thô và chuẩn hóa 
+    const rawData: RawLoiNhuanData[] =
+      await this.thongkeRepository.getLoiNhuanSoBo(startDate, endDate);
+    const formattedData: FormattedLoiNhuanData[] = rawData.map((item) => ({
+      ngay: dayjs(item.ngay).format(DATE_FORMAT), 
+      tong_doanh_thu: parseFloat(item.tong_doanh_thu),
+      tong_chi_phi_nguyen_lieu: parseFloat(item.tong_chi_phi_nguyen_lieu),
+      loi_nhuan_so_bo: parseFloat(item.loi_nhuan_so_bo),
+    }));
+
+    // 2. Chuyển mảng thành Map để tra cứu nhanh theo ngày
+    const dataMap = new Map<string, FormattedLoiNhuanData>();
+    formattedData.forEach((item) => {
+      dataMap.set(item.ngay, item);
+    });
+
+    // 3. Tạo chuỗi ngày đầy đủ
+    const fullDateRange = this.generateDateRange(startDate, endDate);
+
+    // 4. Điền dữ liệu
+    const finalData: FormattedLoiNhuanData[] = fullDateRange.map((date) => {
+      if (dataMap.has(date)) {
+        // Ngày có hóa đơn
+        return dataMap.get(date)!;
+      } else {
+        // Ngày không bán hàng -> điền 0
+        return {
+          ngay: date,
+          tong_doanh_thu: 0,
+          tong_chi_phi_nguyen_lieu: 0,
+          loi_nhuan_so_bo: 0,
+        };
+      }
+    });
+
+    return finalData;
+  }
+
+  async getHieuSuatSanPham(
     startDate: string,
     endDate: string,
     topN: number = 10
-  ): Promise<any> {
+  ): Promise<FormattedHieuSuatSanPhamData[]> {
     this.validateDates(startDate, endDate);
+
     if (topN < 1) {
       topN = 10;
     }
-    return await this.thongkeRepository.getHieuSuatThongKe(
-      startDate,
-      endDate,
-      topN
-    );
+
+    const rawData: RawHieuSuatSanPhamData[] =
+      await this.thongkeRepository.getHieuSuatSanPham(startDate, endDate, topN);
+
+    return rawData.map((item) => ({
+      ten_san_pham: item.ten_san_pham,
+      ten_loai: item.ten_loai,
+      tong_so_luong_ban: parseInt(item.tong_so_luong_ban),
+      tong_doanh_thu_san_pham: parseFloat(item.tong_doanh_thu_san_pham),
+    }));
   }
 }
 

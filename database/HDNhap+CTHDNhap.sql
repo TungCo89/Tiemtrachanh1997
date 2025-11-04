@@ -172,7 +172,7 @@ END$$
 DELIMITER ;
 
 -- GET /api/hoadonnhap/search: Tìm kiếm hóa đơn nhập.
-
+call SearchHoaDonNhap('a');
 DELIMITER $$
 
 CREATE PROCEDURE SearchHoaDonNhap(

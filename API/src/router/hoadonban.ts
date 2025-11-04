@@ -16,6 +16,7 @@ hdbanRouter.post('/create', hdbanController.createHDBan.bind(hdbanController));
 hdbanRouter.put('/update', hdbanController.updateHDBan.bind(hdbanController));
 hdbanRouter.delete('/delete', hdbanController.deleteHDBan.bind(hdbanController));
 hdbanRouter.get('/search-by-keyword', hdbanController.searchByKeyword.bind(hdbanController));
+hdbanRouter.post('/thanh-toan', hdbanController.thanhToan.bind(hdbanController));
 
 
 export default hdbanRouter;

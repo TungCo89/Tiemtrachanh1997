@@ -20,6 +20,7 @@ BEGIN
         hoa_don_ban
     WHERE 
         ngay_lap BETWEEN p_start_date AND DATE_ADD(p_end_date, INTERVAL 1 DAY) -- Đảm bảo bao gồm cả ngày kết thúc
+        AND hdb.trang_thai = 'da_thanh_toan'
     GROUP BY 
         DATE(ngay_lap)
     ORDER BY 
@@ -57,6 +58,7 @@ BEGIN
              JOIN hoa_don_nhap hdn ON cthdn.id_hoa_don_nhap = hdn.id) AS cthdn ON ct.id_nguyen_lieu = cthdn.id_nguyen_lieu AND cthdn.rn = 1
         WHERE
             hdb.ngay_lap BETWEEN p_start_date AND DATE_ADD(p_end_date, INTERVAL 1 DAY)
+            AND hdb.trang_thai = 'da_thanh_toan'
         GROUP BY
             DATE(hdb.ngay_lap)
     ),
@@ -116,6 +118,7 @@ BEGIN
         loai_san_pham AS lsp ON sp.id_loai = lsp.id
     WHERE
         hdb.ngay_lap BETWEEN p_start_date AND DATE_ADD(p_end_date, INTERVAL 1 DAY)
+        AND hdb.trang_thai = 'da_thanh_toan'
     GROUP BY
         sp.id, sp.ten_san_pham, lsp.ten_loai
     ORDER BY

@@ -18,7 +18,7 @@ export class SanPhamModal {
         sanphamMap.set(sanphamId, {
           id: row.id,
           ten_san_pham: row.ten_san_pham,
-          gia_ban: row.gia_ban,
+          gia_ban: parseFloat(row.gia_ban),
           mo_ta: row.mo_ta,
           id_loai: row.id_loai,
           ten_loai: row.ten_loai,

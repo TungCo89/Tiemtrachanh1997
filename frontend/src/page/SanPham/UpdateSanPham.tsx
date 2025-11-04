@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button, Form, Input, Space, message, Select, InputNumber, Spin } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, SaveOutlined } from '@ant-design/icons';
-import { SanPham } from '../../component/interface';
+import { SanPham, LoaiSanPham, NguyenLieu } from '../../component/interface';
 import axios from 'axios';
 
 const { Option } = Select;
@@ -14,7 +14,7 @@ interface SanPhamUpdateValues {
     mo_ta: string;
     id_loai: number;
     cong_thuc: {
-        idNguyenLieu: number;
+        id_nguyen_lieu: number;
         ten_nguyen_lieu: string;
         don_vi: string;
         so_luong: number;
@@ -28,29 +28,78 @@ interface UpdateSanPhamProps {
     onSuccess: () => void;
 }
 
-const API_BASE_URL = 'http://localhost:7000/api/sanpham';
+const API_BASE_URL = 'http://localhost:7000/api';
 
-const mockLoaiSanPham = [
-    { id: 1, ten_loai: 'Trà Sữa' },
-    { id: 2, ten_loai: 'Coffee' },
-    { id: 3, ten_loai: 'Đồ Ăn Vặt' },
-];
 
 const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [loaiSanPhams, setLoaiSanPhams] = useState<LoaiSanPham[]>([]);
+    const [isLoadingLoaiSP, setIsLoadingLoaiSP] = useState(false);
+    const [nguyenLieus, setNguyenLieus] = useState<NguyenLieu[]>([]);
+    const [isLoadingNguyenLieu, setIsLoadingNguyenLieu] = useState(false);
+    const fetchLoaiSanPhams = useCallback(async () => {
+        setIsLoadingLoaiSP(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/loaisanpham/get-all`);
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: LoaiSanPham[] = [];
 
+                // Xử lý API trả về mảng lồng nhau (SQL rows)
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setLoaiSanPhams(resultData.filter(item => item && item.id && item.ten_loai));
+            } else {
+                message.error('Lỗi khi tải danh sách Loại Sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Loại Sản phẩm:', error);
+            message.error('Không thể kết nối để tải Loại Sản phẩm.');
+        } finally {
+            setIsLoadingLoaiSP(false);
+        }
+    }, []);
+    const fetchNguyenLieus = useCallback(async () => {
+        setIsLoadingNguyenLieu(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/nguyenlieu/get-all`);
+
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: NguyenLieu[] = [];
+
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setNguyenLieus(resultData.filter(item => item && item.id && item.ten_nguyen_lieu));
+            }
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách Nguyên liệu.');
+        } finally {
+            setIsLoadingNguyenLieu(false);
+        }
+    }, []);
     useEffect(() => {
+        fetchLoaiSanPhams();
+        fetchNguyenLieus();
         if (initialData) {
             console.log(initialData);
             form.setFieldsValue({
                 id_loai: initialData.id_loai,
                 ten_san_pham: initialData.ten_san_pham,
-                gia_ban: parseFloat(initialData.gia_ban),
+                gia_ban: initialData.gia_ban,
                 mo_ta: initialData.mo_ta,
                 cong_thuc: initialData.cong_thuc.map(ct => ({
-                    ten_nguyen_lieu: ct.ten_nguyen_lieu,
-                    so_luong: parseFloat(ct.so_luong),
+                    id_nguyen_lieu: ct.id_nguyen_lieu,
+                    so_luong: ct.so_luong,
                     don_vi: ct.don_vi,
                 }))
 
@@ -59,20 +108,20 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
         } else {
             setLoading(true);
         }
-    }, [form, initialData]);
+    }, [form, initialData, fetchLoaiSanPhams,fetchNguyenLieus]);
 
     const onFinish = async (values: SanPhamUpdateValues) => {
         setLoading(true);
         try {
             const payload = {
                 ...values,
-                cong_thuc: initialData?.cong_thuc.map(ct => ({
+                cong_thuc: values?.cong_thuc.map(ct => ({
                     id_nguyen_lieu: ct.id_nguyen_lieu,
-                    so_luong: parseFloat(ct.so_luong),
+                    so_luong: parseFloat(String(ct.so_luong)),
                 })) || []
             };
 
-            const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
+            const response = await axios.put(`${API_BASE_URL}/sanpham/update?id=${id}`, payload);
 
             if (response.data.success) {
                 message.success(`Đã cập nhật sản phẩm ID ${id} thành công.`);
@@ -117,11 +166,15 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                     name="id_loai"
                     rules={[{ required: true, message: 'Vui lòng chọn loại sản phẩm!' }]}
                 >
-                    <Select placeholder="Chọn loại sản phẩm">
-                        {mockLoaiSanPham.map(loai => (
-                            <Select.Option key={loai.id} value={loai.id}>
+                    <Select
+                        placeholder="Chọn loại sản phẩm"
+                        loading={isLoadingLoaiSP}
+                        disabled={isLoadingLoaiSP || loaiSanPhams.length === 0}
+                    >
+                        {loaiSanPhams.map(loai => (
+                            <Option key={loai.id} value={loai.id}>
                                 {loai.ten_loai}
-                            </Select.Option>
+                            </Option>
                         ))}
                     </Select>
                 </Form.Item>
@@ -160,15 +213,20 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                                 <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                                     <Form.Item
                                         {...restField}
-                                        name={[name, 'ten_nguyen_lieu']}
-                                        fieldKey={[fieldKey as number, 'ten_nguyen_lieu']} rules={[{ required: true, message: 'Chọn Nguyên Liệu' }]}
+                                        name={[name, 'id_nguyen_lieu']}
+                                        fieldKey={[fieldKey as number, 'id_nguyen_lieu']} rules={[{ required: true, message: 'Chọn Nguyên Liệu' }]}
                                         style={{ width: 150 }}
                                     >
-                                        <Select placeholder="Nguyên liệu">
-                                            <Option value={1}>Trà đen</Option>
-                                            <Option value={2}>Chanh</Option>
-                                            <Option value={3}>Đường</Option>
-                                            <Option value={4}>Đào</Option>
+                                        <Select
+                                            placeholder="Nguyên liệu"
+                                            loading={isLoadingNguyenLieu}
+                                            disabled={isLoadingNguyenLieu || nguyenLieus.length === 0}
+                                        >
+                                            {nguyenLieus.map(nl => (
+                                                <Option key={nl.id} value={nl.id}>
+                                                    {nl.ten_nguyen_lieu}
+                                                </Option>
+                                            ))}
                                         </Select>
                                     </Form.Item>
 
@@ -184,7 +242,7 @@ const UpdateSanPham: React.FC<UpdateSanPhamProps> = ({ id, initialData, onClose,
                                         {...restField}
                                         name={[name, 'don_vi']}
                                         fieldKey={[fieldKey as number, 'don_vi']}
-                                        style={{ width: 50}}
+                                        style={{ width: 50 }}
                                     >
                                         <Input placeholder="Đơn vị" readOnly />
                                     </Form.Item>

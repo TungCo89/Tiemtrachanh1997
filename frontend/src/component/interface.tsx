@@ -2,14 +2,14 @@ export interface CongThucChiTiet {
     id_nguyen_lieu: number;
     ten_nguyen_lieu: string;
     don_vi: string;
-    so_luong: string;
+    so_luong: number;
 }
 
 export interface SanPham {
     id: number;
     ten_loai: string;
     ten_san_pham: string;
-    gia_ban: string;
+    gia_ban: number;
     mo_ta: string;
     cong_thuc: CongThucChiTiet[];
     id_loai: number;
@@ -33,6 +33,13 @@ interface SanPhamUpdateValues {
     gia_ban: number;
     mo_ta?: string;
     cong_thuc: CongThucPayload[];
+}
+export interface Ban {
+    id: number;
+    ten_ban: string;
+    trang_thai: string;
+    id_khu_vuc: number;
+    ten_khu_vuc: string;
 }
 
 export interface User {
@@ -107,6 +114,7 @@ export interface HoaDonBan {
     ten_ban: string;
     ngay_lap: string;
     tong_tien: number;
+    trang_thai: string;
     ghi_chu: string;
     chi_tiet: ChiTietBan[];
 }

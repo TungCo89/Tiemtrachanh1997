@@ -1,35 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Button, Input, Space, Card, Modal, Tag, Popconfirm, message } from 'antd'; // Thêm Popconfirm cho xóa
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import AddBan from './AddBan';
 import UpdateBan from './UpdateBan';
-
-const { Search } = Input;
-
-interface Ban {
-    id: number;
-    tenBan: string;
-    trangThai: 'Trong' | 'Đang hoạt động';
-    idKhuVuc: number;
-    tenKhuVuc: string;
-}
+import axios from 'axios';
+import { Ban } from '../../component/interface';
 interface BanProps {
-    trangThai: Ban['trangThai'];
+    trang_thai: Ban['trang_thai'];
 }
-const rawDataSource: Ban[] = [
-    { id: 1, tenBan: 'Bàn 1', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
-    { id: 2, tenBan: 'Bàn 2', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
-    { id: 3, tenBan: 'Bàn 3', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
-    { id: 4, tenBan: 'Bàn 4', trangThai: 'Trong', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
-    { id: 5, tenBan: 'Bàn 5', trangThai: 'Đang hoạt động', idKhuVuc: 1, tenKhuVuc: 'Khu A' },
-    { id: 6, tenBan: 'Bàn 9', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
-    { id: 7, tenBan: 'Bàn 10', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
-    { id: 8, tenBan: 'Bàn 11', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
-    { id: 9, tenBan: 'Bàn 12', trangThai: 'Trong', idKhuVuc: 2, tenKhuVuc: 'Khu B' },
-];
 
 const KhuVucContainer = styled.div`
     display: flex;
@@ -57,8 +38,8 @@ const BanGrid = styled.div`
     gap: 15px;
     padding: 10px;
 `;
-const getBanColor = (trangThai: Ban['trangThai']) => {
-    switch (trangThai) {
+const getBanColor = (trang_thai: Ban['trang_thai']) => {
+    switch (trang_thai) {
         case 'Đang hoạt động':
             return '#ff4d4f';
         case 'Trong':
@@ -81,8 +62,8 @@ const BanItem = styled.div<BanProps>`
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
-    border: 2px solid ${props => getBanColor(props.trangThai)}; 
-    color: ${props => getBanColor(props.trangThai)}; 
+    border: 2px solid ${props => getBanColor(props.trang_thai)}; 
+    color: ${props => getBanColor(props.trang_thai)}; 
 
     &:hover {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -91,24 +72,59 @@ const BanItem = styled.div<BanProps>`
 // --- END STYLED COMPONENTS ---
 
 const DSBan: React.FC = () => {
-
-    const [dataSource, setDataSource] = useState<Ban[]>(rawDataSource);
+    const [danhSachBan, setDanhSachBan] = useState<Ban[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingItemId, setEditingItemId] = useState<number | null>(null);
     const [searchText, setSearchText] = useState('');
+    const [loading, setLoading] = useState(true);
 
     // --- LOGIC XỬ LÝ STATE VÀ HANDLERS ---
+    // Hàm gọi API
+    const fetchBanData = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:7000/api/ban/get-all');
+            const result = response.data;
+            console.log(result);
 
+            if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                const banList: Ban[] = result.data[0].map((item: any) => ({
+                    id: item.id,
+                    ten_ban: item.ten_ban,
+                    trang_thai: item.trang_thai,
+                    id_khu_vuc: item.id_khu_vuc,
+                    ten_khu_vuc: item.ten_khu_vuc,
+                }));
+                setDanhSachBan(banList);
+
+            } else {
+                setDanhSachBan([]);
+                message.warning('Không có dữ liệu bàn');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách bàn:', error);
+            message.error('Không thể tải danh sách bàn');
+            setDanhSachBan([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Gọi API khi component mount
+    useEffect(() => {
+
+        fetchBanData();
+    }, []);
     // Nhóm dữ liệu theo Khu vực
     const banGroupedByKhuVuc = useMemo(() => {
-        return dataSource.reduce((acc, ban) => {
-            if (!acc[ban.tenKhuVuc]) {
-                acc[ban.tenKhuVuc] = { tenKhuVuc: ban.tenKhuVuc, idKhuVuc: ban.idKhuVuc, bans: [] };
+        return danhSachBan.reduce((acc, ban) => {
+            if (!acc[ban.ten_khu_vuc]) {
+                acc[ban.ten_khu_vuc] = { ten_khu_vuc: ban.ten_khu_vuc, id_khu_vuc: ban.id_khu_vuc, bans: [] };
             }
-            acc[ban.tenKhuVuc].bans.push(ban);
+            acc[ban.ten_khu_vuc].bans.push(ban);
             return acc;
-        }, {} as Record<string, { tenKhuVuc: string, idKhuVuc: number, bans: Ban[] }>);
-    }, [dataSource]);
+        }, {} as Record<string, { ten_khu_vuc: string, id_khu_vuc: number, bans: Ban[] }>);
+    }, [danhSachBan]);
 
     const handleAdd = () => setIsAddModalOpen(true);
     const handleEdit = (id: number) => setEditingItemId(id);
@@ -118,31 +134,30 @@ const DSBan: React.FC = () => {
     };
 
     const filteredBanData = useMemo(() => {
-        if (!searchText) return dataSource;
-        return dataSource.filter(ban =>
-            ban.tenBan.toLowerCase().includes(searchText.toLowerCase())
+        if (!searchText) return danhSachBan;
+        return danhSachBan.filter(ban =>
+            ban.ten_ban.toLowerCase().includes(searchText.toLowerCase())
         );
-    }, [dataSource, searchText]);
+    }, [danhSachBan, searchText]);
 
     const handleOrder = (id: number) => {
         // API call
-        setDataSource(prev => prev.filter(b => b.id !== id));
+        // setDanhSachBan(prev => prev.filter(b => b.id !== id));
         message.success(`Đã thêm order Bàn ID: ${id}`);
     };
 
     const handleDelete = (id: number) => {
         // API call
-        setDataSource(prev => prev.filter(b => b.id !== id));
+        setDanhSachBan(prev => prev.filter(b => b.id !== id));
         message.success(`Đã xóa Bàn ID: ${id}`);
     };
 
-
-
     // --- RENDER COMPONENT BÀN ---
     const RenderBanItem: React.FC<{ ban: Ban }> = ({ ban }) => {
+        const hienThiTrangThai = ban.trang_thai === 'Trong' ? 'Trống' : 'Đang dùng';
         return (
             <Popconfirm
-                title={`Thao tác với ${ban.tenBan}`}
+                title={`Thao tác với ${ban.ten_ban}`}
                 description={
                     <Space direction="vertical" style={{ width: '100%' }}>
                         <Button
@@ -154,7 +169,7 @@ const DSBan: React.FC = () => {
                             Sửa
                         </Button>
                         <Popconfirm
-                            title={`Order với ${ban.tenBan}?`}
+                            title={`Order với ${ban.ten_ban}?`}
                             onConfirm={() => handleOrder(ban.id)}
                             okText="order"
                             cancelText="Hủy"
@@ -170,7 +185,7 @@ const DSBan: React.FC = () => {
                         </Popconfirm>
 
                         <Popconfirm
-                            title={`Xác nhận xóa ${ban.tenBan}?`}
+                            title={`Xác nhận xóa ${ban.ten_ban}?`}
                             onConfirm={() => handleDelete(ban.id)}
                             okText="Xóa"
                             cancelText="Hủy"
@@ -192,10 +207,22 @@ const DSBan: React.FC = () => {
                 icon={null}
                 placement="rightTop"
             >
-                <BanItem trangThai={ban.trangThai}>
-                    {ban.tenBan.split(' ').pop()}
-                    <div style={{ fontSize: 10, fontWeight: 'normal', color: 'gray', marginTop: 2 }}>
-                        {ban.trangThai}
+                <BanItem trang_thai={ban.trang_thai}>
+                    <div>{ban.ten_ban}</div>
+
+                    <div
+                        style={{
+                            fontSize: '12px',
+                            fontWeight: 'normal',
+                            marginTop: '4px',
+                            color: ban.trang_thai === 'Trong' ? '#52c41a' : '#ff4d4f',
+                        }}
+                    >
+                        {(() => {
+                            console.log('trang_thai:', ban.trang_thai);
+                            return null; // ← phải trả về ReactNode hợp lệ
+                        })()}
+                        {ban.trang_thai === 'Trong' ? 'Trống' : 'Đang dùng'}
                     </div>
                 </BanItem>
             </Popconfirm>
@@ -211,18 +238,18 @@ const DSBan: React.FC = () => {
             return <p>Không tìm thấy bàn nào theo từ khóa: "{searchText}"</p>
         }
 
-        // Nếu có tìm kiếm, chỉ hiển thị bàn đã lọc (bỏ qua nhóm khu vực trực quan)
-        if (searchText && filteredBanData.length > 0) {
-            return (
-                <KhuVucBox title={`Kết quả tìm kiếm cho: "${searchText}"`}>
-                    <BanGrid>
-                        {filteredBanData.map(ban => (
-                            <RenderBanItem key={ban.id} ban={ban} />
-                        ))}
-                    </BanGrid>
-                </KhuVucBox>
-            );
-        }
+        // // Nếu có tìm kiếm, chỉ hiển thị bàn đã lọc (bỏ qua nhóm khu vực trực quan)
+        // if (searchText && filteredBanData.length > 0) {
+        //     return (
+        //         <KhuVucBox title={`Kết quả tìm kiếm cho: "${searchText}"`}>
+        //             <BanGrid>
+        //                 {filteredBanData.map(ban => (
+        //                     <RenderBanItem key={ban.id} ban={ban} />
+        //                 ))}
+        //             </BanGrid>
+        //         </KhuVucBox>
+        //     );
+        // }
 
 
         return (
@@ -231,8 +258,8 @@ const DSBan: React.FC = () => {
                     const khuVuc = banGroupedByKhuVuc[key];
                     return (
                         <KhuVucBox
-                            key={khuVuc.idKhuVuc}
-                            title={khuVuc.tenKhuVuc}
+                            key={khuVuc.id_khu_vuc}
+                            title={khuVuc.ten_khu_vuc}
                         >
                             <BanGrid>
                                 {khuVuc.bans.map(ban => (
@@ -255,12 +282,19 @@ const DSBan: React.FC = () => {
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={handleAdd}
+                        disabled={loading}
                     >
                         Thêm Bàn
                     </Button>
                 </Space>
             </div>
-            {renderKhuVuc()}
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <p>Đang tải danh sách bàn...</p>
+                </div>
+            ) : (
+                renderKhuVuc()
+            )}
 
             <Modal
                 title="Thêm Bàn mới"

@@ -135,7 +135,23 @@ const DSSanPham: React.FC = () => {
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Loại', dataIndex: 'ten_loai', key: 'ten_loai' },
         { title: 'Tên sản phẩm', dataIndex: 'ten_san_pham', key: 'ten_san_pham' },
-        { title: 'Giá bán', dataIndex: 'gia_ban', key: 'gia_ban' },
+        {
+            title: 'Giá bán',
+            dataIndex: 'gia_ban',
+            key: 'gia_ban',
+            render: (gia_ban: string) => {
+                if (!gia_ban) return '0 VNĐ';
+                const amount = parseFloat(gia_ban);
+
+                // Định dạng tiền tệ 
+                const formattedAmount = amount.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+
+                return `${formattedAmount} VNĐ`;
+            }
+        },
         { title: 'Mô tả', dataIndex: 'mo_ta', key: 'mo_ta' },
         {
             title: 'Chức năng',
@@ -208,14 +224,14 @@ const DSSanPham: React.FC = () => {
                 open={isFormulaModalOpen}
                 onCancel={() => {
                     setIsFormulaModalOpen(false);
-                    setSelectedProduct(null); 
+                    setSelectedProduct(null);
                 }}
                 footer={[
                     <Button key="close" onClick={() => setIsFormulaModalOpen(false)}>
                         Đóng
                     </Button>,
                 ]}
-                width={700} 
+                width={700}
             >
                 {selectedProduct && (
                     <Table

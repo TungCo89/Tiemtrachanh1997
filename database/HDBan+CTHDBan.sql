@@ -21,8 +21,8 @@ BEGIN
                        WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')) IS NOT NULL);
 
     -- Thêm hóa đơn bán chính
-    INSERT INTO hoa_don_ban (id_ban, tong_tien)
-    VALUES (p_id_ban, v_tong_tien);
+    INSERT INTO hoa_don_ban (id_ban, tong_tien,trang_thai)
+    VALUES (p_id_ban, v_tong_tien,cho_xac_nhan);
 
     -- Lấy ID của hóa đơn vừa tạo
     SET v_id_hoa_don = LAST_INSERT_ID();
@@ -88,7 +88,7 @@ END$$
 DELIMITER ;
 
 -- GET /api/hoadon-ban/get-all: Lấy danh sách hóa đơn bán.
-drop PROCEDURE GetAllHoaDonBan;
+call GetAllHoaDonBan();
 DELIMITER $$
 
 CREATE PROCEDURE GetAllHoaDonBan()
@@ -99,6 +99,7 @@ BEGIN
         b.ten_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
+        hdb.trang_thai,
         cthdb.id AS id_cthdb, 
         cthdb.id_san_pham,
         sp.ten_san_pham,
@@ -131,6 +132,7 @@ BEGIN
         hdb.id AS id_hoa_don_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
+        hdb.trang_thai,
 		b.id as id_ban,
         b.ten_ban,
         cthdb.id as id_cthdb,
@@ -156,10 +158,12 @@ DELIMITER ;
 -- GET /api/hoadonban/search: Tìm kiếm hóa đơn bán.
 -- Tên Procedure: Tìm kiếm hóa đơn bán dựa trên từ khóa
 -- Từ khóa tìm kiếm: ID Hóa đơn, Tên Bàn, Tên Sản phẩm
+call SearchHoaDonBan('da');
+drop PROCEDURE SearchHoaDonBan;
 DELIMITER $$
 
 CREATE PROCEDURE SearchHoaDonBan(
-    IN p_keyword VARCHAR(255)
+    IN p_keyword VARCHAR(255) 
 )
 BEGIN
     SELECT
@@ -168,7 +172,7 @@ BEGIN
         b.ten_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
-        hdb.ghi_chu,
+        hdb.trang_thai,
         cthdb.id AS id_cthdb,
         cthdb.id_san_pham,
         sp.ten_san_pham,
@@ -183,18 +187,14 @@ BEGIN
     JOIN
         san_pham AS sp ON cthdb.id_san_pham = sp.id 
     WHERE
-        -- 1. Tìm kiếm theo ID hóa đơn (Chuyển từ khóa thành số để so sánh với ID)
-        CAST(hdb.id AS CHAR) = p_keyword 
-        -- 2. Tìm kiếm theo Tên Bàn
-        OR b.ten_ban LIKE CONCAT('%', p_keyword, '%')
-        -- 3. Tìm kiếm theo Tên Sản phẩm
-        OR sp.ten_san_pham LIKE CONCAT('%', p_keyword, '%')
-    ORDER BY
-        hdb.ngay_lap DESC;
+	hdb.id = p_keyword 
+	OR b.ten_ban LIKE CONCAT('%', p_keyword, '%')
+	OR sp.ten_san_pham LIKE CONCAT('%', p_keyword, '%')
+	OR hdb.trang_thai LIKE CONCAT('%', p_keyword, '%');
 END$$
 
 DELIMITER ;
--- Thanh toán và chốt hóa đơn (no)
+-- Thanh toán và set ban "Trong" (no)
 
 DELIMITER $$
 CREATE PROCEDURE ThanhToanHoaDon(
@@ -207,11 +207,11 @@ BEGIN
     SELECT id_ban INTO v_id_ban FROM hoa_don_ban WHERE id = p_id_hoa_don;
     
     -- Cập nhật trạng thái hóa đơn
-    UPDATE hoa_don_ban SET trang_thai = 'Đã thanh toán' WHERE id = p_id_hoa_don;
+    UPDATE hoa_don_ban SET trang_thai = 'da_thanh_toan' WHERE id = p_id_hoa_don;
     
-    -- Cập nhật trạng thái bàn thành trống
-    UPDATE ban SET trang_thai = 'Trống' WHERE id = v_id_ban;
+--     -- Cập nhật trạng thái bàn thành trống
+--     UPDATE ban SET trang_thai = 'Trong' WHERE id = v_id_ban;
 END$$
 DELIMITER ;
 
-
+call ThanhToanHoaDon(3);

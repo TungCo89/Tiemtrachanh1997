@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Form, Card, Space, message, Spin, Select, DatePicker, InputNumber } from 'antd';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { HoaDonBan } from '../../component/interface';
+import { SanPham, Ban, HoaDonBan } from '../../component/interface';
 
 const { Option } = Select;
 const { List } = Form;
@@ -27,20 +27,86 @@ interface UpdateHoaDonBanProps {
     onClose: () => void;
     onSuccess: () => void;
 }
-const API_BASE_URL = 'http://localhost:7000/api/hoadonban';
+const API_BASE_URL = 'http://localhost:7000/api';
 
 const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
+    const [sanPhams, setSanPhams] = useState<SanPham[]>([]);
+    const [isLoadingSP, setIsLoadingSP] = useState(false);
+    const [bans, setBans] = useState<Ban[]>([]);
+    const [isLoadingBan, setIsLoadingBan] = useState(false);
+    const fetchSanPhams = useCallback(async () => {
+        setIsLoadingSP(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/sanpham/get-all`);
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: SanPham[] = [];
 
+                // Xử lý API trả về mảng lồng nhau (SQL rows)
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
 
+                setSanPhams(resultData.filter(item => item && item.id && item.ten_loai));
+            } else {
+                message.error('Lỗi khi tải danh sách Sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Sản phẩm:', error);
+            message.error('Không thể kết nối để tải Sản phẩm.');
+        } finally {
+            setIsLoadingSP(false);
+        }
+    }, []);
+    const fetchBans = useCallback(async () => {
+        setIsLoadingBan(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/ban/get-all`);
+
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: Ban[] = [];
+
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setBans(resultData.filter(item => item && item.id && item.ten_ban));
+            }
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách Bàn.');
+        } finally {
+            setIsLoadingBan(false);
+        }
+    }, []);
+    // Gọi khi component mount
+    useEffect(() => {
+        fetchSanPhams();
+        fetchBans();
+    }, [fetchSanPhams, fetchBans]);
     useEffect(() => {
         if (initialData) {
-            console.log(initialData);
-            const ngayLapDayjs = dayjs(initialData.ngay_lap);
-            form.setFieldsValue({
+            // console.log(initialData);
+            const INPUT_DATETIME_FORMAT = 'DD/MM/YYYY HH:mm:ss';
+            let parsedNgayLap = null;
+            //  Chuyển đổi chuỗi ngày tháng thành đối tượng dayjs
+            if (initialData.ngay_lap) {
+                const dateObject = dayjs(initialData.ngay_lap, INPUT_DATETIME_FORMAT);
+
+                if (dateObject.isValid()) {
+                    parsedNgayLap = dateObject;
+                } else {
+                    console.error("Lỗi phân tích cú pháp ngày lập:", initialData.ngay_lap);
+                }
+            } form.setFieldsValue({
                 id_ban: initialData.id_ban,
-                ngay_lap: ngayLapDayjs,
+                ngay_lap: parsedNgayLap,
                 tong_tien: initialData.tong_tien,
                 chi_tiet: initialData.chi_tiet.map(ct => ({
                     id_cthdb: ct.id_cthdb,
@@ -62,16 +128,9 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
         try {
             const payload = {
                 ...values,
-                chi_tiet: initialData?.chi_tiet.map(ct => ({
-                    id_cthdb: ct.id_cthdb,
-                    id_san_pham: ct.id_san_pham,
-                    ten_san_pham: ct.ten_san_pham,
-                    so_luong: ct.so_luong,
-                    don_gia: ct.don_gia,
-                })) || []
             };
 
-            const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
+            const response = await axios.put(`${API_BASE_URL}/hoadonban/update?id=${id}`, payload);
 
             if (response.data.success) {
                 message.success(`Đã cập nhật hóa đơn bán ID ${id} thành công.`);
@@ -120,10 +179,16 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                         name="id_ban"
                         rules={[{ required: true, message: 'Vui lòng chọn Bàn!' }]}
                     >
-                        <Select placeholder="Chọn Bàn">
-                            <Option value={1}>Bàn 1 </Option>
-                            <Option value={2}>Bàn 2 </Option>
-                            <Option value={3}>Bàn 3 </Option>
+                        <Select
+                            placeholder="Chọn bàn"
+                            loading={isLoadingBan}
+                            disabled={isLoadingBan || bans.length === 0}
+                        >
+                            {bans.map(ban => (
+                                <Option key={ban.id} value={ban.id}>
+                                    {ban.ten_ban}
+                                </Option>
+                            ))}
                         </Select>
                     </Form.Item>
 
@@ -138,7 +203,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                     {/* --------------------  CHI TIẾT HÓA ĐƠN (FORM LIST) -------------------- */}
 
                     <h3 style={{ marginTop: 20 }}>Chi tiết Sản phẩm</h3>
-                    <List
+                    <Form.List
                         name="chi_tiet"
                     >
                         {(fields, { add, remove }) => (
@@ -154,11 +219,24 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                                             rules={[{ required: true, message: 'Chọn SP' }]}
                                             style={{ width: 150 }}
                                         >
-                                            <Select placeholder="Sản phẩm">
-                                                <Option value={1}>Trà chanh</Option>
-                                                <Option value={2}>Trà đào</Option>
-                                                <Option value={3}>Cà phê</Option>
-                                                <Option value={4}>Bánh ngọt</Option>
+                                            <Select
+                                                placeholder="Sản phẩm"
+                                                loading={isLoadingSP}
+                                                disabled={isLoadingSP || sanPhams.length === 0}
+                                                onChange={(idSanPham: number) => {
+                                                    const sp = sanPhams.find(p => p.id === idSanPham);
+                                                    if (sp) {
+                                                        form.setFields([
+                                                            { name: ['chi_tiet', name, 'don_gia'], value: sp.gia_ban }
+                                                        ]);
+                                                    }
+                                                }}
+                                            >
+                                                {sanPhams.map(sp => (
+                                                    <Option key={sp.id} value={sp.id}>
+                                                        {sp.ten_san_pham}
+                                                    </Option>
+                                                ))}
                                             </Select>
                                         </Form.Item>
 
@@ -166,37 +244,29 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                                         <Form.Item
                                             {...restField}
                                             name={[name, 'so_luong']}
-                                            fieldKey={[fieldKey as number, 'so_uong']}
+                                            fieldKey={[fieldKey as number, 'so_luong']}
                                             rules={[{ required: true, message: 'SL' }]}
                                             style={{ width: 80 }}
                                         >
                                             <InputNumber min={1} placeholder="SL" />
                                         </Form.Item>
 
-                                        {/* Cột 3: Đơn giá (Đã có step=1 để tránh lỗi TS) */}
+                                        {/* Cột 3: Đơn giá (Đã thêm step=1 để sửa lỗi TS) */}
                                         <Form.Item
                                             {...restField}
                                             name={[name, 'don_gia']}
-                                            fieldKey={[fieldKey as number, 'don_gia']}
                                             rules={[{ required: true, message: 'ĐG' }]}
                                             style={{ width: 120 }}
                                         >
-                                            <InputNumber
-                                                min={100}
-                                                step={1}
-                                                parser={value => Number(value!.replace(/\$\s?|(,*)/g, ''))}
-                                                placeholder="Đơn giá"
-                                            />
+                                            <InputNumber min={1000} step={1000} placeholder="Đơn giá" />
                                         </Form.Item>
 
-                                        {/* Cột 4: Nút Xóa */}
-                                        {fields.length > 1 ? (
+                                        {fields.length > 0 ? (
                                             <MinusCircleOutlined onClick={() => remove(name)} />
                                         ) : null}
                                     </Space>
                                 ))}
 
-                                {/* Nút Thêm dòng mới */}
                                 <Form.Item>
                                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                                         Thêm Sản phẩm
@@ -204,7 +274,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                                 </Form.Item>
                             </>
                         )}
-                    </List>
+                    </Form.List>
 
                     {/* -------------------- 3. NÚT LƯU  -------------------- */}
                     <Form.Item style={{ textAlign: 'center', marginTop: 30 }}>

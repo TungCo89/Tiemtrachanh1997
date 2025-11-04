@@ -49,8 +49,8 @@ export class HDNhapRepository {
     chiTietJson: string
   ): Promise<void> {
     console.log("du lieu hoadonnhap.res",id, id_ncc, ghi_chu, chiTietJson);
-    const sql = "CALL UpdateHDNhap(?, ?, ?, ?)"; //
-    await this.db.query(sql, [id_ncc, ghi_chu, chiTietJson]);
+    const sql = "CALL UpdateHoaDonNhap(?, ?, ?, ?)"; //
+    await this.db.query(sql, [id, id_ncc, ghi_chu, chiTietJson]);
   }
 
   async deleteHDNhap(id: number): Promise<void> {

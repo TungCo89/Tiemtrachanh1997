@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Button, Input, Space, Modal, Table, message } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import { HoaDonBan } from '../../component/interface';
 import AddHoaDonBan from './AddHoaDonBan';
 import UpdateHoaDonBan from './UpdateHoaDonBan';
@@ -130,7 +131,7 @@ const DSHoaDonBan: React.FC = () => {
     };
 
 
-    // Cấu hình các cột cho Table (ĐÃ SỬA CHO HÓA ĐƠN BÁN)
+    // Cấu hình các cột cho Table
     const columns = [
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Bàn', dataIndex: 'ten_ban', key: 'ten_ban' },
@@ -140,21 +141,16 @@ const DSHoaDonBan: React.FC = () => {
             key: 'ngay_lap',
             render: (ngay_lap: string) => {
                 if (!ngay_lap) return '';
-                const date = new Date(ngay_lap);
+                const INPUT_FORMAT = 'DD/MM/YYYY HH:mm:ss';
+                // Định dạng hiển thị mong muốn
+                const DISPLAY_FORMAT = 'YYYY-MM-DD HH:mm';
 
-                const formattedDate = date.toLocaleDateString('en-CA', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).replace(/\//g, '-');
-
-                const formattedTime = date.toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
-
-                return `${formattedDate} ${formattedTime}`;
+                const date = dayjs(ngay_lap, INPUT_FORMAT);
+                // Kiểm tra tính hợp lệ và định dạng
+                if (date.isValid()) {
+                    return date.format(DISPLAY_FORMAT);
+                }
+                return ngay_lap;
             }
         },
         {
@@ -173,6 +169,7 @@ const DSHoaDonBan: React.FC = () => {
                 return `${formattedAmount} VNĐ`;
             }
         },
+        { title: 'Trạng thái', dataIndex: 'trang_thai', key: 'trang_thai' },
 
         {
             title: 'Chức năng',
@@ -219,7 +216,7 @@ const DSHoaDonBan: React.FC = () => {
 
             {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                title={editingItemId ? "Cập nhật Sản phẩm" : "Thêm mới Sản phẩm"}
+                title={editingItemId ? "Cập nhật Hóa đơn bán" : "Thêm mới Sản phẩm"}
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}

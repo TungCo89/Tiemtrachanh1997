@@ -56,7 +56,7 @@ export class ThongKeController {
 
       const n = topN ? parseInt(topN, 10) : 10; // Mặc định lấy Top 10
 
-      const data = await this.thongkeModal.getHieuSuatThongKe(
+      const data = await this.thongkeModal.getHieuSuatSanPham(
         startDate,
         endDate,
         n

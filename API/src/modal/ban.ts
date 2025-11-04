@@ -45,6 +45,12 @@ export class BanModal {
   // async searchBanByName(name: string): Promise<any> {
   //   return await this.banRepository.searchBanByName(name);
   // }
+  async donBan(id: number): Promise<any> {
+    return await this.banRepository.donBan(id);
+  }
+  async thanhToan(id: number): Promise<any> {
+    return await this.banRepository.thanhToan(id);
+  }
 }
 
 export default BanModal;

@@ -23,6 +23,7 @@ export class HDBanModal {
           ten_ban: item.ten_ban,
           ngay_lap: formattedNgayLap,
           tong_tien: parseFloat(item.tong_tien),
+          trang_thai: item.trang_thai,
           chi_tiet: [],
         });
       }
@@ -75,6 +76,9 @@ export class HDBanModal {
   async searchByKeyword(keyword: string): Promise<any[]> {
     const results = await this.hdbanRepository.searchByKeyword(keyword);
     return this.processHoaDonData(results);
+  }
+  async thanhToan(id: number): Promise<any> {
+    return await this.hdbanRepository.thanhToan(id);
   }
 }
 

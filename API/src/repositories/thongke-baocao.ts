@@ -50,12 +50,12 @@ export class ThongKeRepository {
    * @param topN Số lượng sản phẩm top muốn lấy
    * @returns Mảng kết quả từ DB
    */
-  async getHieuSuatThongKe(
+  async getHieuSuatSanPham(
     startDate: string,
     endDate: string,
     topN: number
   ): Promise<any> {
-    const sql = "CALL GetHieuSuatThongKe(?, ?, ?)";
+    const sql = "CALL GetHieuSuatSanPham(?, ?, ?)";
     const [results] = await this.db.query(sql, [startDate, endDate, topN]);
     if (Array.isArray(results)) {
       return results[0];

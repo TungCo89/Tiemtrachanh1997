@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Form, Input, Card, Space, message, Spin, Select, DatePicker, InputNumber } from 'antd';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { HoaDonNhap } from '../../component/interface';
+import { HoaDonNhap, NhaCungCap, NguyenLieu } from '../../component/interface';
 import axios from 'axios';
 import dayjs from 'dayjs';
 const { Option } = Select;
@@ -14,7 +14,7 @@ interface HoaDonNhapUpdateValues {
     tong_tien: number;
     ghi_chu: string;
     chi_tiet: {
-        id_cthdn:number;
+        id_cthdn: number;
         id_nguyen_lieu: number;
         so_luong: number;
         don_gia: number;
@@ -26,24 +26,82 @@ interface UpdateHoaDonNhapProps {
     onClose: () => void;
     onSuccess: () => void;
 }
-const API_BASE_URL = 'http://localhost:7000/api/hoadonnhap';
+const API_BASE_URL = 'http://localhost:7000/api';
 
 
 const UpdateHoaDonNhap: React.FC<UpdateHoaDonNhapProps> = ({ id, initialData, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [nhaCungCaps, setNhaCungCaps] = useState<NhaCungCap[]>([]);
+    const [isLoadingNCC, setIsLoadingNCC] = useState(false);
+    const [nguyenLieus, setNguyenLieus] = useState<NguyenLieu[]>([]);
+    const [isLoadingNguyenLieu, setIsLoadingNguyenLieu] = useState(false);
+    const fetchNhaCungCaps = useCallback(async () => {
+        setIsLoadingNCC(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/nhacungcap/get-all`);
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: NhaCungCap[] = [];
+
+                // Xử lý API trả về mảng lồng nhau (SQL rows)
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setNhaCungCaps(resultData.filter(item => item && item.id && item.ten_ncc));
+            } else {
+                message.error('Lỗi khi tải danh sách Loại Sản phẩm.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Loại Sản phẩm:', error);
+            message.error('Không thể kết nối để tải Loại Sản phẩm.');
+        } finally {
+            setIsLoadingNCC(false);
+        }
+    }, []);
+    const fetchNguyenLieus = useCallback(async () => {
+        setIsLoadingNguyenLieu(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: any }>(`${API_BASE_URL}/nguyenlieu/get-all`);
+
+            if (response.data.success && response.data.data) {
+                const apiData = response.data.data;
+                let resultData: NguyenLieu[] = [];
+
+                if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
+                    resultData = apiData[0];
+                } else if (Array.isArray(apiData)) {
+                    resultData = apiData;
+                }
+
+                setNguyenLieus(resultData.filter(item => item && item.id && item.ten_nguyen_lieu));
+            }
+        } catch (error) {
+            message.error('Lỗi khi tải danh sách Nguyên liệu.');
+        } finally {
+            setIsLoadingNguyenLieu(false);
+        }
+    }, []);
+    useEffect(() => {
+        fetchNhaCungCaps();
+        fetchNguyenLieus();
+    }, [fetchNhaCungCaps, fetchNguyenLieus]);
 
     useEffect(() => {
         if (initialData) {
-            console.log(initialData);
-            const ngayNhapDayjs = dayjs(initialData.ngay_nhap);
+            // console.log(initialData);
+            const INPUT_DATETIME_FORMAT = 'DD/MM/YYYY HH:mm:ss';
+            const dateObject = dayjs(initialData.ngay_nhap, INPUT_DATETIME_FORMAT);
             form.setFieldsValue({
                 id_ncc: initialData.id_ncc,
-                ngay_nhap: ngayNhapDayjs,
+                ngay_nhap: dateObject.isValid() ? dateObject : null,
                 tong_tien: initialData.tong_tien,
                 ghi_chu: initialData.ghi_chu,
                 chi_tiet: initialData.chi_tiet.map(ct => ({
-                    id_cthdn:ct.id_cthdn,
+                    id_cthdn: ct.id_cthdn,
                     id_nguyen_lieu: ct.id_nguyen_lieu,
                     ten_nguyen_lieu: ct.ten_nguyen_lieu,
                     so_luong: ct.so_luong,
@@ -61,17 +119,18 @@ const UpdateHoaDonNhap: React.FC<UpdateHoaDonNhapProps> = ({ id, initialData, on
         setLoading(true);
         try {
             const payload = {
-                ...values,
-                chi_tiet: initialData?.chi_tiet.map(ct => ({
-                    id_cthdn:ct.id_cthdn,
+                id: id,
+                id_ncc: values.id_ncc,
+                ghi_chu: values.ghi_chu,
+                chi_tiet: values.chi_tiet.map(ct => ({
+                    id_cthdn: ct.id_cthdn,
                     id_nguyen_lieu: ct.id_nguyen_lieu,
-                    ten_nguyen_lieu: ct.ten_nguyen_lieu,
                     so_luong: ct.so_luong,
                     don_gia: ct.don_gia,
-                })) || []
+                }))
             };
 
-            const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
+            const response = await axios.put(`${API_BASE_URL}/hoadonnhap/update?id=${id}`, payload);
 
             if (response.data.success) {
                 message.success(`Đã cập nhật hóa đơn nhập ID ${id} thành công.`);
@@ -116,10 +175,15 @@ const UpdateHoaDonNhap: React.FC<UpdateHoaDonNhapProps> = ({ id, initialData, on
                     name="id_ncc"
                     rules={[{ required: true, message: 'Vui lòng chọn Nhà cung cấp!' }]}
                 >
-                    <Select placeholder="Chọn Nhà cung cấp">
-                        <Option value={1}>Công ty Trà Xanh (ID: 1)</Option>
-                        <Option value={2}>Kho Nguyên Liệu Tổng Hợp (ID: 2)</Option>
-                        <Option value={3}>Bách hóa Xanh (ID: 3)</Option>
+                    <Select placeholder="Chọn Nhà cung cấp"
+                        loading={isLoadingNCC}
+                        disabled={isLoadingNCC || nhaCungCaps.length === 0}
+                    >
+                        {nhaCungCaps.map(ncc => (
+                            <Option key={ncc.id} value={ncc.id}>
+                                {ncc.ten_ncc}
+                            </Option>
+                        ))}
                     </Select>
                 </Form.Item>
 
@@ -155,11 +219,16 @@ const UpdateHoaDonNhap: React.FC<UpdateHoaDonNhapProps> = ({ id, initialData, on
                                         fieldKey={[fieldKey as number, 'id_nguyen_lieu']} rules={[{ required: true, message: 'Chọn NL' }]}
                                         style={{ width: 150 }}
                                     >
-                                        <Select placeholder="Nguyên liệu">
-                                            <Option value={1}>Trà đen</Option>
-                                            <Option value={2}>Chanh</Option>
-                                            <Option value={3}>Đường</Option>
-                                            <Option value={4}>Đào</Option>
+                                        <Select
+                                            placeholder="Nguyên liệu"
+                                            loading={isLoadingNguyenLieu}
+                                            disabled={isLoadingNguyenLieu || nguyenLieus.length === 0}
+                                        >
+                                            {nguyenLieus.map(nl => (
+                                                <Option key={nl.id} value={nl.id}>
+                                                    {nl.ten_nguyen_lieu}
+                                                </Option>
+                                            ))}
                                         </Select>
                                     </Form.Item>
 

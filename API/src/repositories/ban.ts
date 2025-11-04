@@ -67,6 +67,22 @@ export class BanRepository {
   //   }
   //   return [];
   // }
+  async donBan(id: number): Promise<void> {
+    try {
+      const sql = "CALL DonBan(?)";
+      await this.db.query(sql, [id]);
+    } catch (error: any) {
+      throw new Error(`Không thể bàn ${id}: ${error.message}`);
+    }
+  }
+  async thanhToan(id: number): Promise<void> {
+    try {
+      const sql = "CALL ThanhToanHDByIDBan(?)";
+      await this.db.query(sql, [id]);
+    } catch (error: any) {
+      throw new Error(`Không thể thanh toán hóa đơn ${id}: ${error.message}`);
+    }
+  }
 }
 
 export default BanRepository;
