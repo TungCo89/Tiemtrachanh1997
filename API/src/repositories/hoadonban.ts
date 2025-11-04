@@ -33,6 +33,16 @@ export class HDBanRepository {
     }
   }
 
+  async getByIDBan(id: number): Promise<any> {
+    try {
+      const sql = "CALL GetHoaDonBanByIDBan(?)";
+      const [rows] = await this.db.query(sql, [id]);
+      return rows;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
   async createHDBan(id_ban: number, chiTietJson: string): Promise<void> {
     console.log("du lieu hoadonban.res", id_ban, chiTietJson);
     const sql = "CALL CreateHoaDonBan(?, ?)"; //

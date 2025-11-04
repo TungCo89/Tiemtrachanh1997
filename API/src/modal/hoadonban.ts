@@ -52,6 +52,11 @@ export class HDBanModal {
     const processed = this.processHoaDonData(results[0]);
     return processed.length > 0 ? processed[0] : null;
   }
+  async getByIDBan(id: number): Promise<any> {
+    const results = await this.hdbanRepository.getByIDBan(id);
+    const processed = this.processHoaDonData(results[0]);
+    return processed.length > 0 ? processed[0] : null;
+  }
 
   async createHDBan(id_ban: number, chiTietHoanChinh: any[]): Promise<void> {
     if (!id_ban || !chiTietHoanChinh || chiTietHoanChinh.length === 0) {

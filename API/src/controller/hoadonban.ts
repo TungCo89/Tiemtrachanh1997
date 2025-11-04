@@ -35,6 +35,20 @@ export class HDBanController {
       res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
     }
   }
+  async getByIDBan(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.query;
+      const result = await this.hdbanModal.getByIDBan(Number(id));
+      res.status(200).json({
+        success: true,
+        message: "Lấy thông tin thành công",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Lỗi khi lấy danh sách:", error);
+      res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+  }
 
   async createHDBan(req: Request, res: Response): Promise<void> {
     try {

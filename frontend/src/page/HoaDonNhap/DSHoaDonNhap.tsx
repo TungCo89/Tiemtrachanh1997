@@ -216,7 +216,7 @@ const DSHoaDonNhap: React.FC = () => {
 
             {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                title={editingItemId ? "Cập nhật Sản phẩm" : "Thêm mới Sản phẩm"}
+                title={editingItemId ? "Cập nhật Hóa đơn" : "Thêm mới Hóa đơn"}
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}

@@ -12,6 +12,7 @@ const hdbanController = new HDBanController(hdbanModal);
 
 hdbanRouter.get('/get-all', hdbanController.getAll.bind(hdbanController));
 hdbanRouter.get('/get-by-ID', hdbanController.getByID.bind(hdbanController));
+hdbanRouter.get('/get-by-IDBan', hdbanController.getByIDBan.bind(hdbanController));
 hdbanRouter.post('/create', hdbanController.createHDBan.bind(hdbanController));
 hdbanRouter.put('/update', hdbanController.updateHDBan.bind(hdbanController));
 hdbanRouter.delete('/delete', hdbanController.deleteHDBan.bind(hdbanController));

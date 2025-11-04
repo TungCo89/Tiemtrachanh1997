@@ -22,7 +22,7 @@ BEGIN
 
     -- Thêm hóa đơn bán chính
     INSERT INTO hoa_don_ban (id_ban, tong_tien,trang_thai)
-    VALUES (p_id_ban, v_tong_tien,cho_xac_nhan);
+    VALUES (p_id_ban, v_tong_tien, 'cho_xac_nhan');
 
     -- Lấy ID của hóa đơn vừa tạo
     SET v_id_hoa_don = LAST_INSERT_ID();
@@ -123,7 +123,6 @@ DELIMITER ;
 -- GET /api/hoadon-ban/get-by-id/:id: Lấy hóa đơn bán và chi tiết.
 
 DELIMITER $$
-
 CREATE PROCEDURE GetHoaDonBanByID(
     IN p_id_hoa_don INT
 )
@@ -152,14 +151,55 @@ BEGIN
     WHERE
         hdb.id = p_id_hoa_don;
 END$$
-
 DELIMITER ;
 
--- GET /api/hoadonban/search: Tìm kiếm hóa đơn bán.
+-- lấy thông tin hdban khi biet id_ban và ban.trang_thai Đang hoạt động
+DELIMITER $$
+CREATE PROCEDURE GetHoaDonBanByIDBan(
+    IN p_id_ban INT
+)
+BEGIN
+    -- Kiểm tra xem bàn có tồn tại và đang ở trạng thái "Đang hoạt động" không
+    DECLARE v_ban_hoat_dong INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO v_ban_hoat_dong
+    FROM ban
+    WHERE id = p_id_ban AND trang_thai = 'Đang hoạt động';
+
+    IF v_ban_hoat_dong = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bàn không tồn tại hoặc không ở trạng thái "Đang hoạt động".';
+    END IF;
+
+    -- Lấy thông tin hóa đơn và chi tiết (có thể có nhiều dòng nếu nhiều sản phẩm)
+    SELECT
+        hdb.id AS id_hoa_don_ban,
+        hdb.ngay_lap,
+        hdb.tong_tien,
+        hdb.trang_thai,
+        b.id AS id_ban,
+        b.ten_ban,
+        cthdb.id AS id_cthdb,
+        cthdb.id_san_pham,
+        sp.ten_san_pham,
+        cthdb.so_luong,
+        cthdb.don_gia,
+        cthdb.thanh_tien
+    FROM
+        hoa_don_ban AS hdb
+    INNER JOIN
+        ban AS b ON hdb.id_ban = b.id
+    INNER JOIN
+        chi_tiet_hoa_don_ban AS cthdb ON hdb.id = cthdb.id_hoa_don_ban
+    INNER JOIN
+        san_pham AS sp ON cthdb.id_san_pham = sp.id
+    WHERE
+        b.id = p_id_ban;
+END$$
+DELIMITER ;
+
 -- Tên Procedure: Tìm kiếm hóa đơn bán dựa trên từ khóa
 -- Từ khóa tìm kiếm: ID Hóa đơn, Tên Bàn, Tên Sản phẩm
-call SearchHoaDonBan('da');
-drop PROCEDURE SearchHoaDonBan;
 DELIMITER $$
 
 CREATE PROCEDURE SearchHoaDonBan(
@@ -215,3 +255,33 @@ END$$
 DELIMITER ;
 
 call ThanhToanHoaDon(3);
+
+-- thanh toan hdban khi biet id bàn và hd 'cho xac nhan' 
+DELIMITER $$
+
+CREATE PROCEDURE ThanhToanHDByIDBan(
+    IN p_id_ban INT
+)
+BEGIN
+    DECLARE v_id_hoa_don INT;
+
+    -- Lấy ID hóa đơn có trạng thái 'cho_xac_nhan' theo id_ban
+    SELECT id INTO v_id_hoa_don
+    FROM hoa_don_ban
+    WHERE id_ban = p_id_ban
+      AND trang_thai = 'cho_xac_nhan'
+    LIMIT 1;
+
+    -- Nếu tìm thấy hóa đơn, tiến hành cập nhật
+    IF v_id_hoa_don IS NOT NULL THEN
+        UPDATE hoa_don_ban
+        SET trang_thai = 'da_thanh_toan'
+        WHERE id = v_id_hoa_don;
+    ELSE
+        -- Tùy chọn: bạn có thể ném lỗi hoặc bỏ qua
+         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không tìm thấy hóa đơn cần thanh toán cho bàn này.';
+    END IF;
+
+END$$
+
+DELIMITER ;

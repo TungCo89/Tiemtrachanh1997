@@ -146,7 +146,7 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onClose, onSuccess }) => {
 
 
                 {/* -------------------- 2. CHI TIẾT HÓA ĐƠN (FORM LIST) -------------------- */}
-                <h3 style={{ marginTop: 20 }}>Chi tiết Sản phẩm</h3>
+                <h3 style={{ marginTop: 20 }}>Chi tiết Hóa đơn</h3>
                 <Form.List
                     name="chi_tiet"
                 >
