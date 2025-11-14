@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import '@ant-design/v5-patch-for-react-19';
 import { Button, Input, Space, Card, Modal, Tag, Popconfirm, message } from 'antd'; // Thêm Popconfirm cho xóa
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined, ClearOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined, ClearOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import AddBan from './AddBan';
 import UpdateBan from './UpdateBan';
@@ -79,6 +79,7 @@ const DSBan: React.FC = () => {
     const [editingItemId, setEditingItemId] = useState<number | null>(null);
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(true);
+    const [dataToEdit, setDataToEdit] = useState<Ban | null>(null);
     const [orderIdBan, setOrderIdBan] = useState<number | null>(null);
     const [viewingBanId, setViewingBanId] = useState<number | null>(null);
     // --- LOGIC XỬ LÝ STATE VÀ HANDLERS ---
@@ -97,7 +98,9 @@ const DSBan: React.FC = () => {
                     trang_thai: item.trang_thai,
                     id_khu_vuc: item.id_khu_vuc,
                     ten_khu_vuc: item.ten_khu_vuc,
+                    trang_thai_hoa_don: item.trang_thai_hoa_don,
                 }));
+
                 setDanhSachBan(banList);
 
             } else {
@@ -113,11 +116,29 @@ const DSBan: React.FC = () => {
         }
     };
 
-    // Gọi API khi component mount
+    const fetchBanById = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.get<{ success: boolean; data: Ban }>(`http://localhost:7000/api/ban/get-by-ID?id=${id}`);
+            if (response.data.success && response.data.data) {
+                setDataToEdit(response.data.data);
+                // setIsModalOpen(true);
+            } else {
+                message.error('Không tìm thấy dữ liệu bàn để sửa.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Get-by-ID:', error);
+            message.error('Lỗi khi lấy thông tin.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
 
         fetchBanData();
     }, []);
+
     // Nhóm dữ liệu theo Khu vực
     const banGroupedByKhuVuc = useMemo(() => {
         return danhSachBan.reduce((acc, ban) => {
@@ -130,8 +151,10 @@ const DSBan: React.FC = () => {
     }, [danhSachBan]);
 
     const handleAdd = () => setIsAddModalOpen(true);
-    const handleEdit = (id: number) => setEditingItemId(id);
-    const handleCancel = () => {
+    const handleEdit = (id: number) => {
+        setEditingItemId(id);
+        fetchBanById(id);
+    }; const handleCancel = () => {
         setIsAddModalOpen(false);
         setEditingItemId(null);
     };
@@ -143,6 +166,21 @@ const DSBan: React.FC = () => {
         );
     }, [danhSachBan, searchText]);
 
+    const handleThanhToan = async (id: number) => {
+        try {
+            const response = await axios.post(`http://localhost:7000/api/ban/thanh-toan-by-IDBan?id=${id}`);
+
+            if (response.data.success) {
+                message.success(`Đã thanh toán Bàn ID: ${id}`);
+                fetchBanData();
+            } else {
+                message.error(response.data.message || 'Không thể thanh toán.');
+            }
+        } catch (error) {
+            console.error('Lỗi khi dọn bàn:', error);
+            message.error('Lỗi kết nối máy chủ. Vui lòng thử lại.');
+        }
+    };
     const handleClear = async (id: number) => {
         try {
             const response = await axios.post(`http://localhost:7000/api/ban/don-ban?id=${id}`);
@@ -167,20 +205,48 @@ const DSBan: React.FC = () => {
 
     // --- RENDER COMPONENT BÀN ---
     const RenderBanItem: React.FC<{ ban: Ban }> = ({ ban }) => {
+        // Trạng thái hóa đơn
+        const renderHoaDonStatus = () => {
+            if (ban.trang_thai !== 'Đang hoạt động' || !ban.trang_thai_hoa_don) {
+                return null;
+            }
+
+            let color = '';
+            let label = '';
+
+            switch (ban.trang_thai_hoa_don) {
+                case 'cho_xac_nhan':
+                    color = 'orange';
+                    label = 'Chờ xác nhận';
+                    break;
+                case 'da_thanh_toan':
+                    color = 'green';
+                    label = 'Đã thanh toán';
+                    break;
+                default:
+                    return null;
+            }
+
+            return (
+                <Tag color={color} style={{ marginTop: '4px', fontSize: '12px' }}>
+                    {label}
+                </Tag>
+            );
+        };
         const hienThiTrangThai = ban.trang_thai === 'Trong' ? 'Trống' : 'Đang dùng';
         return (
             <Popconfirm
                 title={`Thao tác với ${ban.ten_ban}`}
                 description={
                     <Space direction="vertical" style={{ width: '100%' }}>
-                        {/* <Button
+                        <Button
                             icon={<EditOutlined />}
                             onClick={() => handleEdit(ban.id)}
                             style={{ width: '100%', backgroundColor: '#333', color: 'white', borderColor: '#333' }}
                             size="small"
                         >
                             Sửa
-                        </Button> */}
+                        </Button>
                         <Popconfirm
                             title={`Tạo order cho ${ban.ten_ban}?`}
                             onConfirm={() => setOrderIdBan(ban.id)}
@@ -192,13 +258,35 @@ const DSBan: React.FC = () => {
                                 icon={<PlusCircleOutlined />}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: '#52c41a', // xanh lá - hành động tích cực
+                                    backgroundColor: '#52c41a',
                                     borderColor: '#52c41a',
                                     color: 'white',
                                 }}
                                 size="small"
                             >
                                 Order
+                            </Button>
+                        </Popconfirm>
+
+                        <Popconfirm
+                            title={`Xác nhận đã thanh toán cho ${ban.ten_ban}?`}
+                            onConfirm={() => handleThanhToan(ban.id)}
+                            okText="Xác nhận"
+                            cancelText="Hủy"
+                            okButtonProps={{ type: 'primary' }}
+                            placement="bottom"
+                        >
+                            <Button
+                                icon={<CheckCircleOutlined />}
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: '#52c41a',
+                                    borderColor: '#52c41a',
+                                    color: 'white',
+                                }}
+                                size="small"
+                            >
+                                Đã thanh toán
                             </Button>
                         </Popconfirm>
 
@@ -214,7 +302,7 @@ const DSBan: React.FC = () => {
                                 icon={<ClearOutlined />}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: '#faad14', // vàng cam - cảnh báo nhẹ
+                                    backgroundColor: '#faad14',
                                     borderColor: '#faad14',
                                     color: 'white',
                                 }}
@@ -261,10 +349,12 @@ const DSBan: React.FC = () => {
                     >
                         {(() => {
                             // console.log('trang_thai:', ban.trang_thai);
-                            return null; 
+                            return null;
                         })()}
                         {ban.trang_thai === 'Trong' ? 'Trống' : 'Đang dùng'}
+
                     </div>
+                    {renderHoaDonStatus()}
                 </BanItem>
             </Popconfirm>
         );
@@ -274,23 +364,6 @@ const DSBan: React.FC = () => {
     const renderKhuVuc = () => {
         // Lấy danh sách Khu vực từ dữ liệu đã lọc
         const khuVucKeys = Object.keys(banGroupedByKhuVuc);
-
-        if (searchText && filteredBanData.length === 0) {
-            return <p>Không tìm thấy bàn nào theo từ khóa: "{searchText}"</p>
-        }
-
-        // // Nếu có tìm kiếm, chỉ hiển thị bàn đã lọc (bỏ qua nhóm khu vực trực quan)
-        // if (searchText && filteredBanData.length > 0) {
-        //     return (
-        //         <KhuVucBox title={`Kết quả tìm kiếm cho: "${searchText}"`}>
-        //             <BanGrid>
-        //                 {filteredBanData.map(ban => (
-        //                     <RenderBanItem key={ban.id} ban={ban} />
-        //                 ))}
-        //             </BanGrid>
-        //         </KhuVucBox>
-        //     );
-        // }
 
 
         return (
@@ -317,7 +390,7 @@ const DSBan: React.FC = () => {
     return (
         <div style={{ padding: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2>Quản lý Bàn & Sơ đồ</h2>
+                <h2>Quản lý Bàn </h2>
                 <Space>
                     <Button
                         type="primary"
@@ -355,12 +428,17 @@ const DSBan: React.FC = () => {
                 destroyOnClose
             >
                 {editingItemId !== null && (
-                    <UpdateBan id={editingItemId} onCancel={handleCancel} />
+                    <UpdateBan
+                        id={editingItemId}
+                        initialData={dataToEdit}
+                        onClose={handleCancel}
+                        onSuccess={handleCancel}
+                    />
                 )}
             </Modal>
 
             <Modal
-                title="Tạo Hóa đơn"
+                title="Tạo Hóa đơn bán"
                 open={orderIdBan !== null}
                 onCancel={() => setOrderIdBan(null)}
                 footer={null}

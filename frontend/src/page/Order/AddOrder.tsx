@@ -9,7 +9,7 @@ import axios from 'axios';
 const { Option } = Select;
 
 interface AddOrderProps {
-  id_ban: number; // ← Bắt buộc truyền vào
+  id_ban: number; 
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -93,7 +93,7 @@ const AddOrder: React.FC<AddOrderProps> = ({ id_ban, onClose, onSuccess }) => {
     <Card
       title={
         <h2 style={{ textAlign: 'center', margin: 0 }}>
-          Tạo Hóa đơn cho Bàn {id_ban}
+          Tạo hóa đơn cho Bàn {id_ban}
         </h2>
       }
     >

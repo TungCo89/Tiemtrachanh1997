@@ -1,93 +1,114 @@
-// src/pages/UpdateBan.tsx
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Space, Select, Card, message, Spin } from 'antd'; 
-// ... các imports khác
+import { Button, Form, Input, Space, Select, Card, message, Spin } from 'antd';
+import axios from 'axios';
+import { Ban } from '../../component/interface';
 
-// 1. Định nghĩa Interface cho Props của UpdateBan
+const { Option } = Select;
+
 interface UpdateBanProps {
-    id: number;           // ID của bàn cần cập nhật
-    onCancel: () => void; // Hàm đóng modal
+    id: number;
+    initialData: Ban | null;
+    onClose: () => void;
+    onSuccess: () => void;
 }
 
-// Định nghĩa kiểu dữ liệu cho form (giống AddBan)
 interface BanFormValues {
     tenBan: string;
     idKhuVuc: number;
-    // ... các trường khác
 }
 
-// 2. Sử dụng Interface Props trong component
-// PHẢI dùng React.FC<UpdateBanProps> và destructing { id, onCancel }
-const UpdateBan: React.FC<UpdateBanProps> = ({ id, onCancel }) => { 
+const UpdateBan: React.FC<UpdateBanProps> = ({ id, initialData, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
 
-    // Dùng useEffect để tải dữ liệu dựa trên 'id'
+    // Cập nhật form khi có initialData
     useEffect(() => {
-        const fetchBanData = async () => {
-            setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 500)); 
-            
-            // GIẢ LẬP TẢI DỮ LIỆU CŨ TỪ API (dùng 'id' để fetch)
-            const mockInitialData: BanFormValues = {
-                tenBan: `Bàn ${id} (Cũ)`,
-                idKhuVuc: id % 2 === 0 ? 2 : 1, // Logic ví dụ
-            };
-            
-            form.setFieldsValue(mockInitialData);
+        if (initialData) {
+            form.setFieldsValue({
+                tenBan: initialData.ten_ban,
+                idKhuVuc: initialData.id_khu_vuc,
+            });
             setLoading(false);
-        };
-        
-        fetchBanData();
-    }, [form, id]); // Đảm bảo useEffect chạy lại khi ID thay đổi
+        } else {
+            setLoading(true);
+        }
+    }, [initialData, form]);
 
-    const onFinish = (values: BanFormValues) => {
-        console.log(`Thông tin bàn ID ${id} cần cập nhật:`, values);
-        
-        // 🚨 Sau khi gọi API UPDATE thành công:
-        message.success(`Đã cập nhật Bàn ID: ${id}`);
-        onCancel(); // 👈 Đóng Modal
+    const onFinish = async (values: BanFormValues) => {
+        setLoading(true);
+        try {
+            const payload = {
+                ten_ban: values.tenBan,
+                id_khu_vuc: values.idKhuVuc,
+            };
+
+            const response = await axios.put(`http://localhost:7000/api/ban/update?id=${id}`, payload);
+
+            if (response.data.success) {
+                message.success(`Đã cập nhật bàn ID ${id} thành công.`);
+                onSuccess();
+            } else {
+                message.error(response.data.message || 'Lỗi khi cập nhật bàn.');
+            }
+        } catch (error) {
+            console.error('Lỗi API Update:', error);
+            message.error('Lỗi kết nối máy chủ hoặc dữ liệu không hợp lệ.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    return (
-        <Spin spinning={loading} tip="Đang tải dữ liệu bàn...">
-            <Card 
-                title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Bàn ID: {id}</h2>}
-            >
-                <Form
-                    form={form} 
-                    layout="vertical" 
-                    onFinish={onFinish} 
-                >
-                    <Form.Item label="Tên Bàn" name="tenBan" rules={[{ required: true, message: 'Vui lòng nhập tên bàn!' }]}>
-                        <Input placeholder="Ví dụ: Bàn 17" />
-                    </Form.Item>
-                    
-                    <Form.Item label="Khu vực" name="idKhuVuc" rules={[{ required: true, message: 'Vui lòng chọn khu vực!' }]}>
-                        <Select placeholder="Chọn khu vực">
-                            <Select.Option value={1}>Khu A</Select.Option>
-                            <Select.Option value={2}>Khu B</Select.Option>
-                        </Select>
-                    </Form.Item>
+    const onFinishFailed = (errorInfo: any) => {
+        console.log('Gửi form thất bại:', errorInfo);
+        message.error('Vui lòng điền đầy đủ các trường bắt buộc.');
+    };
 
-                    <Form.Item style={{ textAlign: 'right', marginTop: 30 }}>
-                        <Space>
-                            <Button onClick={onCancel}>
-                                Hủy
-                            </Button>
-                            <Button 
-                                type="primary" 
-                                htmlType="submit" 
-                            >
-                                Lưu Thay Đổi
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Card>
-        </Spin>
-    );
+    if (loading || !initialData) {
+        return (
+            <div style={{ padding: 20, textAlign: 'center' }}>
+                <Spin />
+            </div>
+        );
+    }
+return (
+    <Spin spinning={loading} tip="Đang tải dữ liệu bàn...">
+        <Card
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Bàn ID: {id}</h2>}
+        >
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+            >
+                <Form.Item label="Tên Bàn" name="tenBan" rules={[{ required: true, message: 'Vui lòng nhập tên bàn!' }]}>
+                    <Input placeholder="Ví dụ: Bàn 17" />
+                </Form.Item>
+
+                <Form.Item label="Khu vực" name="idKhuVuc" rules={[{ required: true, message: 'Vui lòng chọn khu vực!' }]}>
+                    <Select placeholder="Chọn khu vực">
+                        <Select.Option value={1}>Khu A</Select.Option>
+                        <Select.Option value={2}>Khu B</Select.Option>
+                    </Select>
+                </Form.Item>
+
+                <Form.Item style={{ textAlign: 'right', marginTop: 30 }}>
+                    <Space>
+                        <Button onClick={onClose}>
+                            Hủy
+                        </Button>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                        >
+                            Lưu Thay Đổi
+                        </Button>
+                    </Space>
+                </Form.Item>
+            </Form>
+        </Card>
+    </Spin>
+);
 };
 
 export default UpdateBan;

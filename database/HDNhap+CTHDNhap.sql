@@ -39,6 +39,21 @@ BEGIN
         JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')))
     FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
     WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_nguyen_lieu')) IS NOT NULL;
+    
+     --  CẬP NHẬT TỒN KHO: cộng dồn so_luong vào nguyen_lieu
+    UPDATE nguyen_lieu nl
+    JOIN (
+        SELECT
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].id_nguyen_lieu'))) AS UNSIGNED) AS id_nl,
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].so_luong'))) AS DECIMAL(10,2)) AS sl_nhap
+        FROM (
+            SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+            SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+            SELECT 8 UNION ALL SELECT 9
+        ) AS numbers
+        WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, ']')) IS NOT NULL
+    ) AS json_data ON nl.id = json_data.id_nl
+    SET nl.so_luong_ton = nl.so_luong_ton + json_data.sl_nhap;
 END$$
 
 DELIMITER ;
@@ -53,33 +68,58 @@ CREATE PROCEDURE UpdateHoaDonNhap(
     IN p_chi_tiet_json TEXT   
 )
 BEGIN
-    -- 1. Xóa toàn bộ chi tiết cũ của hóa đơn nhập
-    DELETE FROM chi_tiet_hoa_don_nhap WHERE id_hoa_don_nhap = p_id_hoa_don_nhap;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    -- 2. Chèn lại toàn bộ chi tiết mới từ JSON
+    START TRANSACTION;
+
+    -- 1: TRỪ đi số lượng nguyên liệu của chi tiết cũ
+    UPDATE nguyen_lieu nl
+    JOIN chi_tiet_hoa_don_nhap ctn ON nl.id = ctn.id_nguyen_lieu
+    SET nl.so_luong_ton = nl.so_luong_ton - ctn.so_luong
+    WHERE ctn.id_hoa_don_nhap = p_id_hoa_don_nhap;
+
+    -- 2: Xóa chi tiết cũ
+    DELETE FROM chi_tiet_hoa_don_nhap 
+    WHERE id_hoa_don_nhap = p_id_hoa_don_nhap;
+
+    -- 3: Chèn chi tiết mới từ JSON
     INSERT INTO chi_tiet_hoa_don_nhap (id_hoa_don_nhap, id_nguyen_lieu, so_luong, don_gia, thanh_tien)
     SELECT
         p_id_hoa_don_nhap,
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_nguyen_lieu'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].so_luong'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].don_gia'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')))
-    -- Giả định tối đa 4 chi tiết như trong Create procedure
-    FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
-    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_nguyen_lieu')) IS NOT NULL;
-    
-    -- 3. Cập nhật lại thông tin chung (NCC, Ghi chú) và Tổng tiền của hóa đơn nhập
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].id_nguyen_lieu'))) AS UNSIGNED),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].so_luong'))) AS DECIMAL(10,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].don_gia'))) AS DECIMAL(15,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].thanh_tien'))) AS DECIMAL(15,2))
+    FROM (
+        SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+        SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+        SELECT 8 UNION ALL SELECT 9
+    ) AS numbers
+    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, ']')) IS NOT NULL;
+
+    -- 4: CỘNG thêm số lượng nguyên liệu của chi tiết MỚI
+    UPDATE nguyen_lieu nl
+    JOIN chi_tiet_hoa_don_nhap ctn ON nl.id = ctn.id_nguyen_lieu
+    SET nl.so_luong_ton = nl.so_luong_ton + ctn.so_luong
+    WHERE ctn.id_hoa_don_nhap = p_id_hoa_don_nhap;
+
+    -- 5: Cập nhật lại thông tin hóa đơn chính
     UPDATE hoa_don_nhap
     SET 
         id_ncc = p_id_ncc,
         ghi_chu = p_ghi_chu,
         tong_tien = (
-            SELECT SUM(thanh_tien) 
+            SELECT COALESCE(SUM(thanh_tien), 0)
             FROM chi_tiet_hoa_don_nhap 
             WHERE id_hoa_don_nhap = p_id_hoa_don_nhap
         )
     WHERE id = p_id_hoa_don_nhap;
 
+    COMMIT;
 END$$
 
 DELIMITER ;

@@ -168,7 +168,7 @@ const DSLoaiSanPham: React.FC = () => {
                     style={{ width: 300 }}
                 />
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                    Thêm sản phẩm
+                    Thêm danh mục sản phẩm
                 </Button>
             </div>
 

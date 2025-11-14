@@ -56,7 +56,6 @@ DELIMITER ;
 -- GET /api/ban/get-all: Lấy danh sách tất cả 
 
 DELIMITER $$
-
 CREATE PROCEDURE GetAllBan()
 BEGIN
     SELECT 
@@ -64,7 +63,17 @@ BEGIN
         b.ten_ban,
         b.trang_thai,
         b.id_khu_vuc,
-        kv.ten_khu_vuc
+        kv.ten_khu_vuc,
+        -- Lấy trạng thái hóa đơn mới nhất nếu bàn đang hoạt động
+        CASE 
+            WHEN b.trang_thai = 'Đang hoạt động' THEN 
+                (SELECT hdb.trang_thai
+                 FROM hoa_don_ban hdb
+                 WHERE hdb.id_ban = b.id
+                 ORDER BY hdb.id DESC
+                 LIMIT 1)
+            ELSE NULL
+        END AS trang_thai_hoa_don
     FROM 
         ban AS b
     JOIN
@@ -74,10 +83,10 @@ END$$
 
 DELIMITER ;
 call GetAllBan();
+
 -- GET /api/ban/get-by-id/:id: Lấy thông tin bàn theo ID.
 
 DELIMITER $$
-
 CREATE PROCEDURE GetBanByID(
     IN p_id INT
 )
@@ -87,13 +96,24 @@ BEGIN
         b.ten_ban,
         b.trang_thai,
         b.id_khu_vuc,
-        kv.ten_khu_vuc
+        kv.ten_khu_vuc,
+    -- Lấy trạng thái hóa đơn mới nhất nếu bàn đang hoạt động
+        CASE 
+            WHEN b.trang_thai = 'Đang hoạt động' THEN 
+                (SELECT hdb.trang_thai
+                 FROM hoa_don_ban hdb
+                 WHERE hdb.id_ban = b.id
+                 ORDER BY hdb.id DESC
+                 LIMIT 1)
+            ELSE NULL
+        END AS trang_thai_hoa_don
     FROM 
         ban AS b
     JOIN
         khu_vuc AS kv ON b.id_khu_vuc = kv.id
     WHERE 
-        b.id = p_id;
+        b.id = p_id
+	ORDER BY kv.ten_khu_vuc, b.ten_ban;
 END$$
 
 DELIMITER ;

@@ -7,39 +7,97 @@ use tiemtrachanh1997;
 -- POST /api/hoadon-ban/create: Thêm hóa đơn bán và các chi tiết.
 
 DELIMITER $$
+
 CREATE PROCEDURE CreateHoaDonBan(
     IN p_id_ban INT,
     IN p_chi_tiet_json TEXT
 )
 BEGIN
     DECLARE v_id_hoa_don INT;
-    DECLARE v_tong_tien DECIMAL(15,2);
+    DECLARE v_tong_tien DECIMAL(15,2) DEFAULT 0;
+    DECLARE v_nguyen_lieu_thieu VARCHAR(255) DEFAULT '';
 
-    -- Tính tổng tiền từ JSON
-    SET v_tong_tien = (SELECT SUM(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien'))))
-                       FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
-                       WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')) IS NOT NULL);
+    -- Xử lý lỗi: rollback nếu có exception
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-    -- Thêm hóa đơn bán chính
-    INSERT INTO hoa_don_ban (id_ban, tong_tien,trang_thai)
+    START TRANSACTION;
+
+    --  1: Tính tổng tiền từ JSON (hỗ trợ tối đa 10 dòng) ===
+    SELECT COALESCE(SUM(
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].thanh_tien'))) AS DECIMAL(15,2))
+    ), 0)
+    INTO v_tong_tien
+    FROM (
+        SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+        SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+        SELECT 8 UNION ALL SELECT 9
+    ) AS numbers
+    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, ']')) IS NOT NULL;
+
+    --  2: Tạo hóa đơn bán ===
+    INSERT INTO hoa_don_ban (id_ban, tong_tien, trang_thai)
     VALUES (p_id_ban, v_tong_tien, 'cho_xac_nhan');
 
-    -- Lấy ID của hóa đơn vừa tạo
     SET v_id_hoa_don = LAST_INSERT_ID();
 
-    -- Thêm các chi tiết hóa đơn từ JSON
+    -- 3: Chèn chi tiết hóa đơn bán ===
     INSERT INTO chi_tiet_hoa_don_ban (id_hoa_don_ban, id_san_pham, so_luong, don_gia, thanh_tien)
     SELECT
         v_id_hoa_don,
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_san_pham'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].so_luong'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].don_gia'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')))
-    FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
-    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_san_pham')) IS NOT NULL;
-    
-    -- Cập nhật trạng thái bàn "Đang hoạt động"
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].id_san_pham'))) AS UNSIGNED),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].so_luong'))) AS DECIMAL(10,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].don_gia'))) AS DECIMAL(15,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].thanh_tien'))) AS DECIMAL(15,2))
+    FROM (
+        SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+        SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+        SELECT 8 UNION ALL SELECT 9
+    ) AS numbers
+    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, ']')) IS NOT NULL;
+
+    --  4: KIỂM TRA TỒN KHO NGUYÊN LIỆU ===
+    -- Tạo bảng logic: nhu cầu nguyên liệu cho đơn này
+    IF EXISTS (
+        SELECT 1
+        FROM (
+            SELECT
+                ct.id_nguyen_lieu,
+                SUM(ct.so_luong * cthb.so_luong) AS can_dung
+            FROM chi_tiet_hoa_don_ban cthb
+            INNER JOIN cong_thuc ct ON cthb.id_san_pham = ct.id_san_pham
+            WHERE cthb.id_hoa_don_ban = v_id_hoa_don
+            GROUP BY ct.id_nguyen_lieu
+        ) AS ke_hoach
+        INNER JOIN nguyen_lieu nl ON ke_hoach.id_nguyen_lieu = nl.id
+        WHERE nl.so_luong_ton < ke_hoach.can_dung
+    ) THEN
+        -- Không đủ nguyên liệu → báo lỗi và hủy giao dịch
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Không đủ nguyên liệu để thực hiện đơn hàng!';
+    END IF;
+
+    --  5: CẬP NHẬT TỒN KHO (trừ nguyên liệu) ===
+    UPDATE nguyen_lieu nl
+    INNER JOIN (
+        SELECT
+            ct.id_nguyen_lieu,
+            SUM(ct.so_luong * cthb.so_luong) AS tong_tru
+        FROM chi_tiet_hoa_don_ban cthb
+        INNER JOIN cong_thuc ct ON cthb.id_san_pham = ct.id_san_pham
+        WHERE cthb.id_hoa_don_ban = v_id_hoa_don
+        GROUP BY ct.id_nguyen_lieu
+    ) AS ke_hoach_tru ON nl.id = ke_hoach_tru.id_nguyen_lieu
+    SET nl.so_luong_ton = nl.so_luong_ton - ke_hoach_tru.tong_tru;
+
+    --  6: Cập nhật trạng thái bàn ===
     UPDATE ban SET trang_thai = 'Đang hoạt động' WHERE id = p_id_ban;
+
+    COMMIT;
 END$$
 
 DELIMITER ;
@@ -47,30 +105,101 @@ DELIMITER ;
 -- PUT /api/hoadon-ban/update/:id: Cập nhật hóa đơn bán. (Lưu ý: Thường không cho phép update hóa đơn bán đã hoàn thành).
 
 DELIMITER $$
+
 CREATE PROCEDURE UpdateHoaDonBan(
     IN p_id_hoa_don INT,
     IN p_chi_tiet_json TEXT
 )
 BEGIN
-    -- 1. Xóa toàn bộ chi tiết cũ của hóa đơn
-    DELETE FROM chi_tiet_hoa_don_ban WHERE id_hoa_don_ban = p_id_hoa_don;
-    
-    -- 2. Chèn lại toàn bộ chi tiết mới từ JSON
+    DECLARE v_tong_tien DECIMAL(15,2) DEFAULT 0;
+
+    -- Xử lý lỗi: rollback nếu có exception
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    -- 1: HOÀN TÁC nguyên liệu của chi tiết cũ (cộng lại vào kho)
+    UPDATE nguyen_lieu nl
+    INNER JOIN (
+        SELECT
+            ct.id_nguyen_lieu,
+            SUM(ct.so_luong * cthb_old.so_luong) AS tong_nguyen_lieu_da_dung
+        FROM chi_tiet_hoa_don_ban cthb_old
+        INNER JOIN cong_thuc ct ON cthb_old.id_san_pham = ct.id_san_pham
+        WHERE cthb_old.id_hoa_don_ban = p_id_hoa_don
+        GROUP BY ct.id_nguyen_lieu
+    ) AS cu ON nl.id = cu.id_nguyen_lieu
+    SET nl.so_luong_ton = nl.so_luong_ton + cu.tong_nguyen_lieu_da_dung;
+
+    -- 2: Xóa chi tiết cũ
+    DELETE FROM chi_tiet_hoa_don_ban 
+    WHERE id_hoa_don_ban = p_id_hoa_don;
+
+    -- 3: Chèn chi tiết mới từ JSON
     INSERT INTO chi_tiet_hoa_don_ban (id_hoa_don_ban, id_san_pham, so_luong, don_gia, thanh_tien)
     SELECT
         p_id_hoa_don,
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_san_pham'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].so_luong'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].don_gia'))),
-        JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].thanh_tien')))
-    FROM (SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) AS t
-    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', i, '].id_san_pham')) IS NOT NULL;
-    
-    -- 3. Cập nhật lại tổng tiền của hóa đơn
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].id_san_pham'))) AS UNSIGNED),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].so_luong'))) AS DECIMAL(10,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].don_gia'))) AS DECIMAL(15,2)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, '].thanh_tien'))) AS DECIMAL(15,2))
+    FROM (
+        SELECT 0 AS i UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+        SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+        SELECT 8 UNION ALL SELECT 9
+    ) AS numbers
+    WHERE JSON_EXTRACT(p_chi_tiet_json, CONCAT('$[', numbers.i, ']')) IS NOT NULL;
+
+    -- 4: KIỂM TRA TỒN KHO CHO PHIÊN BẢN MỚI ===
+    IF EXISTS (
+        SELECT 1
+        FROM (
+            SELECT
+                ct.id_nguyen_lieu,
+                SUM(ct.so_luong * cthb_new.so_luong) AS can_dung
+            FROM chi_tiet_hoa_don_ban cthb_new
+            INNER JOIN cong_thuc ct ON cthb_new.id_san_pham = ct.id_san_pham
+            WHERE cthb_new.id_hoa_don_ban = p_id_hoa_don
+            GROUP BY ct.id_nguyen_lieu
+        ) AS ke_hoach
+        INNER JOIN nguyen_lieu nl ON ke_hoach.id_nguyen_lieu = nl.id
+        WHERE nl.so_luong_ton < ke_hoach.can_dung
+    ) THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Không đủ nguyên liệu cho hóa đơn sau khi cập nhật!';
+    END IF;
+
+    -- 5: TRỪ nguyên liệu cho chi tiết MỚI
+    UPDATE nguyen_lieu nl
+    INNER JOIN (
+        SELECT
+            ct.id_nguyen_lieu,
+            SUM(ct.so_luong * cthb_new.so_luong) AS tong_tru
+        FROM chi_tiet_hoa_don_ban cthb_new
+        INNER JOIN cong_thuc ct ON cthb_new.id_san_pham = ct.id_san_pham
+        WHERE cthb_new.id_hoa_don_ban = p_id_hoa_don
+        GROUP BY ct.id_nguyen_lieu
+    ) AS moi ON nl.id = moi.id_nguyen_lieu
+    SET nl.so_luong_ton = nl.so_luong_ton - moi.tong_tru;
+
+    -- 6: Cập nhật lại tổng tiền
+    SELECT COALESCE(SUM(thanh_tien), 0)
+    INTO v_tong_tien
+    FROM chi_tiet_hoa_don_ban
+    WHERE id_hoa_don_ban = p_id_hoa_don;
+
     UPDATE hoa_don_ban
-    SET tong_tien = (SELECT SUM(thanh_tien) FROM chi_tiet_hoa_don_ban WHERE id_hoa_don_ban = p_id_hoa_don)
+    SET tong_tien = v_tong_tien
     WHERE id = p_id_hoa_don;
+
+    COMMIT;
 END$$
+
 DELIMITER ;
 
 -- DELETE /api/hoadon-ban/delete/:id: Xóa hóa đơn bán (cần xóa chi tiết trước).
@@ -159,9 +288,10 @@ CREATE PROCEDURE GetHoaDonBanByIDBan(
     IN p_id_ban INT
 )
 BEGIN
-    -- Kiểm tra xem bàn có tồn tại và đang ở trạng thái "Đang hoạt động" không
     DECLARE v_ban_hoat_dong INT DEFAULT 0;
+    DECLARE v_id_hoa_don_moi_nhat INT DEFAULT NULL;
 
+    -- Kiểm tra bàn có tồn tại và đang "Đang hoạt động"
     SELECT COUNT(*) INTO v_ban_hoat_dong
     FROM ban
     WHERE id = p_id_ban AND trang_thai = 'Đang hoạt động';
@@ -171,30 +301,40 @@ BEGIN
         SET MESSAGE_TEXT = 'Bàn không tồn tại hoặc không ở trạng thái "Đang hoạt động".';
     END IF;
 
-    -- Lấy thông tin hóa đơn và chi tiết (có thể có nhiều dòng nếu nhiều sản phẩm)
+    -- Lấy ID hóa đơn mới nhất của bàn đó
+    SELECT id INTO v_id_hoa_don_moi_nhat
+    FROM hoa_don_ban
+    WHERE id_ban = p_id_ban
+    ORDER BY id DESC
+    LIMIT 1;
+
+    -- Nếu không có hóa đơn nào → trả rỗng hoặc báo lỗi (tùy bạn)
+    IF v_id_hoa_don_moi_nhat IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bàn đang hoạt động nhưng chưa có hóa đơn nào.';
+    END IF;
+
+    -- Lấy thông tin hóa đơn mới nhất + chi tiết
     SELECT
-        hdb.id AS id_hoa_don_ban,
+		hdb.id,
+        b.id AS id_ban,
+        b.ten_ban,
         hdb.ngay_lap,
         hdb.tong_tien,
         hdb.trang_thai,
-        b.id AS id_ban,
-        b.ten_ban,
         cthdb.id AS id_cthdb,
         cthdb.id_san_pham,
         sp.ten_san_pham,
         cthdb.so_luong,
-        cthdb.don_gia,
-        cthdb.thanh_tien
+        cthdb.don_gia
+
     FROM
-        hoa_don_ban AS hdb
-    INNER JOIN
-        ban AS b ON hdb.id_ban = b.id
-    INNER JOIN
-        chi_tiet_hoa_don_ban AS cthdb ON hdb.id = cthdb.id_hoa_don_ban
-    INNER JOIN
-        san_pham AS sp ON cthdb.id_san_pham = sp.id
+        hoa_don_ban hdb
+    INNER JOIN ban b ON hdb.id_ban = b.id
+    INNER JOIN chi_tiet_hoa_don_ban cthdb ON hdb.id = cthdb.id_hoa_don_ban
+    INNER JOIN san_pham sp ON cthdb.id_san_pham = sp.id
     WHERE
-        b.id = p_id_ban;
+        hdb.id = v_id_hoa_don_moi_nhat;
 END$$
 DELIMITER ;
 

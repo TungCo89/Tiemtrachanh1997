@@ -252,3 +252,101 @@ INSERT INTO chi_tiet_hoa_don_ban (id_hoa_don_ban, id_san_pham, so_luong, don_gia
 (20, 8, 1, 28000, 28000),
 (20, 12, 1, 5000, 5000),
 (20, 13, 1, 7000, 2000); -- Tổng = 70k
+
+-- =============cong thuc==============
+-- Xóa dữ liệu cũ (tuỳ chọn, nếu muốn reset)
+-- DELETE FROM cong_thuc WHERE id_san_pham IN (1,2,3,6,7,8,9,10,11,14,15);
+
+-- 1. Trà Chanh (id=1): Chanh + Đường + Trà Đen
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(1, 2, 0.02),  -- Chanh: 20g = 0.02 kg
+(1, 3, 0.03),  -- Đường: 30g = 0.03 kg
+(1, 1, 0.005); -- Trà Đen: 5g = 0.005 kg
+
+-- 2. Trà Đào Cam Sả (id=2): Trà Đen + Đào + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(2, 1, 0.005), -- Trà Đen: 5g
+(2, 4, 0.20),  -- Đào: 200g = 0.2 kg (đã có)
+(2, 3, 0.04);  -- Đường: 40g
+
+-- 3. Trà Vải (id=3): Trà Đen + Vải + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(3, 1, 0.005),
+(3, 5, 0.20),  -- Vải: 200g
+(3, 3, 0.04);
+
+-- 6. Trà Sữa Truyền Thống (id=6): Trà Đen + Sữa Đặc + Bột Kem Béo + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(6, 1, 0.005),  -- Trà Đen
+(6, 7, 0.03),   -- Sữa Đặc: 30g (~1.5 muỗng)
+(6, 6, 0.02),   -- Bột Kem Béo: 20g
+(6, 3, 0.03);   -- Đường
+
+-- 7. Sữa Tươi Trân Châu Đường Đen (id=7): Sữa Tươi + Bột Kem Béo + Trân Châu (giả sử trân châu có công thức riêng, nhưng ở đây xem như nguyên liệu "sẵn")
+-- Vì Trân Châu (id=12) là sản phẩm, nhưng cũng có thể là nguyên liệu → bạn cần lưu ý cấu trúc.
+-- Tạm thời, chỉ tính phần SỮA TƯƠI:
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(7, 13, 0.20),  -- Sữa Tươi Không Đường: 200ml = 0.2 lít
+(7, 6, 0.02),   -- Bột Kem Béo: 20g
+(7, 3, 0.05);   -- Đường (cho sữa)
+
+-- 8. Trà Sữa Ô Long (id=8): Trà Ô Long + Sữa Đặc + Bột Kem Béo + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(8, 11, 0.005), -- Trà Ô Long: 5g
+(8, 7, 0.03),
+(8, 6, 0.02),
+(8, 3, 0.03);
+
+-- 9. Cà Phê Đen Đá (id=9): Cà Phê Rang Xay
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(9, 8, 0.015);  -- Cà Phê: 15g
+
+-- 10. Cà Phê Sữa Đá (id=10): Cà Phê + Sữa Đặc
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(10, 8, 0.015),
+(10, 7, 0.03);  -- Sữa Đặc: 30g
+
+-- 11. Latte Đá (id=11): Cà Phê + Sữa Tươi
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(11, 8, 0.01),   -- Ít cà phê hơn (espresso đặc)
+(11, 13, 0.25);  -- Sữa Tươi: 250ml
+
+-- 12. Trân Châu Đen (id=12): Bột Năng + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(12, 9, 0.05),  -- Bột Năng: 50g
+(12, 3, 0.02);  -- Đường
+
+-- 13. Thạch Trà Đen (id=13): Bột Năng + Trà Đen + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(13, 9, 0.04),
+(13, 1, 0.003),
+(13, 3, 0.02);
+
+-- 14. Cacao Đá Xay (id=14): Bột Cacao + Sữa Tươi + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(14, 12, 0.02),  -- Bột Cacao: 20g
+(14, 13, 0.20),  -- Sữa Tươi: 200ml
+(14, 3, 0.03);
+
+-- 15. Matcha Latte Nóng (id=15): Bột Matcha + Sữa Tươi + Đường
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
+(15, 14, 0.01),  -- Bột Matcha: 10g
+(15, 13, 0.20),  -- Sữa Tươi
+(15, 3, 0.02);
+
+-- ============đồ ăn vặt=========
+-- Thêm nguyên liệu Hướng Dương (id=20)
+INSERT INTO nguyen_lieu (ten_nguyen_lieu, don_vi, so_luong_ton)
+VALUES ('Hướng Dương', 'gói', 50);
+
+-- Thêm nguyên liệu Khô Gà (id=21)
+INSERT INTO nguyen_lieu (ten_nguyen_lieu, don_vi, so_luong_ton)
+VALUES ('Khô Gà', 'gói', 30);
+
+-- Công thức cho Hướng Dương (id_san_pham = 4)
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong)
+VALUES (4, 15, 1);  -- 1 sản phẩm = 1 gói Hướng Dương
+
+-- Công thức cho Khô Gà (id_san_pham = 5)
+INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong)
+VALUES (5, 16, 1);  -- 1 sản phẩm = 1 gói Khô Gà

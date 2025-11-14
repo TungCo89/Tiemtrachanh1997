@@ -11,8 +11,9 @@ export interface SanPham {
     ten_san_pham: string;
     gia_ban: number;
     mo_ta: string;
-    cong_thuc: CongThucChiTiet[];
+    so_luong_kha_dung?: number;
     id_loai: number;
+    cong_thuc: CongThucChiTiet[];
 }
 
 export interface UpdateSanPhamProps {
@@ -40,6 +41,7 @@ export interface Ban {
     trang_thai: string;
     id_khu_vuc: number;
     ten_khu_vuc: string;
+    trang_thai_hoa_don: 'cho_xac_nhan' | 'da_thanh_toan' | null;
 }
 
 export interface User {

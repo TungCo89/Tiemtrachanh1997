@@ -71,7 +71,7 @@ const Dashboard: React.FC = () => (
                 <Card title="Doanh thu 7 ngày gần nhất" style={{ height: 350 }}>
                     {/* THỰC TẾ: Đặt Biểu đồ (Chart) tại đây */}
                     <div style={{ textAlign: 'center', padding: 50, color: '#999' }}>
-                        [Placeholder: Biểu đồ đường Doanh thu]
+                        [Biểu đồ đường Doanh thu]
                     </div>
                 </Card>
             </Col>

@@ -104,6 +104,7 @@ export class HDBanController {
           thanh_tien: thanhTien,
         };
       });
+      console.log("hoadonban controller",hdbanId,chiTietHoanChinh);
 
       await this.hdbanModal.updateHDBan(hdbanId, chiTietHoanChinh);
 

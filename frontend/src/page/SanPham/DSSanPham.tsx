@@ -154,6 +154,14 @@ const DSSanPham: React.FC = () => {
         },
         { title: 'Mô tả', dataIndex: 'mo_ta', key: 'mo_ta' },
         {
+            title: 'Số lượng khả dụng',
+            dataIndex: 'so_luong_kha_dung',
+            key: 'so_luong_kha_dung',
+            render: (value: number) => {
+                return value ?? 0;
+            }
+        },
+        {
             title: 'Chức năng',
             key: 'action',
             render: (_: any, record: SanPham) => (

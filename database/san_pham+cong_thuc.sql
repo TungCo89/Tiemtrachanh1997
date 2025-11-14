@@ -34,6 +34,7 @@ use tiemtrachanh1997;
 -- SearchSanPham.
 
 DELIMITER $$
+
 CREATE PROCEDURE GetAllSanPham()
 BEGIN
     SELECT
@@ -41,14 +42,25 @@ BEGIN
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
-        lsp.ten_loai
+        lsp.ten_loai,
+        COALESCE(
+            FLOOR(MIN(nl.so_luong_ton / ct.so_luong)),
+            0
+        ) AS so_luong_kha_dung
     FROM
         san_pham sp
-    JOIN
-        loai_san_pham lsp ON sp.id_loai = lsp.id;
+    INNER JOIN
+        loai_san_pham lsp ON sp.id_loai = lsp.id
+    INNER JOIN
+        cong_thuc ct ON sp.id = ct.id_san_pham
+    INNER JOIN
+        nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
+    GROUP BY
+        sp.id, sp.ten_san_pham, sp.gia_ban, sp.mo_ta, lsp.ten_loai;
 END$$
 
 DELIMITER ;
+call GetAllSanPham();
 
 -- GetSPbyID
 DELIMITER $$
@@ -74,34 +86,59 @@ END$$
 DELIMITER ;
 
 -- GetAllSanPhamVaCongThuc
-
-DELIMITER $$
 call GetAllSanPhamVaCongThuc();
+DELIMITER $$
+
 CREATE PROCEDURE GetAllSanPhamVaCongThuc()
 BEGIN
+    -- Tính số lượng khả dụng cho từng sản phẩm
+    WITH SoLuongKhaDung AS (
+        SELECT
+            sp.id AS san_pham_id,
+            COALESCE(
+                FLOOR(MIN(
+                    CASE 
+                        WHEN ct.so_luong > 0 AND nl.so_luong_ton IS NOT NULL 
+                        THEN nl.so_luong_ton / ct.so_luong
+                        ELSE NULL
+                    END
+                )),
+                0
+            ) AS so_luong_kha_dung
+        FROM
+            san_pham sp
+        LEFT JOIN
+            cong_thuc ct ON sp.id = ct.id_san_pham
+        LEFT JOIN
+            nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
+        GROUP BY
+            sp.id
+    )
+    -- Truy vấn chính: chi tiết công thức + số lượng khả dụng
     SELECT
         sp.id,
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
-		lsp.id as id_loai,
+        lsp.id AS id_loai,
         lsp.ten_loai,
         ct.id_nguyen_lieu,
         ct.so_luong,
         nl.ten_nguyen_lieu,
-        nl.don_vi
+        nl.don_vi,
+        skd.so_luong_kha_dung  -- ← Thêm cột này
     FROM
         san_pham sp
-    JOIN
+    INNER JOIN
         loai_san_pham lsp ON sp.id_loai = lsp.id
     LEFT JOIN
         cong_thuc ct ON sp.id = ct.id_san_pham
     LEFT JOIN
         nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
-	ORDER BY
-		sp.id ASC, 
-		lsp.id ASC,
-        sp.ten_san_pham ASC,  
+    LEFT JOIN
+        SoLuongKhaDung skd ON sp.id = skd.san_pham_id
+    ORDER BY
+        sp.id ASC,
         nl.ten_nguyen_lieu ASC;
 END$$
 
@@ -114,11 +151,36 @@ CREATE PROCEDURE GetSanPhamVaCongThucByID(
     IN p_id_san_pham INT
 )
 BEGIN
+-- Tính số lượng khả dụng cho từng sản phẩm
+    WITH SoLuongKhaDung AS (
+        SELECT
+            sp.id AS san_pham_id,
+            COALESCE(
+                FLOOR(MIN(
+                    CASE 
+                        WHEN ct.so_luong > 0 AND nl.so_luong_ton IS NOT NULL 
+                        THEN nl.so_luong_ton / ct.so_luong
+                        ELSE NULL
+                    END
+                )),
+                0
+            ) AS so_luong_kha_dung
+        FROM
+            san_pham sp
+        LEFT JOIN
+            cong_thuc ct ON sp.id = ct.id_san_pham
+        LEFT JOIN
+            nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
+        GROUP BY
+            sp.id
+    )
+    -- Truy vấn chính: chi tiết công thức + số lượng khả dụng
     SELECT
         sp.id,
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
+        skd.so_luong_kha_dung,
 		lsp.id as id_loai,
         lsp.ten_loai,
         ct.id_nguyen_lieu,
@@ -133,6 +195,8 @@ BEGIN
         cong_thuc ct ON sp.id = ct.id_san_pham
     LEFT JOIN
         nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
+	LEFT JOIN
+        SoLuongKhaDung skd ON sp.id = skd.san_pham_id
     WHERE
         sp.id = p_id_san_pham;
 END$$

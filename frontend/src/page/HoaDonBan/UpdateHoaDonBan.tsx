@@ -17,7 +17,7 @@ interface HoaDonBanUpdateValues {
         id_cthdb: number;
         id_san_pham: number;
         so_luong: number;
-        don_ia: number;
+        don_gia: number;
     }[];
 }
 
@@ -161,7 +161,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Hóa đơn BÁN ID: {id}</h2>}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Hóa đơn Bán ID: {id}</h2>}
         >
             <Spin spinning={loading} tip="Đang tải dữ liệu...">
                 <Form

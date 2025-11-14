@@ -22,6 +22,7 @@ export class SanPhamModal {
           mo_ta: row.mo_ta,
           id_loai: row.id_loai,
           ten_loai: row.ten_loai,
+          so_luong_kha_dung: parseInt(row.so_luong_kha_dung, 10) || 0,
           cong_thuc: [],
         });
       }
