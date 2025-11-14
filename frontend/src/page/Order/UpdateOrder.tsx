@@ -1,15 +1,36 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Form, Card, Space, message, Spin, Select, DatePicker, InputNumber, Empty } from 'antd';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
 import { SanPham, Ban, HoaDonBan } from '../../component/interface';
 
-const { Option } = Select;
-const { List } = Form;
+// Giả sử bạn có component InvoicePDF ở đường dẫn này
+import InvoicePDF from '../../component/InvoicePDF';
 
-interface UpdateOrderByBanProps {
+const { Option } = Select;
+interface HoaDonBanUpdateValues {
+    id: number;
+    id_ban: number;
+    ngay_lap: dayjs.Dayjs;
+    tong_tien: number;
+    chi_iet: {
+        id_cthdb: number;
+        id_san_pham: number;
+        so_luong: number;
+        don_gia: number;
+    }[];
+}
+interface ChiTietHoaDonForm {
+    id_cthdb?: number | null;
+    id_san_pham: number;
+    so_luong: number;
+    don_gia: number;
+}
+
+interface UpdateOrderProps {
     idBan: number;
     onClose: () => void;
     onSuccess: () => void;
@@ -17,7 +38,7 @@ interface UpdateOrderByBanProps {
 
 const API_BASE_URL = 'http://localhost:7000/api';
 
-const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSuccess }) => {
+const UpdateOrder: React.FC<UpdateOrderProps> = ({ idBan, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
     const [hoaDon, setHoaDon] = useState<HoaDonBan | null>(null);
@@ -26,7 +47,6 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
     const [bans, setBans] = useState<Ban[]>([]);
     const [isLoadingBan, setIsLoadingBan] = useState(false);
 
-    // Fetch sản phẩm
     const fetchSanPhams = useCallback(async () => {
         setIsLoadingSP(true);
         try {
@@ -48,7 +68,6 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
         }
     }, []);
 
-    // Fetch danh sách bàn (để hiển thị tên bàn)
     const fetchBans = useCallback(async () => {
         setIsLoadingBan(true);
         try {
@@ -70,17 +89,16 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
         }
     }, []);
 
-    // Fetch hóa đơn theo id_ban
     const fetchHoaDonByBanId = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/hoadonban/get-by-IDBan?id=${idBan}`);
             if (response.data.success && response.data.data) {
                 const hd = response.data.data;
                 setHoaDon(hd);
-                // Set form values
-                const parsedNgayLap = hd.ngay_lap ? dayjs(hd.ngay_lap) : null;
+                const INPUT_DATETIME_FORMAT = 'DD/MM/YYYY HH:mm:ss';
+                const parsedNgayLap = dayjs(hd.ngay_lap, INPUT_DATETIME_FORMAT);
                 form.setFieldsValue({
-                    id: hd.id,
                     id_ban: hd.id_ban,
                     ngay_lap: parsedNgayLap,
                     chi_tiet: hd.chi_tiet.map((ct: any) => ({
@@ -108,6 +126,41 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
         fetchHoaDonByBanId();
     }, [idBan, fetchSanPhams, fetchBans]);
 
+    // ========== Xuất PDF ==========
+    const handleExportPDF = async () => {
+        if (!hoaDon) {
+            message.warning('Chưa có hóa đơn để xuất.');
+            return;
+        }
+
+        try {
+            const formattedDate = hoaDon.ngay_lap
+                ? dayjs(hoaDon.ngay_lap, 'DD/MM/YYYY HH:mm:ss').format('HH:mm DD/MM/YYYY')
+                : 'Không xác định';
+            const blob = await pdf(
+                <InvoicePDF
+                    tenCuaHang="TIEM TRA CHANH 1997"
+                    diaChi="Nhu Quynh, Van Lam, Hung Yen"
+                    idHoaDon={hoaDon.id}
+                    ngayLap={formattedDate}
+                    chiTiet={hoaDon.chi_tiet.map(ct => ({
+                        ten_san_pham: ct.ten_san_pham,
+                        so_luong: ct.so_luong,
+                        don_gia: ct.don_gia,
+                        thanh_tien: ct.so_luong * ct.don_gia,
+                    }))}
+                    tongTien={hoaDon.tong_tien}
+                />
+            ).toBlob();
+
+            saveAs(blob, `Hoa_Don_${idBan}_${dayjs().format('YYYYMMDD_HHmm')}.pdf`);
+        } catch (error) {
+            console.error('Lỗi xuất PDF:', error);
+            message.error('Không thể xuất hóa đơn. Vui lòng thử lại.');
+        }
+    };
+
+    // ========== Cập nhật hóa đơn ==========
     const onFinish = async (values: any) => {
         if (!hoaDon) {
             message.error('Không có hóa đơn để cập nhật.');
@@ -116,11 +169,29 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
 
         setLoading(true);
         try {
+            const chiTietChuanHoa = values.chi_tiet.map((item: any) => {
+                const soLuong = Number(item.so_luong);
+                const donGia = Number(item.don_gia);
+                const thanhTien = soLuong * donGia;
+
+                const baseItem = {
+                    id_san_pham: item.id_san_pham,
+                    so_luong: soLuong,
+                    don_gia: donGia,
+                    thanh_tien: thanhTien,
+                };
+
+                if (item.id_cthdb != null) {
+                    return { ...baseItem, id_cthdb: item.id_cthdb };
+                }
+                return baseItem;
+            });
+
             const payload = {
                 id: hoaDon.id,
                 id_ban: values.id_ban,
-                ngay_lap: values.ngay_lap,
-                chi_tiet: values.chi_tiet,
+                ngay_lap: values.ngay_lap ? values.ngay_lap.format('YYYY-MM-DD HH:mm:ss') : null,
+                chi_tiet: chiTietChuanHoa,
             };
 
             const response = await axios.put(`${API_BASE_URL}/hoadonban/update?id=${hoaDon.id}`, payload);
@@ -150,21 +221,17 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
     }
 
     return (
-        <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Hóa đơn - {tenBan}</h2>}
-        >
+        <Card title={<h2 style={{ textAlign: 'center', margin: 0 }}>Hóa đơn - {tenBan}</h2>}>
             {!hoaDon ? (
-                <Empty
-                    description={`${tenBan} chưa có hóa đơn nào.`}
-                    style={{ padding: 20 }}
-                />
+                <Empty description={`${tenBan} chưa có hóa đơn nào.`} style={{ padding: 20 }} />
             ) : (
                 <Form
                     form={form}
-                    name="viewOrUpdateOrderForm"
+                    name="updateOrderForm"
                     layout="vertical"
                     onFinish={onFinish}
                     autoComplete="off"
+                    initialValues={{ chi_tiet: [] }}
                 >
                     <Form.Item label="Bàn" name="id_ban">
                         <Select disabled value={idBan}>
@@ -256,6 +323,17 @@ const UpdateOrder: React.FC<UpdateOrderByBanProps> = ({ idBan, onClose, onSucces
                             style={{ width: '100%', maxWidth: 300 }}
                         >
                             Cập nhật Hóa đơn
+                        </Button>
+                    </Form.Item>
+
+                    <Form.Item style={{ textAlign: 'center', marginTop: 10 }}>
+                        <Button
+                            type="default"
+                            onClick={handleExportPDF}
+                            disabled={!hoaDon}
+                            style={{ width: '100%', maxWidth: 300 }}
+                        >
+                            Xuất Hóa đơn (PDF)
                         </Button>
                     </Form.Item>
                 </Form>
