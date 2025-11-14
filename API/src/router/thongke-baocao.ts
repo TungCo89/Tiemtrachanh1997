@@ -11,5 +11,7 @@ const thongkeController = new ThongKeController(thongkeModal);
 thongkeRouter.get('/doanh-thu', thongkeController.getDoanhThu.bind(thongkeController));
 thongkeRouter.get('/loi-nhuan-so-bo', thongkeController.getLoiNhuanSoBo.bind(thongkeController));
 thongkeRouter.get('/hieu-suat-san-pham', thongkeController.getHieuSuatSanPham.bind(thongkeController));
+thongkeRouter.get('/so-don-hang', thongkeController.getSoDonHang.bind(thongkeController));
+thongkeRouter.get('/ton-kho-nguyen-lieu', thongkeController.getTonKhoNguyenLieu.bind(thongkeController));
 
 export default thongkeRouter;

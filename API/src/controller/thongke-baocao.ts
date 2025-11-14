@@ -71,6 +71,42 @@ export class ThongKeController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+  async getSoDonHang(req: Request, res: Response): Promise<void> {
+    try {
+      const { startDate, endDate } = req.query;
+
+      const data = await this.thongkeModal.getSoDonHang(
+        startDate as string,
+        endDate as string
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Thống kê thành công.",
+        data,
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async getTonKhoNguyenLieu(req: Request, res: Response): Promise<void> {
+    try {
+      const { ten_nguyen_lieu } = req.query;
+
+      const data = await this.thongkeModal.getTonKhoNguyenLieu(
+        ten_nguyen_lieu as string
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Thống kê thành công.",
+        data,
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
 
 export default ThongKeController;

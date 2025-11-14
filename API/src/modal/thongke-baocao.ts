@@ -36,6 +36,15 @@ export interface FormattedHieuSuatSanPhamData {
   tong_so_luong_ban: number;
   tong_doanh_thu_san_pham: number;
 }
+export interface SoDonHangResponse {
+  tong_so_don_hang: number;
+}
+
+export interface TonKhoNguyenLieuResponse {
+  ten_nguyen_lieu: string;
+  so_luong_ton: number;
+  don_vi_tinh: string;
+}
 
 export class ThongKeModal {
   private thongkeRepository: ThongKeRepository;
@@ -86,29 +95,23 @@ export class ThongKeModal {
   ): Promise<FormattedLoiNhuanData[]> {
     this.validateDates(startDate, endDate);
 
-    // 1. Lấy dữ liệu thô và chuẩn hóa 
+    // Lấy dữ liệu thô và chuẩn hóa
     const rawData: RawLoiNhuanData[] =
       await this.thongkeRepository.getLoiNhuanSoBo(startDate, endDate);
     const formattedData: FormattedLoiNhuanData[] = rawData.map((item) => ({
-      ngay: dayjs(item.ngay).format(DATE_FORMAT), 
+      ngay: dayjs(item.ngay).format(DATE_FORMAT),
       tong_doanh_thu: parseFloat(item.tong_doanh_thu),
       tong_chi_phi_nguyen_lieu: parseFloat(item.tong_chi_phi_nguyen_lieu),
       loi_nhuan_so_bo: parseFloat(item.loi_nhuan_so_bo),
     }));
 
-    // 2. Chuyển mảng thành Map để tra cứu nhanh theo ngày
     const dataMap = new Map<string, FormattedLoiNhuanData>();
     formattedData.forEach((item) => {
       dataMap.set(item.ngay, item);
     });
-
-    // 3. Tạo chuỗi ngày đầy đủ
     const fullDateRange = this.generateDateRange(startDate, endDate);
-
-    // 4. Điền dữ liệu
     const finalData: FormattedLoiNhuanData[] = fullDateRange.map((date) => {
       if (dataMap.has(date)) {
-        // Ngày có hóa đơn
         return dataMap.get(date)!;
       } else {
         // Ngày không bán hàng -> điền 0
@@ -144,6 +147,27 @@ export class ThongKeModal {
       tong_so_luong_ban: parseInt(item.tong_so_luong_ban),
       tong_doanh_thu_san_pham: parseFloat(item.tong_doanh_thu_san_pham),
     }));
+  }
+  async getSoDonHang(
+    startDate: string,
+    endDate: string
+  ): Promise<SoDonHangResponse> {
+    this.validateDates(startDate, endDate); 
+
+    const result = await this.thongkeRepository.getSoDonHang(
+      startDate,
+      endDate
+    );
+    return result; 
+  }
+
+  async getTonKhoNguyenLieu(
+    ten_nguyen_lieu: string
+  ): Promise<TonKhoNguyenLieuResponse | null> {
+    const result = await this.thongkeRepository.getTonKhoNguyenLieu(
+      ten_nguyen_lieu
+    );
+    return result || null;
   }
 }
 

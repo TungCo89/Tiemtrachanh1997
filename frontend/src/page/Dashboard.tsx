@@ -1,7 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
-import { Card, Statistic, Row, Col, Space, Progress, Button } from 'antd';
+import { Card, Statistic, Row, Col, Space, Progress } from 'antd';
 import { ShoppingCartOutlined, DollarCircleOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+} from 'recharts';
+
+// Dữ liệu mẫu: Doanh thu 7 ngày gần nhất
+const revenueData = [
+    { date: '10/11', revenue: 450000 },
+    { date: '11/11', revenue: 620000 },
+    { date: '12/11', revenue: 580000 },
+    { date: '13/11', revenue: 720000 },
+    { date: '14/11', revenue: 578000 },
+    { date: '15/11', revenue: 630000 },
+    { date: '16/11', revenue: 680000 },
+];
 
 const Dashboard: React.FC = () => (
     <div style={{ padding: 24, background: '#f0f2f5' }}>
@@ -9,7 +29,6 @@ const Dashboard: React.FC = () => (
 
         {/* -------------------- 1. KHU VỰC KPI CHÍNH (KEY METRICS) -------------------- */}
         <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
-            
             {/* KPI 1: Doanh thu hôm nay */}
             <Col xs={24} sm={12} lg={6}>
                 <Card hoverable style={{ borderLeft: '5px solid #1890ff' }}>
@@ -37,7 +56,7 @@ const Dashboard: React.FC = () => (
                 </Card>
             </Col>
 
-            {/* KPI 3: Lợi nhuận gộp (Ví dụ) */}
+            {/* KPI 3: Lợi nhuận gộp */}
             <Col xs={24} sm={12} lg={6}>
                 <Card hoverable style={{ borderLeft: '5px solid #faad14' }}>
                     <Statistic
@@ -63,15 +82,32 @@ const Dashboard: React.FC = () => (
                 </Card>
             </Col>
         </Row>
-        
+
         {/* -------------------- 2. BIỂU ĐỒ VÀ THỐNG KÊ CHI TIẾT -------------------- */}
         <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
-            {/* Col 1: Biểu đồ Doanh thu (Placeholder) */}
+            {/* Col 1: Biểu đồ Doanh thu */}
             <Col xs={24} lg={16}>
                 <Card title="Doanh thu 7 ngày gần nhất" style={{ height: 350 }}>
-                    {/* THỰC TẾ: Đặt Biểu đồ (Chart) tại đây */}
-                    <div style={{ textAlign: 'center', padding: 50, color: '#999' }}>
-                        [Biểu đồ đường Doanh thu]
+                    <div style={{ width: '100%', height: '100%' }}>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart
+                                data={revenueData}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />
+                                <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} VNĐ`, 'Doanh thu']} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#1890ff"
+                                    strokeWidth={2}
+                                    dot={{ r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </Card>
             </Col>
@@ -87,7 +123,6 @@ const Dashboard: React.FC = () => (
                 </Card>
             </Col>
         </Row>
-        
     </div>
 );
 

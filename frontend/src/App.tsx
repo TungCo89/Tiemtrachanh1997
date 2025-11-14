@@ -19,7 +19,7 @@ const App = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Navigate replace to="/admin" />} />
+                <Route path="/" element={<Navigate replace to="/dangnhap" />} />
                 <Route path="dangky" element={<DangKy />} />
                 <Route path="dangnhap" element={<DangNhap />} />
                 <Route path="/admin" element={<AdminLayout />}>

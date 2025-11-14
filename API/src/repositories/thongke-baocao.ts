@@ -9,12 +9,6 @@ export class ThongKeRepository {
     this.db = db;
   }
 
-  /**
-   * Lấy Doanh Thu theo khoảng thời gian
-   * @param startDate Ngày bắt đầu (YYYY-MM-DD)
-   * @param endDate Ngày kết thúc (YYYY-MM-DD)
-   * @returns Mảng kết quả từ DB
-   */
   
   async getDoanhThuByDateRange(
     startDate: string,
@@ -28,12 +22,6 @@ export class ThongKeRepository {
     return [];
   }
 
-  /**
-   * Lấy Lợi Nhuận Sơ Bộ theo khoảng thời gian
-   * @param startDate Ngày bắt đầu (YYYY-MM-DD)
-   * @param endDate Ngày kết thúc (YYYY-MM-DD)
-   * @returns Mảng kết quả từ DB
-   */
   async getLoiNhuanSoBo(startDate: string, endDate: string): Promise<any> {
     const sql = "CALL GetLoiNhuanSoBo(?, ?)";
     const [results] = await this.db.query(sql, [startDate, endDate]);
@@ -42,14 +30,6 @@ export class ThongKeRepository {
     }
     return [];
   }
-
-  /**
-   * Lấy Hiệu Suất Sản Phẩm (Sản phẩm bán chạy)
-   * @param startDate Ngày bắt đầu (YYYY-MM-DD)
-   * @param endDate Ngày kết thúc (YYYY-MM-DD)
-   * @param topN Số lượng sản phẩm top muốn lấy
-   * @returns Mảng kết quả từ DB
-   */
   async getHieuSuatSanPham(
     startDate: string,
     endDate: string,
@@ -57,6 +37,27 @@ export class ThongKeRepository {
   ): Promise<any> {
     const sql = "CALL GetHieuSuatSanPham(?, ?, ?)";
     const [results] = await this.db.query(sql, [startDate, endDate, topN]);
+    if (Array.isArray(results)) {
+      return results[0];
+    }
+    return [];
+  }
+    async getSoDonHang(
+    startDate: string,
+    endDate: string,
+  ): Promise<any> {
+    const sql = "CALL GetSoDonHangByDateRange(?, ?)";
+    const [results] = await this.db.query(sql, [startDate, endDate]);
+    if (Array.isArray(results)) {
+      return results[0];
+    }
+    return [];
+  }
+    async getTonKhoNguyenLieu(
+    ten_nguyen_lieu: string,
+  ): Promise<any> {
+    const sql = "CALL GetTonKhoNguyenLieu(?)";
+    const [results] = await this.db.query(sql, [ten_nguyen_lieu]);
     if (Array.isArray(results)) {
       return results[0];
     }
