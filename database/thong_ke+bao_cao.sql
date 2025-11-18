@@ -129,4 +129,48 @@ END$$
 DELIMITER ;
 CALL GetHieuSuatSanPham('2025-09-01', '2025-09-30', 5);
 
+DELIMITER $$
+
+CREATE PROCEDURE GetSoDonHangByDateRange(
+    IN p_start_date DATE,
+    IN p_end_date DATE
+)
+BEGIN
+    SELECT 
+        COUNT(id) AS tong_so_don_hang
+    FROM 
+        hoa_don_ban
+    WHERE 
+        ngay_lap BETWEEN p_start_date AND DATE_ADD(p_end_date, INTERVAL 1 DAY)
+        AND trang_thai = 'da_thanh_toan'; -- Chỉ đếm đơn hàng đã thanh toán
+END$$
+
+DELIMITER ;
+
+-- Ví dụ gọi:
+-- CALL GetSoDonHangByDateRange(CURRENT_DATE(), CURRENT_DATE());
+
+DELIMITER $$
+
+CREATE PROCEDURE GetTonKhoNguyenLieu(
+    IN p_ten_nguyen_lieu VARCHAR(255)
+)
+BEGIN
+    SELECT 
+        nl.ten_nguyen_lieu,
+        tk.so_luong_ton,
+        nl.don_vi_tinh -- Ví dụ: kg, lít, gói
+    FROM 
+        ton_kho AS tk
+    JOIN 
+        nguyen_lieu AS nl ON tk.id_nguyen_lieu = nl.id
+    WHERE 
+        nl.ten_nguyen_lieu = p_ten_nguyen_lieu
+    LIMIT 1;
+END$$
+
+DELIMITER ;
+
+-- Ví dụ gọi:
+-- CALL GetTonKhoNguyenLieu('Trà Sữa'); -- Giả định 'Trà Sữa' là tên nguyên liệu
 -- Procedure: GetDoanhThuByDateRange, GetLoiNhuanSoBo, GetHieuSuatSanPham.
