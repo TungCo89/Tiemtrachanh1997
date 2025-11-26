@@ -161,7 +161,7 @@ const AdminLayout: React.FC = () => {
             </Sider>
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: 24 }}>
-                    {/* Nút Toggle Sidebar */}
+                    
                     <Button
                         type="text"
                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -169,7 +169,7 @@ const AdminLayout: React.FC = () => {
                         style={{ fontSize: '16px', width: 64, height: 64 }}
                     />
                     
-                    {/* Tên người dùng và Dropdown Profile */}
+                    {/* Tên người dùng và Profile */}
                     <Dropdown menu={{ items: profileMenuItems }} trigger={['click']} placement="bottomRight">
                         <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                             <Space size="middle">

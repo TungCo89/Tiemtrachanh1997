@@ -158,6 +158,11 @@ const DSBan: React.FC = () => {
         setIsAddModalOpen(false);
         setEditingItemId(null);
     };
+    const handleSuccess = () => {
+        setEditingItemId(null);
+        setDataToEdit(null);
+        fetchBanData();
+    };
 
     const filteredBanData = useMemo(() => {
         if (!searchText) return danhSachBan;
@@ -197,8 +202,9 @@ const DSBan: React.FC = () => {
         }
     };
 
-    const handleDelete = (id: number) => {
-        // API call
+    const handleDelete = async (id: number) => {
+        // API 
+        const response = await axios.delete(`http://localhost:7000/api/ban/delete?id=${id}`);
         setDanhSachBan(prev => prev.filter(b => b.id !== id));
         message.success(`Đã xóa Bàn ID: ${id}`);
     };
@@ -416,7 +422,8 @@ const DSBan: React.FC = () => {
                 onCancel={handleCancel}
                 footer={null}
             >
-                <AddBan onCancel={handleCancel} />
+                <AddBan onCancel={handleCancel}
+                    onSuccess={handleSuccess} />
             </Modal>
 
             {/* 5. MODAL CẬP NHẬT */}
