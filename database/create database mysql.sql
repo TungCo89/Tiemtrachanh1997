@@ -23,7 +23,8 @@ CREATE TABLE nha_cung_cap (
 CREATE TABLE nguyen_lieu (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ten_nguyen_lieu VARCHAR(100) NOT NULL,
-    don_vi VARCHAR(20)
+    don_vi VARCHAR(20),
+    so_luong_ton DECIMAL(15,2) default 0
 );
 
 -- Bảng loại sản phẩm

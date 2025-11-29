@@ -124,7 +124,7 @@ const AdminLayout: React.FC = () => {
             children: [
                 { key: '/admin/loaisanpham', icon: <TableOutlined />, label: 'Danh mục Loại SP', requiredRole: [ROLE_ADMIN] },
                 { key: '/admin/sanpham', icon: <TableOutlined />, label: 'Quản lý Sản phẩm', requiredRole: [ROLE_ADMIN, ROLE_STAFF] },
-                { key: '/admin/nguyenlieu', icon: <TableOutlined />, label: 'Quản lý Nguyên liệu', requiredRole: [ROLE_ADMIN] },
+                { key: '/admin/nguyenlieu', icon: <TableOutlined />, label: 'Quản lý Nguyên liệu', requiredRole: [ROLE_ADMIN, ROLE_STAFF] },
             ],
         },
 

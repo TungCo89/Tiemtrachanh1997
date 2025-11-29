@@ -64,11 +64,12 @@ export class NguyenLieuRepository {
   async updateNguyenLieu(
     id: number,
     ten_nguyen_lieu: string,
-    don_vi: number
+    don_vi: number,
+    so_luong_ton: number
   ): Promise<void> {
-    console.log("du lieu nguyenlieu.res", ten_nguyen_lieu, don_vi);
-    const sql = "CALL UpdateNguyenLieu(?, ?, ?)"; //
-    await this.db.query(sql, [id, ten_nguyen_lieu, don_vi]);
+    console.log("du lieu nguyenlieu.res", ten_nguyen_lieu, don_vi, so_luong_ton);
+    const sql = "CALL UpdateNguyenLieu(?, ?, ?, ?)"; 
+    await this.db.query(sql, [id, ten_nguyen_lieu, don_vi, so_luong_ton]);
   }
 
   async deleteNguyenLieu(id: number): Promise<void> {

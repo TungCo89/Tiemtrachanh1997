@@ -73,6 +73,7 @@ export interface NguyenLieu {
     id: number;
     ten_nguyen_lieu: string;
     don_vi: string;
+    so_luong_ton?: number;
 }
 export interface CongThuc {
     id: number;

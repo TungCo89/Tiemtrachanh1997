@@ -32,7 +32,7 @@ use tiemtrachanh1997;
 -- GetSanPhamVaCongThucByID (Cần kết hợp san_pham và cong_thuc).
 
 -- SearchSanPham.
-
+call GetAllSanPham();
 DELIMITER $$
 
 CREATE PROCEDURE GetAllSanPham()
@@ -83,7 +83,6 @@ BEGIN
         sp.id = p_id_san_pham;
 END$$
 
-DELIMITER ;
 
 -- GetAllSanPhamVaCongThuc
 call GetAllSanPhamVaCongThuc();
@@ -91,42 +90,38 @@ DELIMITER $$
 
 CREATE PROCEDURE GetAllSanPhamVaCongThuc()
 BEGIN
-    -- Tính số lượng khả dụng cho từng sản phẩm
+    -- 1. Tính số lượng khả dụng cho từng sản phẩm 
     WITH SoLuongKhaDung AS (
         SELECT
             sp.id AS san_pham_id,
             COALESCE(
                 FLOOR(MIN(
-                    CASE 
-                        WHEN ct.so_luong > 0 AND nl.so_luong_ton IS NOT NULL 
-                        THEN nl.so_luong_ton / ct.so_luong
-                        ELSE NULL
-                    END
+                    nl.so_luong_ton / NULLIF(ct.so_luong, 0)
                 )),
                 0
             ) AS so_luong_kha_dung
         FROM
             san_pham sp
-        LEFT JOIN
+        INNER JOIN
             cong_thuc ct ON sp.id = ct.id_san_pham
         LEFT JOIN
             nguyen_lieu nl ON ct.id_nguyen_lieu = nl.id
         GROUP BY
             sp.id
     )
-    -- Truy vấn chính: chi tiết công thức + số lượng khả dụng
+    
+    -- 2. Truy vấn chính: Lấy chi tiết công thức và JOIN kết quả tính toán
     SELECT
         sp.id,
         sp.ten_san_pham,
         sp.gia_ban,
         sp.mo_ta,
-        lsp.id AS id_loai,
         lsp.ten_loai,
         ct.id_nguyen_lieu,
         ct.so_luong,
         nl.ten_nguyen_lieu,
         nl.don_vi,
-        skd.so_luong_kha_dung  -- ← Thêm cột này
+        skd.so_luong_kha_dung 
     FROM
         san_pham sp
     INNER JOIN

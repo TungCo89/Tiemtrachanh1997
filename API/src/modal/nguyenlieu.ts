@@ -34,7 +34,8 @@ export class NguyenLieuModal {
   async updateNguyenLieu(
     id: number,
     ten_nguyen_lieu: string,
-    don_vi: number
+    don_vi: number,
+    so_luong_ton : number
   ): Promise<void> {
     if (!id || !ten_nguyen_lieu || !don_vi) {
       throw new Error("Dữ liệu cập nhật không hợp lệ.");
@@ -43,7 +44,8 @@ export class NguyenLieuModal {
     await this.nguyenlieuRepository.updateNguyenLieu(
       id,
       ten_nguyen_lieu,
-      don_vi
+      don_vi,
+      so_luong_ton
     );
   }
 

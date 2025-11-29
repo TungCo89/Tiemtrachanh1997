@@ -86,14 +86,14 @@ export class NguyenLieuController {
     try {
       const { id } = req.query;
       const ID = Number(id);
-      const { ten_nguyen_lieu, don_vi } = req.body;
+      const { ten_nguyen_lieu, don_vi, so_luong_ton } = req.body;
 
       if (isNaN(ID)) {
         res.status(400).json({ message: "ID không hợp lệ." });
         return;
       }
 
-      await this.nguyenlieuModal.updateNguyenLieu(ID, ten_nguyen_lieu, don_vi);
+      await this.nguyenlieuModal.updateNguyenLieu(ID, ten_nguyen_lieu, don_vi, so_luong_ton);
 
       res.status(200).json({
         success: true,

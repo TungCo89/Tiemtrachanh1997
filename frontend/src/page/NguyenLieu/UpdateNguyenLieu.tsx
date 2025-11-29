@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Card, Space, message, Spin } from 'antd';
+import { Button, Form, Input, Card, Space, message, Spin, InputNumber } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { NguyenLieu } from '../../component/interface';
@@ -8,6 +8,7 @@ import { NguyenLieu } from '../../component/interface';
 interface NguyenLieuUpdateValues {
     ten_nguyen_lieu: string;
     don_vi: string;
+    so_luong_ton: number;
 }
 interface UpdateNguyenLieuProps {
     id: number;
@@ -29,7 +30,7 @@ const UpdateNguyenLieu: React.FC<UpdateNguyenLieuProps> = ({ id, initialData, on
                 id: initialData.id,
                 ten_nguyen_lieu: initialData.ten_nguyen_lieu,
                 don_vi: initialData.don_vi,
-
+                so_luong_ton: initialData.so_luong_ton,
             });
             setLoading(false);
         } else {
@@ -43,6 +44,7 @@ const UpdateNguyenLieu: React.FC<UpdateNguyenLieuProps> = ({ id, initialData, on
             const payload: NguyenLieuUpdateValues = {
                 ten_nguyen_lieu: values.ten_nguyen_lieu,
                 don_vi: values.don_vi,
+                so_luong_ton: values.so_luong_ton
             };
 
             const response = await axios.put(`${API_BASE_URL}/update?id=${id}`, payload);
@@ -92,6 +94,13 @@ const UpdateNguyenLieu: React.FC<UpdateNguyenLieuProps> = ({ id, initialData, on
                     rules={[{ required: true, message: 'Vui lòng nhập tên nguyên liệu!' }]}
                 >
                     <Input placeholder="Nhập tên nguyên liệu" />
+                </Form.Item>
+                <Form.Item
+                    label="Số lượng tồn"
+                    name="so_luong_ton"
+                    rules={[{ required: true, message: 'Chọn số lượng' }]}
+                >
+                    <InputNumber min={0.01} placeholder="SL" />
                 </Form.Item>
 
                 {/* Trường Đơn vị */}

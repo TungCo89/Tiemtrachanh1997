@@ -131,6 +131,11 @@ const DSNguyenLieu: React.FC = () => {
             key: 'ten_nguyen_lieu',
         },
         {
+            title: 'Số lượng tồn',
+            dataIndex: 'so_luong_ton',
+            key: 'so_luong_ton',
+        },
+        {
             title: 'Đơn vị đo',
             dataIndex: 'don_vi',
             key: 'don_vi',

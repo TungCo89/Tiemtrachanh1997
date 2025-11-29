@@ -7,7 +7,8 @@ BEGIN
     SELECT
         id,
         ten_nguyen_lieu,
-        don_vi
+        don_vi.
+        so_luong_ton
     FROM
         nguyen_lieu ;
 END$$
@@ -22,7 +23,8 @@ BEGIN
     SELECT
         id,
         ten_nguyen_lieu,
-        don_vi
+        don_vi,
+        so_luong_ton
     FROM
         nguyen_lieu 
     WHERE
@@ -128,13 +130,15 @@ DELIMITER $$
 CREATE PROCEDURE UpdateNguyenLieu(
     IN p_id INT,
     IN p_ten_nguyen_lieu VARCHAR(100),
-    IN p_don_vi VARCHAR(20)
+    IN p_don_vi VARCHAR(20),
+    In p_so_luong_ton VARCHAR(20)
 )
 BEGIN
     UPDATE nguyen_lieu
     SET
 		ten_nguyen_lieu = p_ten_nguyen_lieu,
-        don_vi = p_don_vi
+        don_vi = p_don_vi,
+        so_luong_ton = p_so_luong_ton
     WHERE
         id = p_id;
 END$$
