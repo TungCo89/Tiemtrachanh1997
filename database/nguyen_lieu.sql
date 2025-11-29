@@ -120,8 +120,8 @@ CREATE PROCEDURE CreateNguyeLieu(
     IN p_don_vi VARCHAR(20)
 )
 BEGIN
-    INSERT INTO nguyen_lieu (p_ten_nguyen_lieu,p_don_vi)
-    VALUES (ten_nguyen_lieu,don_vi);
+    INSERT INTO nguyen_lieu (ten_nguyen_lieu, don_vi, so_luong_ton)
+    VALUES (p_ten_nguyen_lieu,p_don_vi,0);
 END$$
 DELIMITER ;
 

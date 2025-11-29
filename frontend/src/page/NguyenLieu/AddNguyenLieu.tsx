@@ -30,11 +30,11 @@ const AddNguyenLieu:  React.FC<AddNguyenLieuProps> = ({ onClose, onSuccess }) =>
             const response = await axios.post(`${API_BASE_URL}/create`, payload);
 
             if (response.data.success) {
-                message.success(`Đã thêm sản phẩm thành công.`);
+                message.success(`Đã thêm nguyên liệu thành công.`);
                 form.resetFields();
                 onSuccess();
             } else {
-                message.error(response.data.message || 'Lỗi khi thêm sản phẩm.');
+                message.error(response.data.message || 'Lỗi khi thêm nguyên liệu.');
             }
         } catch (error) {
             console.error('Lỗi API Create:', error);
