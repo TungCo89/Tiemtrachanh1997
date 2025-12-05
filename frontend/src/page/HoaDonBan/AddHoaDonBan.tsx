@@ -103,7 +103,7 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onClose, onSuccess }) => {
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Hóa đơn Bán</h2>}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm hóa đơn bán</h2>}
         >
             <Form
                 form={form}
@@ -231,7 +231,7 @@ const AddHoaDonBan: React.FC<AddHoaDonBanProps> = ({ onClose, onSuccess }) => {
                         loading={loading}
                         style={{ width: '100%', maxWidth: 300 }}
                     >
-                        Thêm Hóa Đơn
+                        Thêm hóa đơn
                     </Button>
                 </Form.Item>
             </Form>

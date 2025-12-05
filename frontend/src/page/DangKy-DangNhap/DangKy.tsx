@@ -94,7 +94,7 @@ const DangKy: React.FC = () => {
                 transition: 'all 0.3s ease',
             }}>
                 <Title level={3} style={{ textAlign: 'center', marginBottom: '30px' }}>
-                    Đăng Ký Tài Khoản
+                    Đăng ký tài khoản
                 </Title>
 
                 <Form

@@ -158,7 +158,7 @@ const DSLoaiSanPham: React.FC = () => {
 
     return (
         <div>
-            <h2>Quản Lý Danh Mục Sản Phẩm</h2>
+            <h2>Quản lý loại sản phẩm</h2>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                 <Search

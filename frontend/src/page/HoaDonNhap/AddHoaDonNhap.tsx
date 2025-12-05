@@ -100,7 +100,7 @@ const AddHoaDonNhap: React.FC<AddHoaDonNhapProps> = ({ onClose, onSuccess }) => 
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm Hóa đơn Nhập</h2>}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Thêm hóa đơn nhập</h2>}
         >
             <Form
                 form={form}

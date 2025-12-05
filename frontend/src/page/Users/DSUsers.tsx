@@ -41,7 +41,7 @@ const DSUsers: React.FC = () => {
         }
     }, []);
 
-    // Hàm gọi API lấy chi tiết người dùng (dùng cho chỉnh sửa)
+    // Hàm gọi API lấy chi tiết người dùng 
     const fetchUserById = async (id: number) => {
         setLoading(true);
         try {

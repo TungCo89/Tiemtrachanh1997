@@ -25,9 +25,9 @@ const revenueData = [
 
 const Dashboard: React.FC = () => (
     <div style={{ padding: 24, background: '#f0f2f5' }}>
-        <h1 style={{ marginBottom: 24 }}>Dashboard Tổng quan bán hàng 📈</h1>
+        <h1 style={{ marginBottom: 24 }}>Dashboard tổng quan bán hàng 📈</h1>
 
-        {/* -------------------- 1. KHU VỰC KPI CHÍNH (KEY METRICS) -------------------- */}
+        {/* -------------------- 1. KHU VỰC KPI CHÍNH  -------------------- */}
         <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
             {/* KPI 1: Doanh thu hôm nay */}
             <Col xs={24} sm={12} lg={6}>

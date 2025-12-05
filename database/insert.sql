@@ -86,12 +86,12 @@ INSERT INTO ban (ten_ban, id_khu_vuc) VALUES
 
 -- Thêm dữ liệu vào bảng Công thức
 INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
-(1, 1, 0.05), -- Trà chanh cần 0.05kg Trà đen
-(1, 2, 0.1),  -- Trà chanh cần 0.1kg Chanh
+(1, 1, 0.05), 
+(1, 2, 0.1),  
 (1, 3, 0.05), -- Trà chanh cần 0.05kg Đường
-(2, 1, 0.05), -- Trà đào cần 0.05kg Trà đen
-(2, 4, 0.2),  -- Trà đào cần 0.2kg Đào
-(2, 3, 0.05); -- Trà đào cần 0.05kg Đường
+(2, 1, 0.05), 
+(2, 4, 0.2),  
+(2, 3, 0.05); 
 
 -- Thêm dữ liệu vào bảng Hóa đơn bán và Chi tiết hóa đơn bán
 INSERT INTO hoa_don_ban (id_ban, ngay_lap, tong_tien) VALUES
@@ -282,9 +282,8 @@ INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
 (6, 6, 0.02),   -- Bột Kem Béo: 20g
 (6, 3, 0.03);   -- Đường
 
--- 7. Sữa Tươi Trân Châu Đường Đen (id=7): Sữa Tươi + Bột Kem Béo + Trân Châu (giả sử trân châu có công thức riêng, nhưng ở đây xem như nguyên liệu "sẵn")
--- Vì Trân Châu (id=12) là sản phẩm, nhưng cũng có thể là nguyên liệu → bạn cần lưu ý cấu trúc.
--- Tạm thời, chỉ tính phần SỮA TƯƠI:
+-- 7. Sữa Tươi Trân Châu Đường Đen (id=7): Sữa Tươi + Bột Kem Béo + Trân Châu 
+
 INSERT INTO cong_thuc (id_san_pham, id_nguyen_lieu, so_luong) VALUES
 (7, 13, 0.20),  -- Sữa Tươi Không Đường: 200ml = 0.2 lít
 (7, 6, 0.02),   -- Bột Kem Béo: 20g

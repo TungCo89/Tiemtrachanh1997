@@ -93,7 +93,7 @@ const AddOrder: React.FC<AddOrderProps> = ({ id_ban, onClose, onSuccess }) => {
     <Card
       title={
         <h2 style={{ textAlign: 'center', margin: 0 }}>
-          Tạo hóa đơn cho Bàn {id_ban}
+          Tạo hóa đơn cho bàn {id_ban}
         </h2>
       }
     >

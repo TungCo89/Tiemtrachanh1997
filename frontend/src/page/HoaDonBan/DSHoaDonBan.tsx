@@ -193,7 +193,7 @@ const DSHoaDonBan: React.FC = () => {
 
     return (
         <div>
-            <h2>Quản Lý Hóa Đơn Bán</h2>
+            <h2>Quản lý hóa đơn bán</h2>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                 <Search
@@ -239,7 +239,7 @@ const DSHoaDonBan: React.FC = () => {
 
             {/* Modal Xem Chi Tiết Hóa Đơn */}
             <Modal
-                title={`Chi Tiết Hóa Đơn: ${selectedHoaDon?.id || 'Chi tiết hóa đơn bán'}`}
+                title={`Chi tiết hóa đơn: ${selectedHoaDon?.id || 'Chi tiết hóa đơn bán'}`}
                 open={isFormulaModalOpen}
                 onCancel={() => {
                     setIsFormulaModalOpen(false);

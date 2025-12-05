@@ -193,7 +193,7 @@ const DSHoaDonNhap: React.FC = () => {
 
     return (
         <div>
-            <h2>Quản Lý Hóa Đơn Nhập</h2>
+            <h2>Quản lý hóa đơn nhập</h2>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                 <Search
@@ -216,7 +216,7 @@ const DSHoaDonNhap: React.FC = () => {
 
             {/* MODAL CHUNG CHO THÊM VÀ SỬA */}
             <Modal
-                title={editingItemId ? "Cập nhật Hóa đơn" : "Thêm mới Hóa đơn"}
+                title={editingItemId ? "Cập nhật hóa đơn" : "Thêm mới hóa đơn"}
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
                 footer={null}
@@ -239,7 +239,7 @@ const DSHoaDonNhap: React.FC = () => {
 
             {/* Modal Xem Chi Tiết Hóa Đơn */}
             <Modal
-                title={`Chi Tiết Hóa Đơn Nhập: ${selectedHoaDon?.id || 'Chi tiết hóa đơn nhập'}`}
+                title={`Chi tiết hóa đơn nhập: ${selectedHoaDon?.id || 'Chi tiết hóa đơn nhập'}`}
                 open={isFormulaModalOpen}
                 onCancel={() => {
                     setIsFormulaModalOpen(false);

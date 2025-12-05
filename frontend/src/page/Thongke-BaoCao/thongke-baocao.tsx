@@ -65,9 +65,9 @@ const ThongKeBaoCao: React.FC = () => {
     const [hieuSuatSPData, setHieuSuatSPData] = useState<HieuSuatSanPhamData[]>([]);
     const [topN, setTopN] = useState<number>(5);
 
-    const totalRevenue = loiNhuanData?.reduce((sum, item) => sum + item.tong_doanh_thu, 0) || 0;
-    const totalProfit = loiNhuanData?.reduce((sum, item) => sum + item.loi_nhuan_so_bo, 0) || 0;
-    const chiPhiNguyenLieu = totalRevenue - totalProfit;
+    const totalDoanhThu = loiNhuanData?.reduce((sum, item) => sum + item.tong_doanh_thu, 0) || 0;
+    const totalLoiNhuan = loiNhuanData?.reduce((sum, item) => sum + item.loi_nhuan_so_bo, 0) || 0;
+    const chiPhiNguyenLieu = totalDoanhThu - totalLoiNhuan;
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -95,7 +95,7 @@ const ThongKeBaoCao: React.FC = () => {
         const wb = XLSX.utils.book_new();
 
         const loiNhuanSheetName = "Loi_Nhuan_So_Bo";
-        const loiNhuanHeader = ["Ngày", "Doanh Thu (VNĐ)", "Chi Phí Nguyên Liệu (VNĐ)", "Lợi Nhuận Sơ Bộ (VNĐ)"];
+        const loiNhuanHeader = ["Ngày", "Doanh thu (VNĐ)", "Chi phí nguyên liệu (VNĐ)", "Lợi nhuận sơ bộ (VNĐ)"];
 
         const loiNhuanDataForExport = loiNhuanData.map(item => [
             item.ngay,
@@ -108,7 +108,7 @@ const ThongKeBaoCao: React.FC = () => {
         XLSX.utils.book_append_sheet(wb, loiNhuanWorksheet, loiNhuanSheetName);
 
         const hieuSuatSheetName = "Hieu_Suat_San_Pham_Top_" + topN;
-        const hieuSuatHeader = ["Sản Phẩm", "Loại", "Số Lượng Bán", "Doanh Thu (VNĐ)"];
+        const hieuSuatHeader = ["Sản phẩm", "Loại", "Số lượng bán", "Doanh thu (VNĐ)"];
 
         const hieuSuatDataForExport = hieuSuatSPData.map(item => [
             item.ten_san_pham,
@@ -148,7 +148,7 @@ const ThongKeBaoCao: React.FC = () => {
         labels: loiNhuanData?.map(item => dayjs(item.ngay).format('DD/MM')) || [],
         datasets: [
             {
-                label: 'Doanh Thu',
+                label: 'Doanh thu',
                 data: loiNhuanData?.map(item => item.tong_doanh_thu) || [],
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -156,7 +156,7 @@ const ThongKeBaoCao: React.FC = () => {
                 tension: 0.3,
             },
             {
-                label: 'Lợi Nhuận Sơ Bộ',
+                label: 'Lợi nhuận sơ bộ',
                 data: loiNhuanData?.map(item => item.loi_nhuan_so_bo) || [],
                 borderColor: 'rgb(53, 162, 235)',
                 backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -170,7 +170,7 @@ const ThongKeBaoCao: React.FC = () => {
         labels: hieuSuatSPData?.map(item => item.ten_san_pham) || [],
         datasets: [
             {
-                label: 'Doanh Thu Sản Phẩm (VNĐ)',
+                label: 'Doanh thu sản phẩm (VNĐ)',
                 data: hieuSuatSPData?.map(item => item.tong_doanh_thu_san_pham) || [],
                 backgroundColor: 'rgba(75, 192, 192, 0.8)',
                 order: 1,
@@ -185,17 +185,17 @@ const ThongKeBaoCao: React.FC = () => {
     };
 
     const productColumns = [
-        { title: 'Sản Phẩm', dataIndex: 'ten_san_pham', key: 'ten_san_pham' },
+        { title: 'Sản phẩm', dataIndex: 'ten_san_pham', key: 'ten_san_pham' },
         { title: 'Loại', dataIndex: 'ten_loai', key: 'ten_loai' },
         {
-            title: 'Số Lượng Bán',
+            title: 'Số lượng bán',
             dataIndex: 'tong_so_luong_ban',
             key: 'tong_so_luong_ban',
             sorter: (a: HieuSuatSanPhamData, b: HieuSuatSanPhamData) => a.tong_so_luong_ban - b.tong_so_luong_ban,
             align: 'right' as const
         },
         {
-            title: 'Doanh Thu',
+            title: 'Doanh thu',
             dataIndex: 'tong_doanh_thu_san_pham',
             key: 'tong_doanh_thu_san_pham',
             render: (text: number) => `${text.toLocaleString('vi-VN')} VNĐ`,
@@ -206,12 +206,12 @@ const ThongKeBaoCao: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            <Title level={2} style={{ marginBottom: 20 }}>Báo Cáo Thống Kê Kinh Doanh</Title>
+            <Title level={2} style={{ marginBottom: 20 }}>Báo cáo thống kê kinh doanh</Title>
 
             <Card style={{ marginBottom: 20 }}>
                 <Row gutter={16} align="middle">
                     <Col>
-                        Chọn Khoảng Thời Gian:
+                        Chọn khoảng thời gian:
                     </Col>
                     <Col>
                         <RangePicker
@@ -241,8 +241,8 @@ const ThongKeBaoCao: React.FC = () => {
                     <Col span={8}>
                         <Card >
                             <Statistic
-                                title="Tổng Doanh Thu"
-                                value={totalRevenue}
+                                title="Tổng doanh thu"
+                                value={totalDoanhThu}
                                 precision={0}
                                 valueStyle={{ color: '#3f8600' }}
                                 prefix={<ArrowUpOutlined />}
@@ -253,11 +253,11 @@ const ThongKeBaoCao: React.FC = () => {
                     <Col span={8}>
                         <Card >
                             <Statistic
-                                title="Tổng Lợi Nhuận "
-                                value={totalProfit}
+                                title="Tổng lợi nhuận "
+                                value={totalLoiNhuan}
                                 precision={0}
-                                valueStyle={{ color: totalProfit >= 0 ? '#3f8600' : '#cf1322' }}
-                                prefix={totalProfit >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                                valueStyle={{ color: totalLoiNhuan >= 0 ? '#3f8600' : '#cf1322' }}
+                                prefix={totalLoiNhuan >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
                                 suffix="VNĐ"
                             />
                         </Card>
@@ -265,7 +265,7 @@ const ThongKeBaoCao: React.FC = () => {
                     <Col span={8}>
                         <Card >
                             <Statistic
-                                title="Chi Phí Nguyên Liệu "
+                                title="Chi phí nguyên liệu "
                                 value={chiPhiNguyenLieu}
                                 precision={0}
                                 valueStyle={{ color: chiPhiNguyenLieu >= 0 ? '#3f8600' : '#cf1322' }}
@@ -275,7 +275,7 @@ const ThongKeBaoCao: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Card title={`Biểu đồ Doanh Thu và Lợi Nhuận theo ngày (${startDate} đến ${endDate})`} style={{ marginBottom: 20 }}>
+                <Card title={`Biểu đồ Doanh thu và Lợi nhuận theo ngày (${startDate} đến ${endDate})`} style={{ marginBottom: 20 }}>
                     {loiNhuanData.length > 0 ? (
                         <Line
                             options={{ responsive: true, interaction: { mode: 'index', intersect: false } }}
@@ -289,7 +289,7 @@ const ThongKeBaoCao: React.FC = () => {
                 <Row gutter={16}>
                     <Col span={24}>
                         <Card
-                            title="Top Sản Phẩm Bán Chạy Nhất"
+                            title="Top sản phẩm bán chạy nhất"
                             extra={
                                 <Select value={topN} style={{ width: 120 }} onChange={(value: number) => setTopN(value)}>
                                     <Option value={5}>Top 5</Option>
@@ -301,11 +301,11 @@ const ThongKeBaoCao: React.FC = () => {
                             {hieuSuatSPData.length > 0 ? (
                                 <Row gutter={16}>
                                     <Col span={12}>
-                                        <h3 style={{ marginTop: 0 }}>Biểu Đồ So Sánh Doanh Thu/Số Lượng</h3>
+                                        <h3 style={{ marginTop: 0 }}>Biểu đồ so sánh Doanh thu/Số lượng</h3>
                                         <Bar options={{ responsive: true }} data={barChartData} />
                                     </Col>
                                     <Col span={12}>
-                                        <h3 style={{ marginTop: 0 }}>Chi Tiết Bảng</h3>
+                                        <h3 style={{ marginTop: 0 }}>Chi tiết bảng</h3>
                                         <Table
                                             columns={productColumns}
                                             dataSource={hieuSuatSPData}
@@ -315,7 +315,7 @@ const ThongKeBaoCao: React.FC = () => {
                                     </Col>
                                 </Row>
                             ) : (
-                                <p style={{ textAlign: 'center', margin: '50px 0' }}>Không có dữ liệu Sản phẩm bán ra trong khoảng thời gian này.</p>
+                                <p style={{ textAlign: 'center', margin: '50px 0' }}>Không có dữ liệu sản phẩm bán ra trong khoảng thời gian này.</p>
                             )}
                         </Card>
                     </Col>

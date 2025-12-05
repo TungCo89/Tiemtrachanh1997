@@ -44,7 +44,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                 const apiData = response.data.data;
                 let resultData: SanPham[] = [];
 
-                // Xử lý API trả về mảng lồng nhau (SQL rows)
+                // Xử lý API trả về mảng lồng nhau 
                 if (Array.isArray(apiData) && Array.isArray(apiData[0])) {
                     resultData = apiData[0];
                 } else if (Array.isArray(apiData)) {
@@ -80,7 +80,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
                 setBans(resultData.filter(item => item && item.id && item.ten_ban));
             }
         } catch (error) {
-            message.error('Lỗi khi tải danh sách Bàn.');
+            message.error('Lỗi khi tải danh sách bàn.');
         } finally {
             setIsLoadingBan(false);
         }
@@ -161,7 +161,7 @@ const UpdateHoaDonBan: React.FC<UpdateHoaDonBanProps> = ({ id, initialData, onCl
 
     return (
         <Card
-            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật Hóa đơn Bán ID: {id}</h2>}
+            title={<h2 style={{ textAlign: 'center', margin: 0 }}>Cập nhật hóa đơn bán ID: {id}</h2>}
         >
             <Spin spinning={loading} tip="Đang tải dữ liệu...">
                 <Form

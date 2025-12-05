@@ -396,7 +396,7 @@ const DSBan: React.FC = () => {
     return (
         <div style={{ padding: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2>Quản lý Bàn </h2>
+                <h2>Quản lý bàn </h2>
                 <Space>
                     <Button
                         type="primary"
@@ -404,7 +404,7 @@ const DSBan: React.FC = () => {
                         onClick={handleAdd}
                         disabled={loading}
                     >
-                        Thêm Bàn
+                        Thêm bàn
                     </Button>
                 </Space>
             </div>
@@ -417,7 +417,7 @@ const DSBan: React.FC = () => {
             )}
 
             <Modal
-                title="Thêm Bàn mới"
+                title="Thêm bàn mới"
                 open={isAddModalOpen}
                 onCancel={handleCancel}
                 footer={null}
@@ -428,7 +428,7 @@ const DSBan: React.FC = () => {
 
             {/* 5. MODAL CẬP NHẬT */}
             <Modal
-                title={`Cập nhật Bàn ID: ${editingItemId}`}
+                title={`Cập nhật bàn ID: ${editingItemId}`}
                 open={editingItemId !== null}
                 onCancel={handleCancel}
                 footer={null}
@@ -445,7 +445,7 @@ const DSBan: React.FC = () => {
             </Modal>
 
             <Modal
-                title="Tạo Hóa đơn bán"
+                title="Tạo hóa đơn bán"
                 open={orderIdBan !== null}
                 onCancel={() => setOrderIdBan(null)}
                 footer={null}
